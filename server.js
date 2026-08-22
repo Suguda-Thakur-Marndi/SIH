@@ -1,3 +1,9 @@
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 const { createServer } = require("http");
 const next = require("next");
 const { Server } = require("socket.io");

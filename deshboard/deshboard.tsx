@@ -1,20 +1,27 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { RadialBarChart, RadialBar, AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { 
   Search, Bell, User, ArrowRight, Activity, ThermometerSun, Leaf, Droplets, 
-  MapPin, ChevronRight, Wind, AlertCircle, Navigation, 
+  MapPin, ChevronRight, Wind, AlertTriangle, Navigation, 
   Home, ShieldAlert, Sparkles, TrendingUp, Landmark 
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import bgImage from './assets/bg.png';
 
+interface FarmerLocation {
+  farmerId: string;
+  lat: number;
+  lng: number;
+  timestamp?: number;
+}
+
 export default function SmartCropDashboard() {
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const socketRef = useRef<Socket | null>(null);
   const [isSharingLocation, setIsSharingLocation] = useState(false);
-  const [farmerLocations, setFarmerLocations] = useState<any[]>([]);
+  const [farmerLocations, setFarmerLocations] = useState<FarmerLocation[]>([]);
 
   // Navigation State
   const [activeNav, setActiveNav] = useState('home');
@@ -58,9 +65,9 @@ export default function SmartCropDashboard() {
   useEffect(() => {
     // Connect to the custom server socket
     const newSocket = io();
-    setSocket(newSocket);
+    socketRef.current = newSocket;
 
-    newSocket.on('farmerLocationUpdate', (data) => {
+    newSocket.on('farmerLocationUpdate', (data: FarmerLocation) => {
       setFarmerLocations(prev => {
         const existing = prev.findIndex(loc => loc.farmerId === data.farmerId);
         if (existing !== -1) {
@@ -74,17 +81,18 @@ export default function SmartCropDashboard() {
 
     return () => {
       newSocket.disconnect();
+      socketRef.current = null;
     };
   }, []);
 
   useEffect(() => {
     let watchId: number;
 
-    if (isSharingLocation && socket) {
+    if (isSharingLocation && socketRef.current) {
       if ('geolocation' in navigator) {
         watchId = navigator.geolocation.watchPosition(
           (position) => {
-            socket.emit('updateLocation', {
+            socketRef.current?.emit('updateLocation', {
               farmerId: 'farmer_123', // Demo ID
               lat: position.coords.latitude,
               lng: position.coords.longitude,
@@ -96,14 +104,14 @@ export default function SmartCropDashboard() {
         );
       } else {
         alert("Geolocation is not supported by your browser");
-        setIsSharingLocation(false);
+        setTimeout(() => setIsSharingLocation(false), 0);
       }
     }
 
     return () => {
       if (watchId) navigator.geolocation.clearWatch(watchId);
     };
-  }, [isSharingLocation, socket]);
+  }, [isSharingLocation]);
 
   // Risk history data
   const riskHistory = [
@@ -167,7 +175,7 @@ export default function SmartCropDashboard() {
             </a>
 
           {/* Links (Symbols by default, expanding writings on hover / active) */}
-          <div className="flex items-center gap-6 md:gap-8 bg-white/70 p-2 px-5 md:px-7 rounded-full border border-black/[0.06] shadow-sm backdrop-blur-md">
+          <div className="flex items-center gap-6 md:gap-8 bg-white/70 p-2 px-5 md:px-7 rounded-full border border-black/6 shadow-sm backdrop-blur-md">
             {navLinks.map((item) => {
               const Icon = item.icon;
               const isActive = activeNav === item.id;
@@ -198,7 +206,7 @@ export default function SmartCropDashboard() {
                       scale: isHovered || isActive ? 1.08 : 1,
                     }}
                     transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                    className="flex items-center justify-center flex-shrink-0"
+                    className="flex items-center justify-center shrink-0"
                   >
                     <Icon
                       size={19}
@@ -233,7 +241,7 @@ export default function SmartCropDashboard() {
                   {isActive && (
                     <motion.div
                       layoutId="activeNavGlow"
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-[3px] rounded-full bg-[#D6F24B]"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-0.75 rounded-full bg-[#D6F24B]"
                       style={{
                         boxShadow: '0 0 8px #D6F24B, 0 0 14px rgba(214,242,75,0.8)',
                       }}
@@ -251,14 +259,14 @@ export default function SmartCropDashboard() {
             <button
               onMouseEnter={() => setHoveredAction('search')}
               onMouseLeave={() => setHoveredAction(null)}
-              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/[0.06] hover:border-black/15 transition-all duration-300 shadow-sm cursor-pointer group ${
+              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm cursor-pointer group ${
                 hoveredAction === 'search' ? 'px-4' : 'w-11'
               }`}
             >
               <motion.div
                 animate={{ y: hoveredAction === 'search' ? -2 : 0 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                className="flex items-center justify-center flex-shrink-0"
+                className="flex items-center justify-center shrink-0"
               >
                 <Search size={18} className="text-[#1B1E19] group-hover:scale-105 transition-transform" />
               </motion.div>
@@ -280,14 +288,14 @@ export default function SmartCropDashboard() {
             <button
               onMouseEnter={() => setHoveredAction('bell')}
               onMouseLeave={() => setHoveredAction(null)}
-              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/[0.06] hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group ${
+              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group ${
                 hoveredAction === 'bell' ? 'px-4' : 'w-11'
               }`}
             >
               <motion.div
                 animate={{ y: hoveredAction === 'bell' ? -2 : 0 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                className="relative flex items-center justify-center flex-shrink-0"
+                className="relative flex items-center justify-center shrink-0"
               >
                 <Bell size={18} className="text-[#1B1E19] group-hover:scale-105 transition-transform" />
                 <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#E4572E] ring-2 ring-white animate-pulse"></div>
@@ -310,14 +318,14 @@ export default function SmartCropDashboard() {
             <button
               onMouseEnter={() => setHoveredAction('user')}
               onMouseLeave={() => setHoveredAction(null)}
-              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/[0.06] hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group ${
+              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group ${
                 hoveredAction === 'user' ? 'px-4' : 'w-11'
               }`}
             >
               <motion.div
                 animate={{ y: hoveredAction === 'user' ? -2 : 0 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                className="relative flex items-center justify-center flex-shrink-0"
+                className="relative flex items-center justify-center shrink-0"
               >
                 <User size={18} className="text-[#1B1E19] group-hover:scale-105 transition-transform" />
                 <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#D6F24B] border-2 border-white"></div>
@@ -365,7 +373,7 @@ export default function SmartCropDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             style={{ letterSpacing: '-0.01em' }}
-            className="text-lg text-white font-medium mb-10 max-w-lg drop-shadow-lg"
+            className="text-lg text-[#1B1E19] font-semibold mb-10 max-w-lg"
           >
             AI-powered crop monitoring, distress prediction, and personalized farming guidance.
           </motion.p>
@@ -416,20 +424,22 @@ export default function SmartCropDashboard() {
           <motion.div 
             whileHover={{ scale: 1.045, y: -6, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
             whileTap={{ scale: 0.96 }}
-            className="group relative w-full sm:w-80 md:w-[360px] lg:w-[420px] overflow-hidden rounded-[32px] p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
+            className="group relative w-full sm:w-80 md:w-90 lg:w-105 overflow-hidden rounded-4xl p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
             style={{
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 252, 242, 0.92) 100%)',
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)',
-              border: '1px solid rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 20px 45px -10px rgba(27, 30, 25, 0.08), 0 0 25px -5px rgba(214, 242, 75, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.95)',
+              background: 'linear-gradient(135deg, rgba(244, 252, 220, 0.75) 0%, rgba(255, 255, 255, 0.65) 50%, rgba(230, 248, 180, 0.60) 100%)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: '1px solid rgba(255, 255, 255, 0.85)',
+              boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.07), 0 0 25px rgba(214, 242, 75, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.95)',
             }}
           >
-            <div className="absolute -top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#D6F24B]/20 blur-3xl pointer-events-none transition-all duration-700 group-hover:scale-125"></div>
+            <div className="absolute -top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#D6F24B]/25 blur-3xl pointer-events-none transition-all duration-700 group-hover:scale-125"></div>
             <div className="relative flex flex-col gap-6">
-              <div className="flex items-center gap-4 border-b border-black/[0.06] pb-5">
-                <div className="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-2xl bg-[#D6F24B]/30 shadow-[0_0_16px_rgba(214,242,75,0.4)] group-hover:scale-110 transition-transform duration-300">
-                  <Activity className="h-6 w-6 lg:h-7 lg:w-7 text-[#1B1E19]" />
+              <div className="flex items-center gap-4 border-b border-black/6 pb-5">
+                <div className="relative flex h-13 w-13 lg:h-14 lg:w-14 items-center justify-center rounded-2xl bg-linear-to-br from-[#E4FC67] to-[#BEE627] p-px shadow-[0_8px_20px_-4px_rgba(214,242,75,0.7),inset_0_1px_2px_rgba(255,255,255,0.9)] group-hover:scale-110 group-hover:shadow-[0_12px_28px_-4px_rgba(214,242,75,0.9)] transition-all duration-300">
+                  <div className="w-full h-full rounded-[14px] bg-linear-to-b from-white/70 via-[#F3FDE0]/80 to-[#E1F79A]/80 backdrop-blur-md flex items-center justify-center border border-white/80 shadow-inner">
+                    <Activity className="h-6 w-6 lg:h-7 lg:w-7 text-[#1B1E19]" strokeWidth={2.2} />
+                  </div>
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-[#1B1E19]">Farm Health</p>
@@ -447,20 +457,22 @@ export default function SmartCropDashboard() {
           <motion.div 
             whileHover={{ scale: 1.045, y: -6, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
             whileTap={{ scale: 0.96 }}
-            className="group relative w-full sm:w-80 md:w-[360px] lg:w-[420px] overflow-hidden rounded-[32px] p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
+            className="group relative w-full sm:w-80 md:w-90 lg:w-105 overflow-hidden rounded-4xl p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
             style={{
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 246, 242, 0.92) 100%)',
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)',
-              border: '1px solid rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 20px 45px -10px rgba(27, 30, 25, 0.08), 0 0 25px -5px rgba(228, 87, 46, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.95)',
+              background: 'linear-gradient(135deg, rgba(255, 240, 232, 0.75) 0%, rgba(255, 255, 255, 0.65) 50%, rgba(254, 226, 215, 0.60) 100%)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: '1px solid rgba(255, 255, 255, 0.85)',
+              boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.07), 0 0 25px rgba(228, 87, 46, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.95)',
             }}
           >
-            <div className="absolute -top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#E4572E]/15 blur-3xl pointer-events-none transition-all duration-700 group-hover:scale-125"></div>
+            <div className="absolute -top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#E4572E]/20 blur-3xl pointer-events-none transition-all duration-700 group-hover:scale-125"></div>
             <div className="relative flex flex-col gap-6">
-              <div className="flex items-center gap-4 border-b border-black/[0.06] pb-5">
-                <div className="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-2xl bg-[#E4572E]/15 shadow-[0_0_16px_rgba(228,87,46,0.3)] group-hover:scale-110 transition-transform duration-300">
-                  <Leaf className="h-6 w-6 lg:h-7 lg:w-7 text-[#E4572E]" />
+              <div className="flex items-center gap-4 border-b border-black/6 pb-5">
+                <div className="relative flex h-13 w-13 lg:h-14 lg:w-14 items-center justify-center rounded-2xl bg-linear-to-br from-[#FF9671] to-[#E4572E] p-px shadow-[0_8px_20px_-4px_rgba(228,87,46,0.5),inset_0_1px_2px_rgba(255,255,255,0.9)] group-hover:scale-110 group-hover:shadow-[0_12px_28px_-4px_rgba(228,87,46,0.7)] transition-all duration-300">
+                  <div className="w-full h-full rounded-[14px] bg-linear-to-b from-white/70 via-[#FFF0EB]/80 to-[#FFD8CC]/80 backdrop-blur-md flex items-center justify-center border border-white/80 shadow-inner">
+                    <Leaf className="h-6 w-6 lg:h-7 lg:w-7 text-[#E4572E]" strokeWidth={2.2} />
+                  </div>
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-[#1B1E19]">NDVI</p>
@@ -478,20 +490,22 @@ export default function SmartCropDashboard() {
           <motion.div 
             whileHover={{ scale: 1.045, y: -6, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
             whileTap={{ scale: 0.96 }}
-            className="group relative w-full sm:w-80 md:w-[360px] lg:w-[420px] overflow-hidden rounded-[32px] p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
+            className="group relative w-full sm:w-80 md:w-90 lg:w-105 overflow-hidden rounded-4xl p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
             style={{
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(242, 248, 254, 0.92) 100%)',
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)',
-              border: '1px solid rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 20px 45px -10px rgba(27, 30, 25, 0.08), 0 0 25px -5px rgba(59, 130, 246, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.95)',
+              background: 'linear-gradient(135deg, rgba(232, 244, 255, 0.75) 0%, rgba(255, 255, 255, 0.65) 50%, rgba(218, 238, 255, 0.60) 100%)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: '1px solid rgba(255, 255, 255, 0.85)',
+              boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.07), 0 0 25px rgba(59, 130, 246, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.95)',
             }}
           >
-            <div className="absolute -top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-blue-500/15 blur-3xl pointer-events-none transition-all duration-700 group-hover:scale-125"></div>
+            <div className="absolute -top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-blue-500/20 blur-3xl pointer-events-none transition-all duration-700 group-hover:scale-125"></div>
             <div className="relative flex flex-col gap-6">
-              <div className="flex items-center gap-4 border-b border-black/[0.06] pb-5">
-                <div className="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-2xl bg-blue-500/15 shadow-[0_0_16px_rgba(59,130,246,0.3)] group-hover:scale-110 transition-transform duration-300">
-                  <Droplets className="h-6 w-6 lg:h-7 lg:w-7 text-blue-600" />
+              <div className="flex items-center gap-4 border-b border-black/6 pb-5">
+                <div className="relative flex h-13 w-13 lg:h-14 lg:w-14 items-center justify-center rounded-2xl bg-linear-to-br from-[#93C5FD] to-[#2563EB] p-px shadow-[0_8px_20px_-4px_rgba(37,99,235,0.45),inset_0_1px_2px_rgba(255,255,255,0.9)] group-hover:scale-110 group-hover:shadow-[0_12px_28px_-4px_rgba(37,99,235,0.65)] transition-all duration-300">
+                  <div className="w-full h-full rounded-[14px] bg-linear-to-b from-white/70 via-[#EFF6FF]/80 to-[#DBEAFE]/80 backdrop-blur-md flex items-center justify-center border border-white/80 shadow-inner">
+                    <Droplets className="h-6 w-6 lg:h-7 lg:w-7 text-blue-600" strokeWidth={2.2} />
+                  </div>
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-[#1B1E19]">Advisory</p>
@@ -509,20 +523,23 @@ export default function SmartCropDashboard() {
           <motion.div 
             whileHover={{ scale: 1.045, y: -6, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
             whileTap={{ scale: 0.96 }}
-            className="group relative w-full sm:w-80 md:w-[360px] lg:w-[420px] overflow-hidden rounded-[32px] p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
+            className="group relative w-full sm:w-80 md:w-90 lg:w-105 overflow-hidden rounded-4xl p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
             style={{
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 244, 244, 0.92) 100%)',
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)',
-              border: '1px solid rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 20px 45px -10px rgba(27, 30, 25, 0.08), 0 0 25px -5px rgba(239, 68, 68, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.95)',
+              background: 'linear-gradient(135deg, rgba(255, 236, 236, 0.75) 0%, rgba(255, 255, 255, 0.65) 50%, rgba(254, 220, 220, 0.60) 100%)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: '1px solid rgba(255, 255, 255, 0.85)',
+              boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.07), 0 0 25px rgba(239, 68, 68, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.95)',
             }}
           >
-            <div className="absolute -top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-red-500/15 blur-3xl pointer-events-none transition-all duration-700 group-hover:scale-125"></div>
+            <div className="absolute -top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-red-500/20 blur-3xl pointer-events-none transition-all duration-700 group-hover:scale-125"></div>
             <div className="relative flex flex-col gap-6 h-full justify-between">
-              <div className="flex items-center gap-4 border-b border-black/[0.06] pb-5">
-                <div className="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-2xl bg-red-500/15 shadow-[0_0_16px_rgba(239,68,68,0.3)] group-hover:scale-110 transition-transform duration-300">
-                  <AlertCircle className="h-6 w-6 lg:h-7 lg:w-7 text-red-600" />
+              <div className="flex items-center gap-4 border-b border-black/6 pb-5">
+                <div className="relative flex h-13 w-13 lg:h-14 lg:w-14 items-center justify-center rounded-full bg-linear-to-br from-[#FF6B6B] to-[#DC2626] p-0.5 shadow-[0_8px_22px_-4px_rgba(220,38,38,0.55),inset_0_1px_2px_rgba(255,255,255,0.9)] group-hover:scale-110 group-hover:shadow-[0_12px_30px_-4px_rgba(220,38,38,0.75)] transition-all duration-300">
+                  <div className="relative w-full h-full rounded-full bg-linear-to-b from-white/80 via-[#FFEBEB]/85 to-[#FFCDCD]/85 backdrop-blur-md flex items-center justify-center border border-white/90 shadow-inner overflow-hidden">
+                    <div className="absolute top-0 left-0 right-0 h-1/2 bg-linear-to-b from-white/70 to-transparent pointer-events-none" />
+                    <ShieldAlert className="h-6 w-6 lg:h-7 lg:w-7 text-red-600 drop-shadow-[0_2px_4px_rgba(220,38,38,0.25)] relative z-10" strokeWidth={2.2} />
+                  </div>
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-[#1B1E19]">Risk Level</p>
@@ -553,16 +570,17 @@ export default function SmartCropDashboard() {
                 whileTap={{ scale: 0.92, transition: { type: 'spring', stiffness: 550, damping: 14 } }}
                 className="relative overflow-hidden rounded-[28px] p-6 text-[#1B1E19] transition-colors duration-300 hover:shadow-[0_24px_50px_-10px_rgba(214,242,75,0.35)] cursor-pointer"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 252, 242, 0.92) 100%)',
-                  backdropFilter: 'blur(30px)',
-                  WebkitBackdropFilter: 'blur(30px)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  boxShadow: '0 16px 40px -10px rgba(0, 0, 0, 0.45), 0 0 28px -5px rgba(214, 242, 75, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.1)',
+                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(244, 252, 230, 0.60) 100%)',
+                  backdropFilter: 'blur(24px)',
+                  WebkitBackdropFilter: 'blur(24px)',
+                  border: '1px solid rgba(255, 255, 255, 0.85)',
+                  boxShadow: '0 16px 36px -10px rgba(0, 0, 0, 0.06), 0 0 25px rgba(214, 242, 75, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.9)',
                 }}
               >
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#D6F24B]/20 rounded-full blur-2xl pointer-events-none" />
                 <div className="flex items-center gap-3.5 mb-6">
-                  <div className="w-13 h-13 rounded-full p-0.5 bg-gradient-to-tr from-[#D6F24B] to-emerald-400 shadow-[0_0_16px_rgba(214,242,75,0.6)] overflow-hidden">
+                  <div className="w-13 h-13 rounded-full p-0.5 bg-linear-to-tr from-[#D6F24B] to-emerald-400 shadow-[0_0_16px_rgba(214,242,75,0.6)] overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="https://ui-avatars.com/api/?name=Ramesh+Singh&background=D6F24B&color=1B1E19" alt="Ramesh" className="w-full h-full object-cover rounded-full" />
                   </div>
                   <div>
@@ -571,19 +589,19 @@ export default function SmartCropDashboard() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-y-5 gap-x-4">
-                  <div className="bg-black/[0.04] p-2.5 rounded-xl border border-black/[0.06]">
+                  <div className="bg-black/4 p-2.5 rounded-xl border border-black/6">
                     <div className="text-[11px] font-semibold tracking-wide uppercase text-[#1B1E19]/60 mb-1">LAND SIZE</div>
                     <div className="font-semibold text-[#1B1E19]">2.5 Acres</div>
                   </div>
-                  <div className="bg-black/[0.04] p-2.5 rounded-xl border border-black/[0.06]">
+                  <div className="bg-black/4 p-2.5 rounded-xl border border-black/6">
                     <div className="text-[11px] font-semibold tracking-wide uppercase text-[#1B1E19]/60 mb-1">CROP</div>
                     <div className="font-semibold text-[#1B1E19]">Paddy (Rice)</div>
                   </div>
-                  <div className="bg-black/[0.04] p-2.5 rounded-xl border border-black/[0.06]">
+                  <div className="bg-black/4 p-2.5 rounded-xl border border-black/6">
                     <div className="text-[11px] font-semibold tracking-wide uppercase text-[#1B1E19]/60 mb-1">SEASON</div>
                     <div className="font-semibold text-[#1B1E19]">Kharif 2026</div>
                   </div>
-                  <div className="bg-black/[0.04] p-2.5 rounded-xl border border-black/[0.06]">
+                  <div className="bg-black/4 p-2.5 rounded-xl border border-black/6">
                     <div className="text-[11px] font-semibold tracking-wide uppercase text-[#1B1E19]/60 mb-1">SOWING DATE</div>
                     <div className="font-semibold text-[#1B1E19]">June 15</div>
                   </div>
@@ -597,11 +615,11 @@ export default function SmartCropDashboard() {
                   whileTap={{ scale: 0.92, transition: { type: 'spring', stiffness: 550, damping: 14 } }}
                   className="relative overflow-hidden rounded-[28px] p-6 text-[#1B1E19] transition-colors duration-300 cursor-pointer"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 246, 242, 0.92) 100%)',
-                    backdropFilter: 'blur(30px)',
-                    WebkitBackdropFilter: 'blur(30px)',
-                    border: '1px solid rgba(255, 255, 255, 0.9)',
-                    boxShadow: '0 16px 40px -10px rgba(0, 0, 0, 0.08), 0 0 28px -5px rgba(228, 87, 46, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.95)',
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(254, 240, 232, 0.60) 100%)',
+                    backdropFilter: 'blur(24px)',
+                    WebkitBackdropFilter: 'blur(24px)',
+                    border: '1px solid rgba(255, 255, 255, 0.85)',
+                    boxShadow: '0 16px 36px -10px rgba(0, 0, 0, 0.06), 0 0 25px rgba(228, 87, 46, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.9)',
                   }}
                 >
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-[#1B1E19]">
@@ -609,7 +627,7 @@ export default function SmartCropDashboard() {
                   </h3>
                   <div className="space-y-4">
                     {farmerLocations.map((loc, idx) => (
-                      <div key={idx} className="flex justify-between items-center bg-black/[0.04] p-3 rounded-xl border border-black/[0.06] shadow-sm">
+                      <div key={idx} className="flex justify-between items-center bg-black/4 p-3 rounded-xl border border-black/6 shadow-sm">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-[#1B1E19] flex items-center justify-center text-[#D6F24B] text-xs font-bold shadow-[0_0_10px_rgba(214,242,75,0.4)]">
                             {loc.farmerId.substring(0, 2).toUpperCase()}
@@ -634,18 +652,18 @@ export default function SmartCropDashboard() {
                 whileTap={{ scale: 0.92, transition: { type: 'spring', stiffness: 550, damping: 14 } }}
                 className="relative overflow-hidden rounded-[28px] p-6 text-[#1B1E19] transition-colors duration-300 hover:shadow-[0_24px_50px_-10px_rgba(214,242,75,0.35)] cursor-pointer"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 252, 242, 0.92) 100%)',
-                  backdropFilter: 'blur(30px)',
-                  WebkitBackdropFilter: 'blur(30px)',
-                  border: '1px solid rgba(255, 255, 255, 0.9)',
-                  boxShadow: '0 16px 40px -10px rgba(0, 0, 0, 0.08), 0 0 32px -5px rgba(214, 242, 75, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.95)',
+                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(242, 252, 232, 0.60) 100%)',
+                  backdropFilter: 'blur(24px)',
+                  WebkitBackdropFilter: 'blur(24px)',
+                  border: '1px solid rgba(255, 255, 255, 0.85)',
+                  boxShadow: '0 16px 36px -10px rgba(0, 0, 0, 0.06), 0 0 28px rgba(214, 242, 75, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.9)',
                 }}
               >
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-lime-400/10 rounded-full blur-2xl pointer-events-none" />
                 <h2 className="text-[22px] font-semibold mb-5 tracking-tight text-[#1B1E19]">Crop Health</h2>
 
                 {/* NDVI */}
-                <div className="mb-6 bg-gradient-to-br from-[#EAF7B8]/40 via-lime-500/10 to-transparent rounded-2xl p-4 border border-[#D6F24B]/40 shadow-sm">
+                <div className="mb-6 bg-linear-to-br from-[#EAF7B8]/40 via-lime-500/10 to-transparent rounded-2xl p-4 border border-[#D6F24B]/40 shadow-sm">
                   <div className="flex justify-between items-end mb-3">
                     <div className="text-sm font-semibold text-[#1B1E19]">NDVI Trend</div>
                     <div className="text-sm font-bold text-[#E4572E]">↓18% vs 30-day avg</div>
@@ -672,13 +690,17 @@ export default function SmartCropDashboard() {
                       <span className="text-[#6B6F63] flex items-center gap-1.5 font-medium"><Droplets size={16} className="text-blue-500" /> Soil Moisture</span>
                       <span className="font-bold text-[#E4572E]">Low (22%)</span>
                     </div>
-                    <div className="h-2.5 w-full bg-black/[0.08] rounded-full overflow-hidden p-0.5">
-                      <div className="h-full bg-gradient-to-r from-amber-500 to-[#E4572E] rounded-full shadow-sm" style={{ width: '22%' }}></div>
+                    <div className="h-2.5 w-full bg-black/8 rounded-full overflow-hidden p-0.5">
+                      <div className="h-full bg-linear-to-r from-amber-500 to-[#E4572E] rounded-full shadow-sm" style={{ width: '22%' }}></div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3.5 p-3.5 bg-amber-500/10 rounded-2xl border border-amber-400/30 shadow-sm">
-                    <ThermometerSun size={26} className="text-amber-600" />
+                  <div className="flex items-center gap-3.5 p-3.5 bg-linear-to-r from-amber-500/15 via-amber-500/8 to-transparent rounded-2xl border border-amber-400/30 shadow-sm backdrop-blur-sm">
+                    <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br from-[#FDE68A] to-[#D97706] p-px shadow-[0_4px_12px_rgba(217,119,6,0.3)] shrink-0">
+                      <div className="w-full h-full rounded-[10px] bg-linear-to-b from-white/80 to-[#FEF3C7]/90 flex items-center justify-center border border-white/80">
+                        <ThermometerSun size={20} className="text-amber-600" strokeWidth={2.2} />
+                      </div>
+                    </div>
                     <div>
                       <div className="text-sm font-semibold text-[#1B1E19]">Overcast, no rain</div>
                       <div className="text-xs text-[#6B6F63] mt-0.5">Expected for next 5 days</div>
@@ -698,13 +720,13 @@ export default function SmartCropDashboard() {
             <motion.div
               whileHover={{ scale: 1.012, y: -4, transition: { type: 'spring', stiffness: 350, damping: 25 } }}
               whileTap={{ scale: 0.99 }}
-              className="md:col-span-8 relative overflow-hidden rounded-[32px] p-8 text-[#1B1E19] flex flex-col transition-all duration-500 cursor-pointer"
+              className="md:col-span-8 relative overflow-hidden rounded-4xl p-8 text-[#1B1E19] flex flex-col transition-all duration-500 cursor-pointer"
               style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 252, 242, 0.95) 50%, rgba(254, 246, 242, 0.95) 100%)',
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 244, 236, 0.65) 45%, rgba(246, 252, 235, 0.65) 100%)',
                 backdropFilter: 'blur(30px)',
                 WebkitBackdropFilter: 'blur(30px)',
                 border: '1px solid rgba(255, 255, 255, 0.9)',
-                boxShadow: '0 24px 60px -12px rgba(27, 30, 25, 0.1), 0 0 35px -10px rgba(228, 87, 46, 0.2), 0 0 40px -15px rgba(214, 242, 75, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.95)',
+                boxShadow: '0 24px 50px -12px rgba(0, 0, 0, 0.08), 0 0 35px rgba(228, 87, 46, 0.18), 0 0 35px rgba(214, 242, 75, 0.18), inset 0 1px 2px rgba(255, 255, 255, 0.95)',
               }}
             >
               {/* Internal ambient glow orbs */}
@@ -713,13 +735,16 @@ export default function SmartCropDashboard() {
 
               <div className="relative z-10 flex justify-between items-start mb-8">
                 <h2 className="text-[28px] font-semibold tracking-tight text-[#1B1E19]">Distress Risk Intelligence</h2>
-                <div className="px-4 py-1.5 rounded-full bg-[#E4572E]/15 text-[#E4572E] text-[11px] font-extrabold tracking-wider border border-[#E4572E]/40 uppercase shadow-sm">HIGH RISK</div>
+                <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-linear-to-r from-red-500/15 to-[#E4572E]/15 text-[#E4572E] text-[11px] font-extrabold tracking-wider border border-[#E4572E]/40 uppercase shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                  <span>HIGH RISK</span>
+                </div>
               </div>
 
-              <div className="relative z-10 flex flex-col md:flex-row gap-8 flex-grow">
+              <div className="relative z-10 flex flex-col md:flex-row gap-8 grow">
                 {/* Meter Side */}
                 <div className="flex-1 flex flex-col items-center justify-center relative">
-                  <div className="w-[280px] h-[280px]" style={{ filter: 'drop-shadow(0 0 16px rgba(228, 87, 46, 0.4))' }}>
+                  <div className="w-70 h-70" style={{ filter: 'drop-shadow(0 0 16px rgba(228, 87, 46, 0.4))' }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <RadialBarChart
                         cx="50%" cy="50%"
@@ -738,7 +763,7 @@ export default function SmartCropDashboard() {
                   </div>
 
                   {/* Trend sparkline under gauge */}
-                  <div className="w-36 h-10 mt-[-55px]">
+                  <div className="w-36 h-10 -mt-13.75">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={riskHistory}>
                         <Area type="monotone" dataKey="score" stroke="#E4572E" fill="transparent" strokeWidth={2.5} />
@@ -753,25 +778,37 @@ export default function SmartCropDashboard() {
                   <div>
                     <h3 className="text-[11px] font-bold tracking-wider text-[#6B6F63] uppercase mb-4">Contributing Factors</h3>
                     <div className="space-y-3.5">
-                      <div className="flex justify-between items-center bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.06] hover:border-black/[0.12] px-4 py-3.5 rounded-2xl shadow-sm transition-all duration-300 group/factor">
+                      <div className="flex justify-between items-center bg-black/3 hover:bg-black/6 border border-black/6 hover:border-black/12 px-4 py-3.5 rounded-2xl shadow-sm transition-all duration-300 group/factor">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-[#E4572E]/15 flex items-center justify-center shadow-sm"><Wind size={16} className="text-[#E4572E]" /></div>
+                          <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-[#FFA07A] to-[#E4572E] p-px shadow-[0_4px_12px_rgba(228,87,46,0.35)] shrink-0">
+                            <div className="w-full h-full rounded-[10px] bg-linear-to-b from-white/70 to-[#FFE4DC]/80 flex items-center justify-center border border-white/80">
+                              <Wind size={16} className="text-[#E4572E]" strokeWidth={2.2} />
+                            </div>
+                          </div>
                           <span className="text-[15px] font-semibold text-[#1B1E19]">Rainfall −35%</span>
                         </div>
                         <span className="text-[#E4572E] text-[15px] font-bold">+28 pts</span>
                       </div>
 
-                      <div className="flex justify-between items-center bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.06] hover:border-black/[0.12] px-4 py-3.5 rounded-2xl shadow-sm transition-all duration-300 group/factor">
+                      <div className="flex justify-between items-center bg-black/3 hover:bg-black/6 border border-black/6 hover:border-black/12 px-4 py-3.5 rounded-2xl shadow-sm transition-all duration-300 group/factor">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-amber-500/15 flex items-center justify-center shadow-sm"><Activity size={16} className="text-amber-700" /></div>
+                          <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-[#FDE68A] to-[#D97706] p-px shadow-[0_4px_12px_rgba(217,119,6,0.35)] shrink-0">
+                            <div className="w-full h-full rounded-[10px] bg-linear-to-b from-white/70 to-[#FEF3C7]/80 flex items-center justify-center border border-white/80">
+                              <Activity size={16} className="text-amber-700" strokeWidth={2.2} />
+                            </div>
+                          </div>
                           <span className="text-[15px] font-semibold text-[#1B1E19]">Market price −22%</span>
                         </div>
                         <span className="text-amber-700 text-[15px] font-bold">+19 pts</span>
                       </div>
 
-                      <div className="flex justify-between items-center bg-black/[0.03] hover:bg-black/[0.06] border border-black/[0.06] hover:border-black/[0.12] px-4 py-3.5 rounded-2xl shadow-sm transition-all duration-300 group/factor">
+                      <div className="flex justify-between items-center bg-black/3 hover:bg-black/6 border border-black/6 hover:border-black/12 px-4 py-3.5 rounded-2xl shadow-sm transition-all duration-300 group/factor">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-amber-500/15 flex items-center justify-center shadow-sm"><AlertCircle size={16} className="text-amber-700" /></div>
+                          <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-[#F87171] to-[#DC2626] p-px shadow-[0_4px_12px_rgba(220,38,38,0.35)] shrink-0">
+                            <div className="w-full h-full rounded-[10px] bg-linear-to-b from-white/70 to-[#FEE2E2]/80 flex items-center justify-center border border-white/80">
+                              <AlertTriangle size={16} className="text-red-600" strokeWidth={2.2} />
+                            </div>
+                          </div>
                           <span className="text-[15px] font-semibold text-[#1B1E19]">Loan due in 8 days</span>
                         </div>
                         <span className="text-amber-700 text-[15px] font-bold">+15 pts</span>
@@ -793,18 +830,20 @@ export default function SmartCropDashboard() {
             <motion.div
               whileHover={{ scale: 1.06, y: -10, transition: { type: 'spring', stiffness: 500, damping: 12, mass: 0.6 } }}
               whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 600, damping: 14 } }}
-              className="rounded-[24px] p-6 flex items-center justify-between cursor-pointer transition-colors duration-300 group"
+              className="rounded-3xl p-6 flex items-center justify-between cursor-pointer transition-colors duration-300 group"
               style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(238, 250, 220, 0.9) 100%)',
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(238, 252, 218, 0.65) 100%)',
                 backdropFilter: 'blur(24px)',
                 WebkitBackdropFilter: 'blur(24px)',
-                border: '1px solid rgba(214, 242, 75, 0.5)',
-                boxShadow: '0 16px 40px -10px rgba(27, 30, 25, 0.08), 0 0 28px -5px rgba(214, 242, 75, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.95)',
+                border: '1px solid rgba(255, 255, 255, 0.85)',
+                boxShadow: '0 16px 36px -10px rgba(27, 30, 25, 0.06), 0 0 25px rgba(214, 242, 75, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.9)',
               }}
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-[#D6F24B] flex items-center justify-center shadow-[0_0_16px_rgba(214,242,75,0.7)] group-hover:scale-110 transition-transform">
-                  <Droplets size={20} className="text-[#1B1E19]" />
+                <div className="relative flex w-12 h-12 rounded-2xl bg-linear-to-br from-[#E4FC67] to-[#BEE627] p-px shadow-[0_8px_20px_-4px_rgba(214,242,75,0.7)] group-hover:scale-110 transition-transform duration-300 shrink-0">
+                  <div className="w-full h-full rounded-[14px] bg-linear-to-b from-white/70 via-[#F3FDE0]/80 to-[#E1F79A]/80 backdrop-blur-md flex items-center justify-center border border-white/80 shadow-inner">
+                    <Droplets size={20} className="text-[#1B1E19]" strokeWidth={2.2} />
+                  </div>
                 </div>
                 <div>
                   <h3 className="font-semibold text-[#1B1E19] text-[15px]">Switch irrigation</h3>
@@ -817,18 +856,20 @@ export default function SmartCropDashboard() {
             <motion.div
               whileHover={{ scale: 1.06, y: -10, transition: { type: 'spring', stiffness: 500, damping: 12, mass: 0.6 } }}
               whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 600, damping: 14 } }}
-              className="rounded-[24px] p-6 flex items-center justify-between cursor-pointer transition-colors duration-300 group"
+              className="rounded-3xl p-6 flex items-center justify-between cursor-pointer transition-colors duration-300 group"
               style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 238, 232, 0.9) 100%)',
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(254, 236, 228, 0.65) 100%)',
                 backdropFilter: 'blur(24px)',
                 WebkitBackdropFilter: 'blur(24px)',
-                border: '1px solid rgba(228, 87, 46, 0.5)',
-                boxShadow: '0 16px 40px -10px rgba(27, 30, 25, 0.08), 0 0 28px -5px rgba(228, 87, 46, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.95)',
+                border: '1px solid rgba(255, 255, 255, 0.85)',
+                boxShadow: '0 16px 36px -10px rgba(27, 30, 25, 0.06), 0 0 25px rgba(228, 87, 46, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.9)',
               }}
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-[#E4572E] text-[#1B1E19] flex items-center justify-center shadow-[0_0_16px_rgba(228,87,46,0.7)] group-hover:scale-110 transition-transform">
-                  <AlertCircle size={20} className="text-[#1B1E19]" />
+                <div className="relative flex w-12 h-12 rounded-full bg-linear-to-br from-[#FF7B7B] to-[#DC2626] p-0.5 shadow-[0_8px_20px_-4px_rgba(220,38,38,0.55)] group-hover:scale-110 transition-transform duration-300 shrink-0">
+                  <div className="w-full h-full rounded-full bg-linear-to-b from-white/80 via-[#FFEBEB]/85 to-[#FFCDCD]/85 backdrop-blur-md flex items-center justify-center border border-white/90 shadow-inner">
+                    <ShieldAlert size={20} className="text-red-600" strokeWidth={2.2} />
+                  </div>
                 </div>
                 <div>
                   <h3 className="font-semibold text-[#1B1E19] text-[15px]">Apply insurance</h3>
@@ -841,18 +882,20 @@ export default function SmartCropDashboard() {
             <motion.div
               whileHover={{ scale: 1.06, y: -10, transition: { type: 'spring', stiffness: 500, damping: 12, mass: 0.6 } }}
               whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 600, damping: 14 } }}
-              className="rounded-[24px] p-6 flex items-center justify-between cursor-pointer transition-colors duration-300 group"
+              className="rounded-3xl p-6 flex items-center justify-between cursor-pointer transition-colors duration-300 group"
               style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(234, 250, 238, 0.9) 100%)',
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(232, 252, 238, 0.65) 100%)',
                 backdropFilter: 'blur(24px)',
                 WebkitBackdropFilter: 'blur(24px)',
-                border: '1px solid rgba(34, 197, 94, 0.5)',
-                boxShadow: '0 16px 40px -10px rgba(27, 30, 25, 0.08), 0 0 28px -5px rgba(34, 197, 94, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.95)',
+                border: '1px solid rgba(255, 255, 255, 0.85)',
+                boxShadow: '0 16px 36px -10px rgba(27, 30, 25, 0.06), 0 0 25px rgba(34, 197, 94, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.9)',
               }}
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-[#D6F24B] flex items-center justify-center shadow-[0_0_16px_rgba(214,242,75,0.7)] group-hover:scale-110 transition-transform">
-                  <Leaf size={20} className="text-[#1B1E19]" />
+                <div className="relative flex w-12 h-12 rounded-2xl bg-linear-to-br from-[#86EFAC] to-[#22C55E] p-px shadow-[0_8px_20px_-4px_rgba(34,197,94,0.55)] group-hover:scale-110 transition-transform duration-300 shrink-0">
+                  <div className="w-full h-full rounded-[14px] bg-linear-to-b from-white/70 via-[#ECFDF5]/80 to-[#DCFCE7]/80 backdrop-blur-md flex items-center justify-center border border-white/80 shadow-inner">
+                    <Leaf size={20} className="text-emerald-800" strokeWidth={2.2} />
+                  </div>
                 </div>
                 <div>
                   <h3 className="font-semibold text-[#1B1E19] text-[15px]">Alternative crop</h3>
