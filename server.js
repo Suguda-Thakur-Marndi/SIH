@@ -23,10 +23,10 @@ app.prepare().then(() => {
     console.log("Client connected:", socket.id);
 
     // Listen for live location updates from farmers
-    socket.on("updateLocation", (data) => {
-      console.log("Location update:", data);
-      // Broadcast location to officers/dashboard
-      io.emit("farmerLocationUpdate", data);
+    socket.on("updateLocation", (data = {}) => {
+      const { farmerId, lat, lng, timestamp } = data;
+      if (typeof farmerId !== "string" || typeof lat !== "number" || typeof lng !== "number" || lat < -90 || lat > 90 || lng < -180 || lng > 180) return;
+      io.emit("farmerLocationUpdate", { farmerId, lat, lng, timestamp: typeof timestamp === "number" ? timestamp : Date.now() });
     });
 
     socket.on("disconnect", () => {
