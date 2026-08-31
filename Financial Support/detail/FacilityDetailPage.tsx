@@ -111,7 +111,7 @@ export default function FacilityDetailPage() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, bankId]);
 
   const InfoRow = ({ label, value }: { label: string; value: string }) => (
     <div

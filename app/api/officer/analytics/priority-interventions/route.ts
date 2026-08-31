@@ -4,7 +4,7 @@ import { extractBearerToken, verifyJwt } from '@/lib/auth-jwt';
 
 async function getOfficerUser(req: NextRequest) {
   let userId = 'usr_admin_demo_1';
-  let district = 'Mayurbhanj';
+  const district = 'Mayurbhanj';
 
   const token = extractBearerToken(req) || req.cookies.get('smartcrop_token')?.value;
   if (token) {

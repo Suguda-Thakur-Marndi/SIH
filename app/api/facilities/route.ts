@@ -3,22 +3,6 @@ import { query } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-const MOCK_FACILITIES_LIST = [
-  {
-    id: 'fac_kisan_01',
-    facilityName: 'Kisan Crop Loan Scheme',
-    facilityType: 'Crop Finance',
-    shortDescription: 'Low-interest short-term credit scheme designed for seasonal agricultural operations and input procurement.',
-    bankName: 'SBI / Regional Agri Credit Hub',
-    bankVerified: true,
-    interestRate: '4.00%',
-    tenure: '12 Months',
-    minimumAmount: 10000,
-    maximumAmount: 300000,
-    cropTypes: ['Paddy', 'Wheat', 'Pulses', 'Oilseeds'],
-  },
-];
-
 /**
  * Farmer-facing facility discovery: published facilities only,
  * joined with bank name/verification (LEFT JOIN eligibility for crop filter data).

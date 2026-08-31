@@ -21,9 +21,11 @@ export default function Logo({ showTagline = false }: LogoProps) {
         </span>
       </div>
 
-      <p className="text-xs text-slate-500 font-normal">
-        Agricultural Intelligence Platform
-      </p>
+      {showTagline && (
+        <p className="text-xs text-slate-500 font-normal">
+          Agricultural Intelligence Platform
+        </p>
+      )}
     </div>
   );
 }

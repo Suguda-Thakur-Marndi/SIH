@@ -27,6 +27,7 @@ const message = buildMockMessage();
 
 console.log('--- SMS DISPATCH INITIATED ---');
 console.log(`To: +91${testPhone}`);
+console.log(`Priority: ${priority} | Lang: ${language}`);
 console.log(`Provider: MSG91 (Mock)`);
 console.log(`Status: PENDING -> SENT`);
 console.log('\n--- MESSAGE CONTENT ---');

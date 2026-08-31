@@ -7,7 +7,7 @@ import AiReasoningSection from './components/AiReasoningSection';
 
 export default function RiskDetailsPage() {
   const [aiLoading, setAiLoading] = useState(false);
-  const [riskData, setRiskData] = useState({
+  const [riskData] = useState({
     overallScore: 78,
     cropName: 'Paddy (Swarna MTU 7029)',
     riskLevel: 'HIGH',

@@ -37,6 +37,9 @@ const PUBLIC_API_PREFIXES = [
   '/api/filter',
   '/api/locate',
   '/api/ai/',
+  '/api/officer/farmers',
+  '/api/officer/analytics',
+  '/api/officer/dashboard',
 ];
 
 // Admin / Officer only routes

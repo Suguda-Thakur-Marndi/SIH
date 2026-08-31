@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { translateWithSarvam, textToSpeechWithSarvam, SARVAM_LANGUAGE_MAP } from '@/lib/sarvam-ai';
+import { translateWithSarvam, textToSpeechWithSarvam } from '@/lib/sarvam-ai';
 
 export async function POST(req: NextRequest) {
   try {

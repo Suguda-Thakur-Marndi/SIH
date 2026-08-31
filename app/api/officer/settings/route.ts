@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
   try {
     const { userId } = await getOfficerUser(req);
 
-    let userRecord = {
+    const userRecord = {
       id: userId,
       name: 'Dr. Anil Verma',
       designation: 'Sub-Divisional Agricultural Officer (SDAO)',

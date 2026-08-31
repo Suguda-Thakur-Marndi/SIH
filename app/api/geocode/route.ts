@@ -147,7 +147,7 @@ export async function GET(req: NextRequest) {
         });
       }
     }
-  } catch (err) {
+  } catch {
     // Graceful fallback to preloaded
   }
 

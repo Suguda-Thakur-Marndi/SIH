@@ -10,12 +10,10 @@ import Header from '../components/Header';
 import { 
   Clock, 
   Search, 
-  Filter, 
   RotateCcw, 
   Eye, 
   X, 
   Calendar, 
-  User, 
   PhoneCall, 
   Compass, 
   AlertTriangle, 
@@ -27,7 +25,6 @@ import {
   ChevronRight,
   Loader2,
   FileText,
-  Activity,
   MapPin,
   ShieldAlert
 } from 'lucide-react';

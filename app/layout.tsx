@@ -55,10 +55,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             `,
           }}
         />
-        <Script
+        <script
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
           strategy="afterInteractive"
         />
+      </head>
+      <body className="min-h-full flex flex-col font-sans">
         {/* Hidden Google Translate container */}
         <div id="google_translate_element" style={{ display: 'none' }} aria-hidden="true" />
         <ClerkProvider publishableKey={publishableKey}>
@@ -72,4 +74,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
-

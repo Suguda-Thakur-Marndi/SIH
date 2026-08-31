@@ -1,25 +1,17 @@
 'use client';
 
-import React, { useState, useRef, useEffect, Suspense } from 'react';
+import React, { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
   ArrowLeft,
   Bot,
-  User,
   Send,
   Mic,
   MicOff,
   Volume2,
-  VolumeX,
   Sparkles,
-  RotateCcw,
   Sprout,
-  Droplets,
-  ShieldAlert,
-  IndianRupee,
-  Lightbulb,
-  Headphones,
 } from 'lucide-react';
 import { CROPS_GUIDE_DATA } from '@/lib/cropGuideData';
 import AIChatSkeleton from '@/components/skeletons/AIChatSkeleton';
@@ -59,57 +51,7 @@ function AiChatPageContent() {
     },
   ]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if ('speechSynthesis' in window) {
-        synthRef.current = window.speechSynthesis;
-      }
-      const SpeechRecognition =
-        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = false;
-        recognitionRef.current.lang = 'en-IN';
-        recognitionRef.current.onresult = (e: any) => {
-          const transcript = e.results[0][0].transcript;
-          setInputText(transcript);
-          setIsListening(false);
-          if (transcript.trim().length > 3) {
-            handleSend(transcript);
-          }
-        };
-        recognitionRef.current.onerror = () => setIsListening(false);
-        recognitionRef.current.onend = () => setIsListening(false);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const toggleMic = () => {
-    if (!recognitionRef.current) {
-      alert('Speech recognition is not supported in this browser.');
-      return;
-    }
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    } else {
-      try {
-        if (synthRef.current && synthRef.current.speaking) {
-          synthRef.current.cancel();
-        }
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  };
-
-  const handleSpeak = (id: string, text: string) => {
+  const handleSpeak = useCallback((id: string, text: string) => {
     if (!synthRef.current) return;
     if (speakingMessageId === id) {
       synthRef.current.cancel();
@@ -138,9 +80,9 @@ function AiChatPageContent() {
     utterance.onend = () => setSpeakingMessageId(null);
     utterance.onerror = () => setSpeakingMessageId(null);
     synthRef.current.speak(utterance);
-  };
+  }, [speakingMessageId]);
 
-  const handleSend = async (queryOverride?: string) => {
+  const handleSend = useCallback(async (queryOverride?: string) => {
     const query = (queryOverride || inputText).trim();
     if (!query || isLoading) return;
 
@@ -211,6 +153,56 @@ function AiChatPageContent() {
       ]);
     } finally {
       setIsLoading(false);
+    }
+  }, [inputText, isLoading, activeCrop.name, activeCrop.id, autoSpeak, handleSpeak]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if ('speechSynthesis' in window) {
+        synthRef.current = window.speechSynthesis;
+      }
+      const SpeechRecognition =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.lang = 'en-IN';
+        recognitionRef.current.onresult = (e: any) => {
+          const transcript = e.results[0][0].transcript;
+          setInputText(transcript);
+          setIsListening(false);
+          if (transcript.trim().length > 3) {
+            handleSend(transcript);
+          }
+        };
+        recognitionRef.current.onerror = () => setIsListening(false);
+        recognitionRef.current.onend = () => setIsListening(false);
+      }
+    }
+  }, [handleSend]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const toggleMic = () => {
+    if (!recognitionRef.current) {
+      alert('Speech recognition is not supported in this browser.');
+      return;
+    }
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        if (synthRef.current && synthRef.current.speaking) {
+          synthRef.current.cancel();
+        }
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 

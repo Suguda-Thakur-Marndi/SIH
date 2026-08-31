@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
-import { processSmsAlert } from '@/SMS/notification/lib/notifications/service';
-import { getRiskPriority } from '@/SMS/notification/lib/notifications/rules';
+import { processSmsAlert } from '@/SMS/SMS/lib/notifications/service';
+import { getRiskPriority } from '@/SMS/SMS/lib/notifications/rules';
 
 /**
  * POST /api/risk/check-all
@@ -11,9 +11,9 @@ export async function POST(req: NextRequest) {
   // 1. Authorization check
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET || 'dev_cron_secret';
-  
+
   if (authHeader !== `Bearer ${cronSecret}` && process.env.NODE_ENV === 'production') {
-     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 
   let connection;
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     for (const farmer of farmers) {
       // In a real app, we'd invoke the AI risk engine here to calculate a new score.
       // For this MVP, we fetch the latest scores to detect if a threshold was crossed.
-      
+
       const [scores]: any = await connection.query(`
         SELECT overall_score, ai_explanation 
         FROM risk_scores 
@@ -43,17 +43,17 @@ export async function POST(req: NextRequest) {
       if (scores.length > 0) {
         const currentScore = scores[0].overall_score;
         const previousScore = scores.length > 1 ? scores[1].overall_score : 0;
-        
+
         const currentPriority = getRiskPriority(currentScore);
         const previousPriority = getRiskPriority(previousScore);
-        
+
         // Threshold crossing detection: 
         // Only send if we escalated into HIGH or CRITICAL from a lower band
         if (
           (currentPriority === 'HIGH' && previousPriority !== 'HIGH' && previousPriority !== 'CRITICAL') ||
           (currentPriority === 'CRITICAL' && previousPriority !== 'CRITICAL')
         ) {
-          
+
           // Parse reasons from DB if possible, otherwise use a default
           let reasons = ['Severe distress indicators detected'];
           if (scores[0].ai_explanation) {
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
             language: farmer.language || 'en',
             channel: 'SMS'
           });
-          
+
           if (result) {
             alertsSent++;
           }

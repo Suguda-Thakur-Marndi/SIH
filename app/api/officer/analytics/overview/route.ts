@@ -5,7 +5,7 @@ import { extractBearerToken, verifyJwt } from '@/lib/auth-jwt';
 // Helper to resolve current officer user
 async function getOfficerUser(req: NextRequest) {
   let userId = 'usr_admin_demo_1';
-  let district = 'Mayurbhanj';
+  const district = 'Mayurbhanj';
 
   const token = extractBearerToken(req) || req.cookies.get('smartcrop_token')?.value;
   if (token) {
@@ -28,10 +28,9 @@ async function getOfficerUser(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const { userId, district } = await getOfficerUser(req);
+    const { district } = await getOfficerUser(req);
     const { searchParams } = new URL(req.url);
     const block = searchParams.get('block');
-    const crop = searchParams.get('crop');
     const timeRange = searchParams.get('timeRange') || '7d';
     const days = parseInt(timeRange.replace('d', '')) || 7;
 

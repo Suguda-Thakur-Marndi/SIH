@@ -3,8 +3,6 @@
  * Strictly operates on the backend to protect API keys and format structured domain responses.
  */
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
-
 interface GeminiGenerateOptions {
   systemPrompt?: string;
   userPrompt: string;

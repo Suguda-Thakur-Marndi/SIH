@@ -200,7 +200,6 @@ export default function SmartCropDashboard() {
               const Icon = item.icon;
               const isActive = activeNav === item.id;
               const isHovered = hoveredNav === item.id;
-              const isExpanded = isActive || isHovered;
 
               return (
                 <Link
@@ -209,8 +208,8 @@ export default function SmartCropDashboard() {
                   onClick={() => setActiveNav(item.id)}
                   onMouseEnter={() => setHoveredNav(item.id)}
                   onMouseLeave={() => setHoveredNav(null)}
-                  className={`relative flex items-center justify-center h-11 rounded-full cursor-pointer select-none transition-all duration-300 min-w-[2.75rem] px-2.5 ${
-                    isExpanded ? 'pr-4 pl-3' : ''
+                  className={`relative flex items-center justify-center h-11 rounded-full cursor-pointer select-none transition-all duration-300 ${
+                    isExpanded ? 'px-5' : 'w-11'
                   } ${
                     isActive
                       ? 'bg-[#1B1E19] text-[#F7F8F4] shadow-md shadow-black/20'
@@ -220,43 +219,15 @@ export default function SmartCropDashboard() {
                     backdropFilter: 'blur(8px)',
                   }}
                 >
-                  {/* Symbol / Icon */}
-                  <motion.div
-                    animate={{
-                      y: isHovered ? -2 : 0,
-                      scale: isHovered || isActive ? 1.08 : 1,
-                    }}
-                    transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                    className="flex items-center justify-center shrink-0"
-                  >
-                    <Icon
-                      size={19}
-                      className={`transition-all duration-300 ${
-                        isActive
-                          ? 'text-[#D6F24B] drop-shadow-[0_0_8px_rgba(214,242,75,0.6)]'
-                          : isHovered
-                          ? 'text-[#1B1E19] drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]'
-                          : 'text-[#6B6F63]'
-                      }`}
-                    />
-                  </motion.div>
-
-                  {/* Expandable Label on Hover / Active */}
-                  <motion.span
-                    initial={false}
-                    animate={{
-                      width: isExpanded ? 'auto' : 0,
-                      opacity: isExpanded ? 1 : 0,
-                      marginLeft: isExpanded ? 8 : 0,
-                    }}
-                    transition={{
-                      width: { type: 'spring', stiffness: 350, damping: 30 },
-                      opacity: { duration: 0.2 },
-                    }}
-                    className="overflow-hidden whitespace-nowrap text-sm font-medium tracking-tight"
-                  >
-                    {item.label}
-                  </motion.span>
+                  {/* Icon */}
+                  <Icon
+                    size={19}
+                    className={`transition-colors duration-300 ${
+                      isActive
+                        ? 'text-[#D6F24B] drop-shadow-[0_0_8px_rgba(214,242,75,0.6)]'
+                        : 'text-current'
+                    }`}
+                  />
 
                   {/* Glowing Indicator bar for active item */}
                   {isActive && (
@@ -283,7 +254,9 @@ export default function SmartCropDashboard() {
             <button
               onMouseEnter={() => setHoveredAction('search')}
               onMouseLeave={() => setHoveredAction(null)}
-              className="h-11 min-w-[2.75rem] px-2.5 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm cursor-pointer group"
+              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm cursor-pointer group ${
+                hoveredAction === 'search' ? 'px-4' : 'w-11'
+              }`}
             >
               <motion.div
                 animate={{ y: hoveredAction === 'search' ? -2 : 0 }}
@@ -300,7 +273,7 @@ export default function SmartCropDashboard() {
                   marginLeft: hoveredAction === 'search' ? 6 : 0,
                 }}
                 transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19] pointer-events-none"
+                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19]"
               >
                 Search
               </motion.span>
@@ -311,7 +284,9 @@ export default function SmartCropDashboard() {
               onClick={() => router.push('/notifications')}
               onMouseEnter={() => setHoveredAction('bell')}
               onMouseLeave={() => setHoveredAction(null)}
-              className="h-11 min-w-[2.75rem] px-2.5 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group"
+              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group ${
+                hoveredAction === 'bell' ? 'px-4' : 'w-11'
+              }`}
             >
               <motion.div
                 animate={{ y: hoveredAction === 'bell' ? -2 : 0 }}
@@ -329,7 +304,7 @@ export default function SmartCropDashboard() {
                   marginLeft: hoveredAction === 'bell' ? 6 : 0,
                 }}
                 transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19] pointer-events-none"
+                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19]"
               >
                 {t('alerts', 'Alerts')}
               </motion.span>
@@ -340,7 +315,9 @@ export default function SmartCropDashboard() {
               onClick={() => router.push('/farmer-profile')}
               onMouseEnter={() => setHoveredAction('user')}
               onMouseLeave={() => setHoveredAction(null)}
-              className="h-11 min-w-[2.75rem] px-2.5 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group"
+              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group ${
+                hoveredAction === 'user' ? 'px-4' : 'w-11'
+              }`}
             >
               <motion.div
                 animate={{ y: hoveredAction === 'user' ? -2 : 0 }}
@@ -358,7 +335,7 @@ export default function SmartCropDashboard() {
                   marginLeft: hoveredAction === 'user' ? 6 : 0,
                 }}
                 transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19] pointer-events-none"
+                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19]"
               >
                 Profile
               </motion.span>
@@ -370,10 +347,10 @@ export default function SmartCropDashboard() {
                 await smartCropAuth.signOut();
                 router.push('/authentication');
               }}
-              onMouseEnter={() => setHoveredAction('logout')}
-              onMouseLeave={() => setHoveredAction(null)}
               title="Sign Out to Authentication"
-              className="h-11 min-w-[2.75rem] px-2.5 rounded-full flex items-center justify-center bg-red-50/90 hover:bg-red-100 border border-red-200/80 transition-all duration-300 shadow-sm relative cursor-pointer group"
+              className={`h-11 rounded-full flex items-center justify-center bg-red-50/90 hover:bg-red-100 border border-red-200/80 transition-all duration-300 shadow-sm relative cursor-pointer group ${
+                hoveredAction === 'logout' ? 'px-4' : 'w-11'
+              }`}
             >
               <motion.div
                 animate={{ y: hoveredAction === 'logout' ? -2 : 0 }}
@@ -390,7 +367,7 @@ export default function SmartCropDashboard() {
                   marginLeft: hoveredAction === 'logout' ? 6 : 0,
                 }}
                 transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-red-700 pointer-events-none"
+                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-red-700"
               >
                 Logout
               </motion.span>
@@ -435,12 +412,12 @@ export default function SmartCropDashboard() {
             transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-wrap justify-center items-center gap-4"
           >
-            <Link href="/crop-monitoring">
+            <Link href="/risk-details">
               <button className="whitespace-nowrap px-8 py-4 rounded-full bg-[#1B1E19] text-[#F7F8F4] font-medium flex items-center gap-2 hover:bg-black transition-colors shadow-lg shadow-black/10">
                 {t('view_farm_health', 'View Farm Health')}
               </button>
             </Link>
-            <Link href="/crop-monitoring">
+            <Link href="/alternative-crop">
               <button className="whitespace-nowrap px-8 py-4 rounded-full bg-white/60 backdrop-blur-xl border border-black/10 font-medium text-[#1B1E19] flex items-center gap-2 hover:bg-white/80 transition-colors shadow-lg shadow-black/5">
                 {t('explore_advisory', 'Explore Advisory')} <ArrowRight size={18} />
               </button>
@@ -476,8 +453,9 @@ export default function SmartCropDashboard() {
       {/* SECTION 1.5: Quick Insights 2x2 Grid */}
       <section className="relative z-10 py-24 px-6 md:px-12 max-w-7xl mx-auto flex flex-col items-center">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 md:gap-14 lg:gap-20 w-fit pointer-events-auto">
-          {/* Stat 1 */}
+          {/* Stat 1 (Farm Health) */}
           <motion.div 
+            onClick={() => router.push('/risk-details')}
             whileHover={{ scale: 1.045, y: -6, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
             whileTap={{ scale: 0.96 }}
             className="group relative w-full sm:w-80 md:w-90 lg:w-105 overflow-hidden rounded-4xl p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
@@ -577,6 +555,7 @@ export default function SmartCropDashboard() {
 
           {/* Stat 4 (Risk Card) */}
           <motion.div 
+            onClick={() => router.push('/risk-details')}
             whileHover={{ scale: 1.045, y: -6, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
             whileTap={{ scale: 0.96 }}
             className="group relative w-full sm:w-80 md:w-90 lg:w-105 overflow-hidden rounded-4xl p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
@@ -705,6 +684,7 @@ export default function SmartCropDashboard() {
 
               {/* Crop Health Monitoring Card */}
               <motion.div
+                onClick={() => router.push('/risk-details')}
                 whileHover={{ scale: 1.045, y: -8, transition: { type: 'spring', stiffness: 450, damping: 12 } }}
                 whileTap={{ scale: 0.92, transition: { type: 'spring', stiffness: 550, damping: 14 } }}
                 className="relative overflow-hidden rounded-[28px] p-6 text-[#1B1E19] transition-colors duration-300 hover:shadow-[0_24px_50px_-10px_rgba(214,242,75,0.35)] cursor-pointer"

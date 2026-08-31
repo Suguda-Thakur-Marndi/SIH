@@ -4,15 +4,24 @@ import { useState } from 'react';
 import Image from 'next/image';
 import bgDesktop from './img/1 (1).jpeg';
 import bgMobile from './img/3.png';
+import dynamic from 'next/dynamic';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import RiskSummaryCards from './components/RiskSummaryCards';
 import FarmerRiskTable from './components/FarmerRiskTable';
-import DistressMap from './components/DistressMap';
 import RiskAnalyticsCharts from './components/RiskAnalyticsCharts';
 import AlertPanel from './components/AlertPanel';
 import FarmerDetailPanel from './components/FarmerDetailPanel';
 import InterventionModal from './components/InterventionModal';
+
+const DistressMap = dynamic(() => import('./components/DistressMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="glass bg-white/80 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 h-full min-h-[360px] animate-pulse flex items-center justify-center text-sm font-semibold text-neutral-500">
+      Loading Real Spatial Distress Map...
+    </div>
+  ),
+});
 
 export default function OfficerDashboardPage() {
   const [selectedFarmerId, setSelectedFarmerId] = useState<string | null>(null);

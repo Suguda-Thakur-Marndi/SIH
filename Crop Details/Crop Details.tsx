@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Sprout, Droplets, Layers, CheckCircle2, BookOpen } from 'lucide-react';
+import { ArrowLeft, Sprout, Droplets, Layers, BookOpen } from 'lucide-react';
 import bgImage from '../farmer profile/image/BG_2.png';
 import CropDetailsCalendar from './CropDetailsCalendar';
 
@@ -157,7 +157,6 @@ export default function CropDetails() {
     // Simulate data/background load
     setLoading(false);
   }, []);
-  const cal = selectedCrop.calendar;
 
   if (loading) {
     return (
