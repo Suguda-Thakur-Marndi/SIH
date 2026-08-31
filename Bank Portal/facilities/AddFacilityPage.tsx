@@ -38,6 +38,34 @@ const FARMER_TYPES = [
   'Other',
 ];
 
+const Section = ({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) => (
+  <div style={{ marginBottom: '2.25rem' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', borderBottom: '2px solid #eff6ff', paddingBottom: '0.75rem', marginBottom: '1.35rem' }}>
+      <span
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '32px',
+          height: '32px',
+          borderRadius: '8px',
+          background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+          border: '1px solid #bfdbfe',
+          fontSize: '1.05rem',
+          flexShrink: 0,
+          boxShadow: '0 1px 3px rgba(37,99,235,0.08)',
+        }}
+      >
+        {icon}
+      </span>
+      <h3 style={{ color: '#1e4078', fontSize: '1rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
+        {title}
+      </h3>
+    </div>
+    {children}
+  </div>
+);
+
 export default function AddFacilityPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -148,9 +176,17 @@ export default function AddFacilityPage() {
         status = form.status.toLowerCase() === 'published' ? 'submitted' : 'draft';
       }
 
+      const tokenMatch = typeof document !== 'undefined' ? document.cookie.match(/(?:^|;\s*)smartcrop_token=([^;]+)/) : null;
+      const token = tokenMatch ? decodeURIComponent(tokenMatch[1]) : '';
+
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ ...form, bankId, status }),
       });
       const data = await res.json().catch(() => ({}) as { message?: string; error?: string });
@@ -159,7 +195,10 @@ export default function AddFacilityPage() {
         showToast(data.message || (editId ? 'Facility updated successfully!' : 'Facility saved successfully!'), 'success');
         setTimeout(() => router.push(`/bank-portal/facilities?bankId=${encodeURIComponent(bankId)}`), 1500);
       } else {
-        const msg = data.error || (editId ? 'Facility update failed.' : 'Facility creation failed.');
+        const rawErr = data.error;
+        const msg =
+          (typeof rawErr === 'object' && rawErr !== null ? (rawErr as any).message : rawErr) ||
+          (editId ? 'Facility update failed.' : 'Facility creation failed.');
         setApiError(msg);
         showToast(msg, 'error');
       }
@@ -178,34 +217,6 @@ export default function AddFacilityPage() {
   };
 
   const saveDraft = () => submitToApi('draft');
-
-  const Section = ({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) => (
-    <div style={{ marginBottom: '2.25rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', borderBottom: '2px solid #eff6ff', paddingBottom: '0.75rem', marginBottom: '1.35rem' }}>
-        <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '32px',
-            height: '32px',
-            borderRadius: '8px',
-            background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
-            border: '1px solid #bfdbfe',
-            fontSize: '1.05rem',
-            flexShrink: 0,
-            boxShadow: '0 1px 3px rgba(37,99,235,0.08)',
-          }}
-        >
-          {icon}
-        </span>
-        <h3 style={{ color: '#1e4078', fontSize: '1rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
-          {title}
-        </h3>
-      </div>
-      {children}
-    </div>
-  );
 
   return (
     <div style={{ ...BANK_PAGE_CONTAINER_STYLE, position: 'relative' }} className="selection:bg-emerald-500 selection:text-white">

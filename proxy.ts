@@ -32,14 +32,6 @@ const PUBLIC_API_PREFIXES = [
   '/api/filter',
   '/api/locate',
   '/api/ai/',
-  '/api/officer/farmers',
-  '/api/officer/dashboard',
-  '/api/equipment',
-  '/api/facilities',
-  '/api/notifications',
-  '/api/farmer/dashboard',
-  '/api/farmer/risk',
-  '/api/farmer/recommendations',
 ];
 
 // Admin / Officer only routes
@@ -119,7 +111,7 @@ export default function middleware(req: NextRequest) {
     if (userRole === 'administrator') {
       dashboardUrl = '/admin/dashboard';
     } else if (userRole === 'bank') {
-      dashboardUrl = '/bank/dashboard';
+      dashboardUrl = '/bank-portal/dashboard';
     }
     return NextResponse.redirect(new URL(dashboardUrl, req.url));
   }

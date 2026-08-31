@@ -18,7 +18,7 @@ const dbConfig = {
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 10000,
-  connectTimeout: 3500,
+  connectTimeout: 15000,
   ssl: {
     rejectUnauthorized: false,
   },
@@ -34,7 +34,7 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Helper to execute parameterized SQL queries against AWS RDS MySQL with a quick timeout.
  */
-export async function query<T = any>(sql: string, params?: any[], timeoutMs = 4000): Promise<T> {
+export async function query<T = any>(sql: string, params?: any[], timeoutMs = 10000): Promise<T> {
   const queryPromise = pool.execute(sql, params).then(([rows]) => rows as T);
   
   const timeoutPromise = new Promise<never>((_, reject) => {
