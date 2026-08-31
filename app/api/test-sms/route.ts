@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendSms } from '@/SMS/notification/lib/notifications/sms';
-import { buildMessage } from '@/SMS/notification/lib/notifications/templates';
-import { getRiskPriority } from '@/SMS/notification/lib/notifications/rules';
+import { sendSms } from '@/SMS/SMS/lib/notifications/sms';
+import { buildMessage } from '@/SMS/SMS/lib/notifications/templates';
+import { getRiskPriority } from '@/SMS/SMS/lib/notifications/rules';
 
 export async function GET(req: NextRequest) {
   try {
