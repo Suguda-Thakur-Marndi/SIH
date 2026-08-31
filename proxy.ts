@@ -10,6 +10,10 @@ const PUBLIC_PATHS = [
   '/schemes',
   '/full-crop-guide',
   '/alternative-crop',
+  '/financial-support',
+  '/financial-support/list',
+  '/financial-support/detail',
+  '/financial-support/acknowledgement',
   '/ai-chat',
   '/unauthorized',
   '/admin/dashboard',
@@ -27,6 +31,7 @@ const PUBLIC_API_PREFIXES = [
   '/api/farmer/register',
   '/api/banks/register',
   '/api/db-check',
+  '/api/facilities',
   '/api/translate',
   '/api/sarvam',
   '/api/filter',
@@ -69,7 +74,8 @@ export default function middleware(req: NextRequest) {
   const isPublicUi =
     PUBLIC_PATHS.includes(pathname) ||
     pathname.startsWith('/schemes/') ||
-    pathname.startsWith('/full-crop-guide');
+    pathname.startsWith('/full-crop-guide') ||
+    pathname.startsWith('/financial-support');
 
   // 3. Extract auth credentials from cookies or Authorization header
   const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
