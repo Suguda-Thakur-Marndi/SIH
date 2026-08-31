@@ -435,7 +435,7 @@ export default function SmartCropDashboard() {
             transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-wrap justify-center items-center gap-4"
           >
-            <Link href="/crop-monitoring">
+            <Link href="/risk-details">
               <button className="whitespace-nowrap px-8 py-4 rounded-full bg-[#1B1E19] text-[#F7F8F4] font-medium flex items-center gap-2 hover:bg-black transition-colors shadow-lg shadow-black/10">
                 {t('view_farm_health', 'View Farm Health')}
               </button>
@@ -476,8 +476,9 @@ export default function SmartCropDashboard() {
       {/* SECTION 1.5: Quick Insights 2x2 Grid */}
       <section className="relative z-10 py-24 px-6 md:px-12 max-w-7xl mx-auto flex flex-col items-center">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 md:gap-14 lg:gap-20 w-fit pointer-events-auto">
-          {/* Stat 1 */}
+          {/* Stat 1 (Farm Health) */}
           <motion.div 
+            onClick={() => router.push('/risk-details')}
             whileHover={{ scale: 1.045, y: -6, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
             whileTap={{ scale: 0.96 }}
             className="group relative w-full sm:w-80 md:w-90 lg:w-105 overflow-hidden rounded-4xl p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
@@ -577,6 +578,7 @@ export default function SmartCropDashboard() {
 
           {/* Stat 4 (Risk Card) */}
           <motion.div 
+            onClick={() => router.push('/risk-details')}
             whileHover={{ scale: 1.045, y: -6, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
             whileTap={{ scale: 0.96 }}
             className="group relative w-full sm:w-80 md:w-90 lg:w-105 overflow-hidden rounded-4xl p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
@@ -705,6 +707,7 @@ export default function SmartCropDashboard() {
 
               {/* Crop Health Monitoring Card */}
               <motion.div
+                onClick={() => router.push('/risk-details')}
                 whileHover={{ scale: 1.045, y: -8, transition: { type: 'spring', stiffness: 450, damping: 12 } }}
                 whileTap={{ scale: 0.92, transition: { type: 'spring', stiffness: 550, damping: 14 } }}
                 className="relative overflow-hidden rounded-[28px] p-6 text-[#1B1E19] transition-colors duration-300 hover:shadow-[0_24px_50px_-10px_rgba(214,242,75,0.35)] cursor-pointer"

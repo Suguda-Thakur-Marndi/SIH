@@ -1,4 +1,4 @@
-export async function sendSms(phone: string, message: string, notificationId?: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
+export async function sendSms(phone: string, message: string, _notificationId?: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const provider = process.env.SMS_PROVIDER || 'msg91';
 
   try {

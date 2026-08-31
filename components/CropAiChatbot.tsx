@@ -1,23 +1,13 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
-  MessageSquare,
   X,
   Send,
-  Sparkles,
-  Bot,
-  User,
   Mic,
   MicOff,
   Volume2,
-  VolumeX,
   RotateCcw,
-  Sprout,
-  HelpCircle,
-  CheckCircle2,
-  CornerDownLeft,
-  Headphones,
 } from 'lucide-react';
 
 interface ChatMessage {
@@ -47,7 +37,7 @@ export default function CropAiChatbot({
   const [isListening, setIsListening] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
-  const [voiceLang, setVoiceLang] = useState<'en-IN' | 'hi-IN' | 'or-IN'>('en-IN');
+  const [voiceLang] = useState<'en-IN' | 'hi-IN' | 'or-IN'>('en-IN');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -62,77 +52,7 @@ export default function CropAiChatbot({
     },
   ]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if ('speechSynthesis' in window) {
-        synthRef.current = window.speechSynthesis;
-      }
-      const SpeechRecognition =
-        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = false;
-        recognitionRef.current.interimResults = false;
-        recognitionRef.current.lang = voiceLang;
-
-        recognitionRef.current.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript;
-          setInputText(transcript);
-          setIsListening(false);
-          // Auto send query if clear transcript received
-          if (transcript.trim().length > 3) {
-            handleSend(transcript);
-          }
-        };
-
-        recognitionRef.current.onerror = () => setIsListening(false);
-        recognitionRef.current.onend = () => setIsListening(false);
-      }
-    }
-  }, [voiceLang]);
-
-  useEffect(() => {
-    if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages, isOpen]);
-
-  useEffect(() => {
-    if (messages.length === 1 && messages[0].id === 'welcome-1') {
-      setMessages([
-        {
-          id: 'welcome-updated',
-          sender: 'ai',
-          text: `🌱 **Namaste! AI Voice Agronomist is ready for ${currentCropName}.**\n\nAsk me about stage-by-stage farming, pest protection, or the activity calendar for **${currentCropName}**!`,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ]);
-    }
-  }, [currentCropName]);
-
-  const toggleSpeechRecognition = () => {
-    if (!recognitionRef.current) {
-      alert('Speech recognition is not supported in this browser. Please type your message.');
-      return;
-    }
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    } else {
-      try {
-        if (synthRef.current && synthRef.current.speaking) {
-          synthRef.current.cancel();
-        }
-        recognitionRef.current.lang = voiceLang;
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  };
-
-  const handleSpeakMessage = (msgId: string, text: string) => {
+  const handleSpeakMessage = useCallback((msgId: string, text: string) => {
     if (!synthRef.current) return;
     if (speakingMessageId === msgId) {
       synthRef.current.cancel();
@@ -150,7 +70,6 @@ export default function CropAiChatbot({
     const utterance = new SpeechSynthesisUtterance(cleanText);
     const voices = synthRef.current.getVoices();
 
-    // Select best Indian English / Hindi / Odia voice
     const indianVoice = voices.find(
       (v) =>
         v.lang.toLowerCase().includes('en-in') ||
@@ -167,9 +86,9 @@ export default function CropAiChatbot({
     utterance.onerror = () => setSpeakingMessageId(null);
 
     synthRef.current.speak(utterance);
-  };
+  }, [speakingMessageId]);
 
-  const handleSend = async (queryText?: string) => {
+  const handleSend = useCallback(async (queryText?: string) => {
     const text = (queryText || inputText).trim();
     if (!text || isLoading) return;
 
@@ -230,7 +149,6 @@ export default function CropAiChatbot({
 
       setMessages((prev) => [...prev, aiMessage]);
 
-      // Auto-read response if enabled
       if (autoSpeak) {
         setTimeout(() => handleSpeakMessage(aiMsgId, aiReply), 200);
       }
@@ -247,6 +165,78 @@ export default function CropAiChatbot({
       ]);
     } finally {
       setIsLoading(false);
+    }
+  }, [inputText, isLoading, currentCropName, currentCropId, currentStageName, autoSpeak, handleSpeakMessage]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if ('speechSynthesis' in window) {
+        synthRef.current = window.speechSynthesis;
+      }
+      const SpeechRecognition =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
+        recognitionRef.current.lang = voiceLang;
+
+        recognitionRef.current.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setInputText(transcript);
+          setIsListening(false);
+          if (transcript.trim().length > 3) {
+            handleSend(transcript);
+          }
+        };
+
+        recognitionRef.current.onerror = () => setIsListening(false);
+        recognitionRef.current.onend = () => setIsListening(false);
+      }
+    }
+  }, [voiceLang, handleSend]);
+
+  useEffect(() => {
+    if (isOpen) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages.length, isOpen]);
+
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].id === 'welcome-1') {
+        return [
+          {
+            id: 'welcome-updated',
+            sender: 'ai',
+            text: `🌱 **Namaste! AI Voice Agronomist is ready for ${currentCropName}.**\n\nAsk me about stage-by-stage farming, pest protection, or the activity calendar for **${currentCropName}**!`,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          },
+        ];
+      }
+      return prev;
+    });
+  }, [currentCropName]);
+
+  const toggleSpeechRecognition = () => {
+    if (!recognitionRef.current) {
+      alert('Speech recognition is not supported in this browser. Please type your message.');
+      return;
+    }
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        if (synthRef.current && synthRef.current.speaking) {
+          synthRef.current.cancel();
+        }
+        recognitionRef.current.lang = voiceLang;
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Globe, ChevronDown, Check, Sparkles, MapPin, Layers } from 'lucide-react';
+import { Globe, ChevronDown, Check, MapPin } from 'lucide-react';
 import { useLanguage, SUPPORTED_LANGUAGES, LanguageCode } from '@/lib/language-context';
 
 export default function TopLanguageBar() {

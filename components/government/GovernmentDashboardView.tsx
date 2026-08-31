@@ -4,8 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
-  Building2, Tractor, Users, FileText, ArrowLeft, BarChart3, 
-  CheckCircle2, AlertCircle, Sparkles, Plus, ExternalLink, LogOut
+  Building2, Tractor, FileText, ArrowLeft, ExternalLink, LogOut
 } from 'lucide-react';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/lib/language-context';

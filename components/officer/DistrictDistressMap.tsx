@@ -2,37 +2,23 @@
 
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin,
   AlertTriangle,
-  ShieldAlert,
   Search,
   RotateCcw,
-  Layers,
   ChevronRight,
-  User,
   Phone,
-  Droplets,
-  CloudRain,
-  Sprout,
-  Activity,
-  Calendar,
   Sparkles,
   TrendingUp,
-  Landmark,
   X,
-  Maximize2,
-  Minimize2,
   CheckCircle2,
   ArrowUpRight,
   Filter,
   Navigation,
-  Crosshair,
   Compass,
   Radio,
-  LocateFixed,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/language-context';
 import { DistressFarmer } from '@/app/api/officer/farmers/route';
@@ -68,7 +54,6 @@ export default function DistrictDistressMap({
   onFarmerSelect,
 }: DistrictDistressMapProps) {
   const { t } = useLanguage();
-  const router = useRouter();
 
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -93,6 +78,10 @@ export default function DistrictDistressMap({
   const [locationSearchQuery, setLocationSearchQuery] = useState<string>('');
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
   const locationMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const onFarmerSelectRef = useRef(onFarmerSelect);
+  useEffect(() => {
+    onFarmerSelectRef.current = onFarmerSelect;
+  }, [onFarmerSelect]);
 
   // Master Mayurbhanj & Regional Location Hubs
   const MAYURBHANJ_LOCATIONS = useMemo(() => [
@@ -114,6 +103,14 @@ export default function DistrictDistressMap({
     { name: 'Thakurmunda Block', type: 'Block Headquarter', block: 'Thakurmunda', lat: 21.5120, lng: 86.0120 },
     { name: 'Saraskana Block', type: 'Block Headquarter', block: 'Saraskana', lat: 22.2540, lng: 86.6120 },
     { name: 'Suliapada Block', type: 'Block Headquarter', block: 'Suliapada', lat: 21.9840, lng: 86.9210 },
+    { name: 'Kusumi Block', type: 'Block Headquarter', block: 'Kusumi', lat: 22.3120, lng: 86.2150 },
+    { name: 'Jamda Block', type: 'Block Headquarter', block: 'Jamda', lat: 22.1430, lng: 86.1340 },
+    { name: 'Tiring Block', type: 'Block Headquarter', block: 'Tiring', lat: 22.5230, lng: 86.0450 },
+    { name: 'Bijatala Block', type: 'Block Headquarter', block: 'Bijatala', lat: 22.3850, lng: 86.3210 },
+    { name: 'Raruan Block', type: 'Block Headquarter', block: 'Raruan', lat: 21.8920, lng: 85.8450 },
+    { name: 'Sukruli Block', type: 'Block Headquarter', block: 'Sukruli', lat: 21.8420, lng: 85.9120 },
+    { name: 'Gopabandhunagar Block', type: 'Block Headquarter', block: 'Gopabandhunagar', lat: 21.6120, lng: 86.7450 },
+    { name: 'Rasgovindpur Block', type: 'Block Headquarter', block: 'Rasgovindpur', lat: 21.8150, lng: 86.9320 },
   ], []);
 
   // Universal Geocoded Locations State
@@ -222,10 +219,6 @@ export default function DistrictDistressMap({
   const [isInterventionSuccess, setIsInterventionSuccess] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
-  // Map view state
-  const [mapStyleMode, setMapStyleMode] = useState<'liberty' | 'osm'>('liberty');
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
   // 1. Fetch Farmer Data from Enriched Backend API
   const fetchFarmers = useCallback(async () => {
     setLoading(true);
@@ -314,7 +307,7 @@ export default function DistrictDistressMap({
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
+        const { latitude, longitude } = position.coords;
         updateMarkerPosition(latitude, longitude);
       },
       (geoError) => {
@@ -384,17 +377,18 @@ export default function DistrictDistressMap({
     });
   }, [farmers, selectedRisk, selectedCrop, selectedBlock, selectedReason, searchQuery]);
 
-  // Available blocks and crops extracted dynamically
-  const availableBlocks = useMemo(() => {
-    const blocks = Array.from(new Set(farmers.map((f) => f.block))).filter(Boolean);
-    return blocks.sort();
-  }, [farmers]);
-
   const availableCrops = useMemo(() => {
     const crops = Array.from(
       new Set(farmers.map((f) => f.crop.split(' ')[0].replace(/[^a-zA-Z]/g, '')))
     ).filter(Boolean);
     return crops.sort();
+  }, [farmers]);
+
+  const availableBlocks = useMemo(() => {
+    const blocks = Array.from(
+      new Set(farmers.map((f) => f.block).filter(Boolean))
+    );
+    return blocks.sort();
   }, [farmers]);
 
   // Key Statistics
@@ -606,7 +600,7 @@ export default function DistrictDistressMap({
           if (fullFarmer) {
             setSelectedFarmer(fullFarmer);
             setIsDrawerOpen(true);
-            if (onFarmerSelect) onFarmerSelect(fullFarmer);
+            if (onFarmerSelectRef.current) onFarmerSelectRef.current(fullFarmer);
 
             const geom = feat.geometry as GeoJSON.Point;
             map.flyTo({
@@ -640,6 +634,22 @@ export default function DistrictDistressMap({
 
   const markersRef = useRef<maplibregl.Marker[]>([]);
 
+  // Center on farmer when selected from search or list
+  const handleSelectFarmer = useCallback((farmer: DistressFarmer) => {
+    setSelectedFarmer(farmer);
+    setIsDrawerOpen(true);
+    if (onFarmerSelect) onFarmerSelect(farmer);
+
+    if (mapRef.current) {
+      mapRef.current.flyTo({
+        center: [farmer.longitude, farmer.latitude],
+        zoom: 13,
+        duration: 900,
+        pitch: 0,
+      });
+    }
+  }, [onFarmerSelect]);
+
   // 4. Render Rich Interactive Farmer Markers & GeoJSON on Map
   useEffect(() => {
     if (!mapRef.current) return;
@@ -655,7 +665,11 @@ export default function DistrictDistressMap({
       const bounds = new maplibregl.LngLatBounds();
 
       filteredFarmers.forEach((farmer) => {
-        bounds.extend([farmer.longitude, farmer.latitude]);
+        const lng = Number(farmer.longitude);
+        const lat = Number(farmer.latitude);
+        if (isNaN(lng) || isNaN(lat) || (lng === 0 && lat === 0)) return;
+
+        bounds.extend([lng, lat]);
 
         const isHigh = farmer.riskLevel === 'HIGH';
         const isModerate = farmer.riskLevel === 'MODERATE';
@@ -702,21 +716,27 @@ export default function DistrictDistressMap({
         });
 
         const marker = new maplibregl.Marker({ element: el, anchor: 'top' })
-          .setLngLat([farmer.longitude, farmer.latitude])
+          .setLngLat([lng, lat])
           .addTo(map);
 
         markersRef.current.push(marker);
       });
 
-      // Fit map bounds to frame all matching farmers
-      if (filteredFarmers.length > 1) {
-        map.fitBounds(bounds, { padding: 60, maxZoom: 13, duration: 600 });
-      } else if (filteredFarmers.length === 1) {
-        map.flyTo({
-          center: [filteredFarmers[0].longitude, filteredFarmers[0].latitude],
-          zoom: 12.5,
-          duration: 600,
-        });
+      // Fit map bounds to frame all matching farmers safely
+      if (!bounds.isEmpty()) {
+        if (filteredFarmers.length > 1) {
+          map.fitBounds(bounds, { padding: 60, maxZoom: 13, duration: 600 });
+        } else if (filteredFarmers.length === 1) {
+          const lng = Number(filteredFarmers[0].longitude);
+          const lat = Number(filteredFarmers[0].latitude);
+          if (!isNaN(lng) && !isNaN(lat)) {
+            map.flyTo({
+              center: [lng, lat],
+              zoom: 12.5,
+              duration: 600,
+            });
+          }
+        }
       }
     };
 
@@ -725,23 +745,7 @@ export default function DistrictDistressMap({
     } else {
       map.once('load', renderMarkers);
     }
-  }, [filteredFarmers]);
-
-  // Center on farmer when selected from search or list
-  const handleSelectFarmer = (farmer: DistressFarmer) => {
-    setSelectedFarmer(farmer);
-    setIsDrawerOpen(true);
-    if (onFarmerSelect) onFarmerSelect(farmer);
-
-    if (mapRef.current) {
-      mapRef.current.flyTo({
-        center: [farmer.longitude, farmer.latitude],
-        zoom: 13,
-        duration: 900,
-        pitch: 0,
-      });
-    }
-  };
+  }, [filteredFarmers, handleSelectFarmer]);
 
   // Reset Filters Handler
   const handleResetFilters = () => {
@@ -842,7 +846,7 @@ export default function DistrictDistressMap({
               Farmers Mapped
             </div>
             <div className="text-xl font-extrabold text-[#1A1A1A] mt-0.5">{stats.total}</div>
-            <div className="text-[10px] text-neutral-500 font-medium mt-0.5">Across 12 Blocks</div>
+            <div className="text-[10px] text-neutral-500 font-medium mt-0.5">Across {availableBlocks.length || 26} Blocks</div>
           </div>
 
           <div className="bg-red-50/70 backdrop-blur-md rounded-2xl p-3 border border-red-200/60 shadow-xs">
@@ -887,7 +891,7 @@ export default function DistrictDistressMap({
 
       {/* 3. Multi-Filter & Search Bar (White Blur Transparent) */}
       <div className="glass bg-white/80 backdrop-blur-2xl border border-white/60 rounded-3xl p-4 shadow-xl text-[#1A1A1A] space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 gap-2.5">
           {/* A. Location Search with Dropdown Autocomplete */}
           <div className="lg:col-span-2 relative">
             <div className="relative">
@@ -992,7 +996,23 @@ export default function DistrictDistressMap({
             />
           </div>
 
-          {/* C. Risk Select */}
+          {/* C. Block Select */}
+          <div>
+            <select
+              value={selectedBlock}
+              onChange={(e) => setSelectedBlock(e.target.value)}
+              className="w-full px-2.5 py-2 rounded-2xl bg-white/90 border border-black/10 text-xs font-semibold text-[#1A1A1A] focus:outline-none cursor-pointer shadow-inner"
+            >
+              <option value="all">Block: All</option>
+              {availableBlocks.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* D. Risk Select */}
           <div>
             <select
               value={selectedRisk}
@@ -1006,7 +1026,7 @@ export default function DistrictDistressMap({
             </select>
           </div>
 
-          {/* D. Crop Select */}
+          {/* E. Crop Select */}
           <div>
             <select
               value={selectedCrop}
@@ -1022,7 +1042,7 @@ export default function DistrictDistressMap({
             </select>
           </div>
 
-          {/* E. Reset Filters */}
+          {/* F. Reset Filters */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => {

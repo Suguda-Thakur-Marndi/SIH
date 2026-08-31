@@ -21,20 +21,20 @@ interface Props {
 export function CombinedRiskMatrix({ data, loading }: Props) {
   if (loading || !data) {
     return (
-      <div className="bg-black/40 border border-white/10 rounded-2xl p-5 backdrop-blur-md animate-pulse" role="status" aria-busy="true" aria-label="Loading combined risk matrix">
+      <div className="glass bg-white/80 backdrop-blur-2xl border border-white/80 rounded-3xl p-6 shadow-xl animate-pulse" role="status" aria-busy="true" aria-label="Loading combined risk matrix">
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-5 h-5 rounded bg-white/10" />
-          <div className="h-6 w-48 rounded bg-white/10" />
+          <div className="w-5 h-5 rounded bg-slate-900/10" />
+          <div className="h-6 w-48 rounded bg-slate-900/10" />
         </div>
-        <div className="h-4 w-72 rounded bg-white/10 mb-5" />
+        <div className="h-4 w-72 rounded bg-slate-900/10 mb-5" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[1, 2, 3, 4, 5, 6, 7].map(i => (
-            <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
+            <div key={i} className="bg-white/60 border border-white/80 rounded-2xl p-4 space-y-2">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-white/10" />
-                <div className="h-4 w-20 rounded bg-white/10" />
+                <div className="w-4 h-4 rounded bg-slate-900/10" />
+                <div className="h-4 w-20 rounded bg-slate-900/10" />
               </div>
-              <div className="h-8 w-12 rounded bg-white/10" />
+              <div className="h-8 w-12 rounded bg-slate-900/10" />
             </div>
           ))}
         </div>
@@ -84,7 +84,7 @@ export function CombinedRiskMatrix({ data, loading }: Props) {
       isAllThree: false,
     },
     {
-      label: 'All Three Signals',
+      label: 'All Three Distress Signals',
       icons: [CloudRain, TrendingDown, CreditCard],
       count: data.allThree,
       isAllThree: true,
@@ -92,61 +92,63 @@ export function CombinedRiskMatrix({ data, loading }: Props) {
   ];
 
   return (
-    <div className="bg-black/40 border border-white/10 rounded-2xl p-5 backdrop-blur-md">
+    <div className="glass bg-white/85 backdrop-blur-2xl border border-white/80 rounded-3xl p-6 shadow-xl text-[#1A1A1A]">
       <div className="flex items-center gap-2 mb-1">
-        <Layers className="w-5 h-5 text-purple-400" />
-        <h3 className="text-xl font-bold text-white">Combined Risk Analysis</h3>
+        <div className="p-1.5 rounded-lg bg-purple-100 text-purple-800 border border-purple-200">
+          <Layers className="w-4 h-4" />
+        </div>
+        <h3 className="text-xl font-black text-slate-900 tracking-tight">Multi-Hazard Combined Risk Matrix</h3>
       </div>
-      <p className="text-white/60 text-sm mb-5">Signal combination breakdown among high-risk farmers</p>
+      <p className="text-slate-600 text-xs font-medium mb-5">Single, double, and triple-signal compound vulnerability breakdown</p>
 
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-white/5 border-b border-white/10 text-white/60 text-sm">
-              <th className="p-3 font-medium">Signal Combination</th>
-              <th className="p-3 font-medium text-center">Farmers</th>
-              <th className="p-3 font-medium text-center">Share</th>
-              <th className="p-3 font-medium">Distribution</th>
+            <tr className="bg-neutral-100/80 border-b border-black/10 text-slate-600 text-xs font-bold uppercase tracking-wider">
+              <th className="p-3.5 rounded-l-xl">Signal Combination</th>
+              <th className="p-3.5 text-center">Farmers</th>
+              <th className="p-3.5 text-center">Share</th>
+              <th className="p-3.5 rounded-r-xl">Distribution</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-black/5">
             {rows.map((row, idx) => {
               const percent = total > 0 ? Math.round((row.count / total) * 100) : 0;
               const rowClass = row.isAllThree
-                ? 'bg-red-950/40 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)]'
-                : 'border-b border-white/5 hover:bg-white/5';
+                ? 'bg-red-50/90 border border-red-500/30'
+                : 'hover:bg-white/80';
 
               return (
                 <tr key={idx} className={`${rowClass} transition-colors`}>
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
+                  <td className="p-3.5">
+                    <div className="flex items-center gap-2.5">
                       <div className="flex items-center gap-1">
                         {row.icons.map((Icon, i) => (
-                          <Icon key={i} className={`w-4 h-4 ${row.isAllThree ? 'text-red-400' : 'text-white/50'}`} />
+                          <Icon key={i} className={`w-4 h-4 ${row.isAllThree ? 'text-red-700' : 'text-slate-500'}`} />
                         ))}
                       </div>
-                      <span className={`font-medium text-sm ${row.isAllThree ? 'text-red-300 font-bold' : 'text-white'}`}>
+                      <span className={`text-sm ${row.isAllThree ? 'text-red-900 font-black' : 'text-slate-800 font-bold'}`}>
                         {row.label}
                       </span>
                       {row.isAllThree && (
-                        <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-red-500/20 text-red-400 border border-red-500/30">
-                          Priority
+                        <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-red-600 text-white shadow-2xs">
+                          Priority 1
                         </span>
                       )}
                     </div>
                   </td>
-                  <td className="p-3 text-center">
-                    <span className={`text-lg font-bold ${row.isAllThree ? 'text-red-400' : 'text-white'}`}>
+                  <td className="p-3.5 text-center">
+                    <span className={`text-lg font-black ${row.isAllThree ? 'text-red-700' : 'text-slate-900'}`}>
                       {row.count}
                     </span>
                   </td>
-                  <td className="p-3 text-center">
-                    <span className="text-white/60 text-sm">{percent}%</span>
+                  <td className="p-3.5 text-center">
+                    <span className="text-slate-600 text-xs font-bold">{percent}%</span>
                   </td>
-                  <td className="p-3">
-                    <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden max-w-[180px]">
+                  <td className="p-3.5">
+                    <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden max-w-[180px] p-0.5">
                       <div
-                        className={`h-full rounded-full transition-all duration-700 ${row.isAllThree ? 'bg-red-500' : 'bg-blue-500/60'}`}
+                        className={`h-full rounded-full transition-all duration-700 ${row.isAllThree ? 'bg-red-600' : 'bg-emerald-600'}`}
                         style={{ width: `${percent}%` }}
                       />
                     </div>
@@ -160,16 +162,16 @@ export function CombinedRiskMatrix({ data, loading }: Props) {
 
       {total === 0 && (
         <div className="flex items-center justify-center h-24 mt-4">
-          <p className="text-white/40">No combined risk data available</p>
+          <p className="text-slate-400 text-xs font-semibold">No combined risk data available</p>
         </div>
       )}
 
       {data.allThree > 0 && (
-        <div className="mt-4 p-3 rounded-xl bg-red-950/30 border border-red-500/30 flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-          <p className="text-red-300 text-sm">
-            <strong>{data.allThree} farmer{data.allThree > 1 ? 's' : ''}</strong> facing all three risk signals simultaneously — highest priority for intervention.
-          </p>
+        <div className="mt-4 p-4 rounded-2xl bg-red-50 border border-red-500/30 flex items-center gap-3 text-red-950 text-xs font-bold">
+          <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
+          <span>
+            <strong>{data.allThree} farmer{data.allThree > 1 ? 's' : ''}</strong> are experiencing all three risk signals simultaneously (Rainfall Deficit + APMC Crash + Loan Repayment Due) — assigned highest triage dispatch level.
+          </span>
         </div>
       )}
     </div>

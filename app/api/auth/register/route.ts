@@ -63,7 +63,6 @@ export async function POST(req: NextRequest) {
     const timestamp = Date.now();
     const prefix = normalizedRole === 'farmer' ? 'FRM' : normalizedRole === 'bank' ? 'BNK' : 'ADM';
     const userId = `${prefix}_${timestamp.toString().slice(-8)}_${Math.floor(100 + Math.random() * 900)}`;
-    const farmId = `LAND_${timestamp.toString().slice(-8)}`;
     const cropId = `CRP_${timestamp.toString().slice(-8)}`;
 
     const connection = await pool.getConnection();

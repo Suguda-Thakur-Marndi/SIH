@@ -4,8 +4,8 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { 
-  ArrowLeft, Search, Filter, AlertTriangle, Phone, MapPin, 
-  ChevronRight, ShieldAlert, ArrowUpDown, UserCheck, CheckCircle2
+  ArrowLeft, Search, Filter, AlertTriangle, MapPin, 
+  ChevronRight
 } from 'lucide-react';
 
 function HighRiskFarmersContent() {
@@ -125,7 +125,11 @@ function HighRiskFarmersContent() {
 
         {/* Farmer Triage Cards / Table */}
         <div className="space-y-3">
-          {filteredFarmers.map((farmer) => {
+          {loading ? (
+            <div className="p-8 text-center bg-white/70 rounded-[22px] text-neutral-500 font-medium animate-pulse">
+              Loading high-risk farmer telemetry...
+            </div>
+          ) : filteredFarmers.map((farmer) => {
             const isHigh = farmer.riskLevel === 'HIGH';
             return (
               <div 

@@ -27,7 +27,6 @@ import {
   LogOut
 } from "lucide-react";
 import { smartCropAuth } from "@/lib/smartcrop-auth";
-import FarmerTaskManager from "@/farmer profile/FarmerTaskManager";
 
 export default function FarmerProfilePage() {
   // Master Farmer State (following PRD specs & mock data)

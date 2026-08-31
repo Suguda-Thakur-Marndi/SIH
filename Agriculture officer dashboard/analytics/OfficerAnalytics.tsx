@@ -6,7 +6,7 @@ import bgDesktop from '@/Government equipment schemes/img/1(1).png';
 import bgMobile from '@/Agriculture officer dashboard/img/3.png';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import { Calendar, MapPin, Filter, CloudRain, TrendingDown, CreditCard, Wheat, RefreshCw, BarChart2, ShieldAlert } from 'lucide-react';
+import { Calendar, MapPin, Filter, CloudRain, Wheat, RefreshCw } from 'lucide-react';
 import { KPICards } from './components/KPICards';
 import { DistressTrendChart } from './components/DistressTrendChart';
 import { DistressFactorsExpanded } from './components/DistressFactorsExpanded';
@@ -137,8 +137,8 @@ export function OfficerAnalytics() {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex overflow-hidden font-sans text-white bg-black">
-      {/* Background Images */}
+    <div className="relative min-h-screen w-full flex overflow-hidden font-sans text-[#1A1A1A] bg-[#F2F2EF]">
+      {/* Background Images with White Transparent Blur Overlay */}
       <div className="fixed inset-0 z-0 hidden md:block">
         <Image
           src={bgDesktop}
@@ -146,9 +146,9 @@ export function OfficerAnalytics() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center opacity-65"
+          className="object-cover object-center opacity-40"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/95 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/55 to-white/85 backdrop-blur-[3px]" />
       </div>
       <div className="fixed inset-0 z-0 block md:hidden">
         <Image
@@ -157,9 +157,9 @@ export function OfficerAnalytics() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center opacity-65"
+          className="object-cover object-center opacity-40"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/95 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/55 to-white/85 backdrop-blur-[3px]" />
       </div>
 
       {/* Sidebar */}
@@ -170,26 +170,28 @@ export function OfficerAnalytics() {
         <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
         <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto space-y-8">
-          {/* Header Banner */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
+          {/* Header Banner - White Frosted Glass */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 glass bg-white/85 backdrop-blur-2xl border border-white/80 rounded-3xl p-6 md:p-8 shadow-xl text-[#1A1A1A]">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#CFE362] text-black uppercase tracking-wider">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="px-3 py-1 rounded-full text-xs font-black bg-[#1A1A1A] text-[#CFE362] uppercase tracking-wider shadow-sm">
                   Distress Analytics
                 </span>
-                <span className="text-white/50 text-xs font-medium">Mayurbhanj Jurisdiction</span>
+                <span className="text-slate-600 text-xs font-bold bg-white/80 px-2.5 py-0.5 rounded-full border border-black/5">
+                  Mayurbhanj Jurisdiction
+                </span>
               </div>
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
+              <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900">
                 Agricultural Distress Intelligence Engine
               </h1>
-              <p className="text-white/60 text-sm mt-1">
+              <p className="text-slate-700 text-sm font-medium mt-1">
                 Answering four critical signals: <em>Where is distress? How is it changing? Why is it happening? Who needs intervention?</em>
               </p>
             </div>
 
             <button
               onClick={resetFilters}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white/80 hover:text-white text-xs font-semibold border border-white/10 transition-colors cursor-pointer shrink-0"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#1A1A1A] hover:bg-black text-[#CFE362] text-xs font-bold shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer shrink-0"
               title="Reset all filters to defaults"
             >
               <RefreshCw className="w-3.5 h-3.5" />
@@ -197,94 +199,94 @@ export function OfficerAnalytics() {
             </button>
           </div>
 
-          {/* ═══════ GLOBAL FILTERS ═══════ */}
-          <div className="flex flex-wrap items-center gap-3 p-4 bg-black/40 border border-white/10 rounded-2xl backdrop-blur-md">
+          {/* ═══════ GLOBAL FILTERS - White Frosted Glass ═══════ */}
+          <div className="flex flex-wrap items-center gap-3 p-4 md:p-5 glass bg-white/85 backdrop-blur-2xl border border-white/80 rounded-3xl shadow-xl text-[#1A1A1A]">
             {/* District (Locked) */}
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 min-w-[150px]">
-              <MapPin className="w-4 h-4 text-[#CFE362]" />
-              <span className="text-white text-sm font-semibold">Mayurbhanj</span>
-              <span className="text-white/40 text-xs ml-auto" title="Jurisdiction locked to authenticated officer">🔒</span>
+            <div className="flex items-center gap-2 bg-white/90 border border-black/10 rounded-2xl px-3.5 py-2 min-w-[150px] shadow-2xs">
+              <MapPin className="w-4 h-4 text-emerald-700" />
+              <span className="text-slate-900 text-sm font-bold">Mayurbhanj</span>
+              <span className="text-slate-400 text-xs ml-auto" title="Jurisdiction locked to authenticated officer">🔒</span>
             </div>
 
             {/* Block Filter */}
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 min-w-[140px]">
-              <MapPin className="w-4 h-4 text-white/50" />
+            <div className="flex items-center gap-2 bg-white/90 border border-black/10 rounded-2xl px-3 py-2 min-w-[140px] shadow-2xs">
+              <MapPin className="w-4 h-4 text-slate-500" />
               <select
                 value={block}
                 onChange={(e) => setBlock(e.target.value)}
-                className="bg-transparent border-none text-white text-sm outline-none w-full cursor-pointer appearance-none"
+                className="bg-transparent border-none text-slate-900 text-sm font-bold outline-none w-full cursor-pointer appearance-none"
               >
-                <option value="ALL" className="bg-gray-900">All Blocks</option>
-                <option value="Baripada" className="bg-gray-900">Baripada</option>
-                <option value="Betnoti" className="bg-gray-900">Betnoti</option>
-                <option value="Badasahi" className="bg-gray-900">Badasahi</option>
-                <option value="Kuliana" className="bg-gray-900">Kuliana</option>
-                <option value="Udala" className="bg-gray-900">Udala</option>
-                <option value="Karanjia" className="bg-gray-900">Karanjia</option>
-                <option value="Rairangpur" className="bg-gray-900">Rairangpur</option>
-                <option value="Jashipur" className="bg-gray-900">Jashipur</option>
+                <option value="ALL" className="bg-white text-slate-900">All Blocks</option>
+                <option value="Baripada" className="bg-white text-slate-900">Baripada</option>
+                <option value="Betnoti" className="bg-white text-slate-900">Betnoti</option>
+                <option value="Badasahi" className="bg-white text-slate-900">Badasahi</option>
+                <option value="Kuliana" className="bg-white text-slate-900">Kuliana</option>
+                <option value="Udala" className="bg-white text-slate-900">Udala</option>
+                <option value="Karanjia" className="bg-white text-slate-900">Karanjia</option>
+                <option value="Rairangpur" className="bg-white text-slate-900">Rairangpur</option>
+                <option value="Jashipur" className="bg-white text-slate-900">Jashipur</option>
               </select>
             </div>
 
             {/* Crop Filter */}
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 min-w-[130px]">
-              <Wheat className="w-4 h-4 text-white/50" />
+            <div className="flex items-center gap-2 bg-white/90 border border-black/10 rounded-2xl px-3 py-2 min-w-[130px] shadow-2xs">
+              <Wheat className="w-4 h-4 text-slate-500" />
               <select
                 value={crop}
                 onChange={(e) => setCrop(e.target.value)}
-                className="bg-transparent border-none text-white text-sm outline-none w-full cursor-pointer appearance-none"
+                className="bg-transparent border-none text-slate-900 text-sm font-bold outline-none w-full cursor-pointer appearance-none"
               >
-                <option value="ALL" className="bg-gray-900">All Crops</option>
-                <option value="Paddy" className="bg-gray-900">Paddy</option>
-                <option value="Groundnut" className="bg-gray-900">Groundnut</option>
-                <option value="Mustard" className="bg-gray-900">Mustard</option>
-                <option value="Maize" className="bg-gray-900">Maize</option>
-                <option value="Vegetables" className="bg-gray-900">Vegetables</option>
-                <option value="Wheat" className="bg-gray-900">Wheat</option>
+                <option value="ALL" className="bg-white text-slate-900">All Crops</option>
+                <option value="Paddy" className="bg-white text-slate-900">Paddy</option>
+                <option value="Groundnut" className="bg-white text-slate-900">Groundnut</option>
+                <option value="Mustard" className="bg-white text-slate-900">Mustard</option>
+                <option value="Maize" className="bg-white text-slate-900">Maize</option>
+                <option value="Vegetables" className="bg-white text-slate-900">Vegetables</option>
+                <option value="Wheat" className="bg-white text-slate-900">Wheat</option>
               </select>
             </div>
 
             {/* Risk Level Filter */}
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 min-w-[130px]">
-              <Filter className="w-4 h-4 text-white/50" />
+            <div className="flex items-center gap-2 bg-white/90 border border-black/10 rounded-2xl px-3 py-2 min-w-[130px] shadow-2xs">
+              <Filter className="w-4 h-4 text-slate-500" />
               <select
                 value={riskLevel}
                 onChange={(e) => setRiskLevel(e.target.value)}
-                className="bg-transparent border-none text-white text-sm outline-none w-full cursor-pointer appearance-none"
+                className="bg-transparent border-none text-slate-900 text-sm font-bold outline-none w-full cursor-pointer appearance-none"
               >
-                <option value="ALL" className="bg-gray-900">All Risk Levels</option>
-                <option value="high" className="bg-gray-900">High Risk (&gt;70)</option>
-                <option value="moderate" className="bg-gray-900">Moderate (31–70)</option>
-                <option value="low" className="bg-gray-900">Low Risk (≤30)</option>
+                <option value="ALL" className="bg-white text-slate-900">All Risk Levels</option>
+                <option value="high" className="bg-white text-slate-900">High Risk (&gt;70)</option>
+                <option value="moderate" className="bg-white text-slate-900">Moderate (31–70)</option>
+                <option value="low" className="bg-white text-slate-900">Low Risk (≤30)</option>
               </select>
             </div>
 
             {/* Risk Factor Filter */}
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 min-w-[140px]">
-              <CloudRain className="w-4 h-4 text-white/50" />
+            <div className="flex items-center gap-2 bg-white/90 border border-black/10 rounded-2xl px-3 py-2 min-w-[140px] shadow-2xs">
+              <CloudRain className="w-4 h-4 text-slate-500" />
               <select
                 value={riskFactor}
                 onChange={(e) => setRiskFactor(e.target.value)}
-                className="bg-transparent border-none text-white text-sm outline-none w-full cursor-pointer appearance-none"
+                className="bg-transparent border-none text-slate-900 text-sm font-bold outline-none w-full cursor-pointer appearance-none"
               >
-                <option value="ALL" className="bg-gray-900">All Risk Factors</option>
-                <option value="weather" className="bg-gray-900">Weather / Rainfall</option>
-                <option value="market" className="bg-gray-900">Market Prices</option>
-                <option value="loan" className="bg-gray-900">Loan Proximity</option>
+                <option value="ALL" className="bg-white text-slate-900">All Risk Factors</option>
+                <option value="weather" className="bg-white text-slate-900">Weather / Rainfall</option>
+                <option value="market" className="bg-white text-slate-900">Market Prices</option>
+                <option value="loan" className="bg-white text-slate-900">Loan Proximity</option>
               </select>
             </div>
 
             {/* Time Range */}
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 min-w-[130px] ml-auto">
-              <Calendar className="w-4 h-4 text-white/50" />
+            <div className="flex items-center gap-2 bg-white/90 border border-black/10 rounded-2xl px-3 py-2 min-w-[130px] ml-auto shadow-2xs">
+              <Calendar className="w-4 h-4 text-slate-500" />
               <select
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value)}
-                className="bg-transparent border-none text-white text-sm outline-none w-full cursor-pointer appearance-none"
+                className="bg-transparent border-none text-slate-900 text-sm font-bold outline-none w-full cursor-pointer appearance-none"
               >
-                <option value="7d" className="bg-gray-900">Last 7 Days</option>
-                <option value="15d" className="bg-gray-900">Last 15 Days</option>
-                <option value="30d" className="bg-gray-900">Last 30 Days</option>
+                <option value="7d" className="bg-white text-slate-900">Last 7 Days</option>
+                <option value="15d" className="bg-white text-slate-900">Last 15 Days</option>
+                <option value="30d" className="bg-white text-slate-900">Last 30 Days</option>
               </select>
             </div>
           </div>

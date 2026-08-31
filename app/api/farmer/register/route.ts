@@ -30,8 +30,7 @@ export async function POST(req: NextRequest) {
     const farmerPhone = (mobileNumber || phone || '').trim().replace(/\D/g, '');
     const farmerEmail = email ? email.trim().toLowerCase() : null;
     const farmerDistrict = (district || 'Mayurbhanj').trim();
-    const farmerBlock = (block || 'Baripada').trim();
-    const farmerVillage = (village || 'Baripada').trim();
+    const farmerVillage = (village || block || 'Baripada').trim();
     const farmerState = (state || 'Odisha').trim();
     const farmerLang = preferredLanguage || language || 'en';
     const parsedArea = parseFloat(String(landArea)) || 3.50;

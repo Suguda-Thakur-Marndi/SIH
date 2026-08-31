@@ -16,7 +16,7 @@ export default function NotificationsHub() {
   // Fetch from RDS on mount
   useEffect(() => {
     fetchNotifications();
-  }, []);
+  }, [fetchNotifications]);
 
   const filtered = activeFilter === 'All' 
     ? notifications 

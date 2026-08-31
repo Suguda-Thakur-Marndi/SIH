@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
-import { extractBearerToken, verifyJwt } from '@/lib/auth-jwt';
 
 interface InterventionItem {
   id: string;
@@ -162,7 +161,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Apply filters
-    let filtered = items.filter((item) => {
+    const filtered = items.filter((item) => {
       if (startDate && new Date(item.created_at) < new Date(startDate)) return false;
       if (endDate && new Date(item.created_at) > new Date(endDate + 'T23:59:59.999Z')) return false;
       if (farmerId && item.farmer_id.toLowerCase() !== farmerId.toLowerCase()) return false;

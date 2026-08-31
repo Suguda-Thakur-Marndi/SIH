@@ -1,10 +1,10 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, Sprout, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, Sprout } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 import LanguageSelector from '@/components/LanguageSelector';
 import Logo from './components/Logo';
@@ -28,13 +28,28 @@ export default function AuthenticationPage() {
   const router = useRouter();
   const [currentView, setCurrentView] = useState<AuthView>('login');
   const [selectedRole, setSelectedRole] = useState<UserRole>('farmer');
-  const [activeSession, setActiveSession] = useState<UserSession | null>(null);
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const [successInfo, setSuccessInfo] = useState<{
     title: string;
     message: string;
     targetRoute: string;
   } | null>(null);
+
+  // Handle successful login
+  const handleLoginSuccess = useCallback((session: UserSession) => {
+    const targetRoute = smartCropAuth.getDashboardRoute(session.role);
+
+    setSuccessInfo({
+      title: 'Welcome Back!',
+      message: `Logging you into Smart Crop (${session.role.toUpperCase()})...`,
+      targetRoute,
+    });
+    setCurrentView('success');
+
+    setTimeout(() => {
+      router.push(targetRoute);
+    }, 1200);
+  }, [router]);
 
   // Clerk Google Auth hook
   const { user: clerkUser, isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn } = useUser();
@@ -69,14 +84,13 @@ export default function AuthenticationPage() {
       smartCropAuth.saveSession(session);
       handleLoginSuccess(session);
     }
-  }, [isClerkLoaded, isClerkSignedIn, clerkUser]);
+  }, [isClerkLoaded, isClerkSignedIn, clerkUser, handleLoginSuccess]);
 
   // Check if already authenticated on initial load or returning from InsForge OAuth
   useEffect(() => {
     const checkAuth = async () => {
       const existing = await smartCropAuth.getCurrentSession();
       if (existing) {
-        setActiveSession(existing);
         if (
           typeof window !== 'undefined' &&
           (window.location.search.includes('insforge_code') ||
@@ -87,28 +101,10 @@ export default function AuthenticationPage() {
       }
     };
     checkAuth();
-  }, []);
-
-  // Handle successful login
-  const handleLoginSuccess = (session: UserSession) => {
-    setActiveSession(session);
-    const targetRoute = smartCropAuth.getDashboardRoute(session.role);
-
-    setSuccessInfo({
-      title: 'Welcome Back!',
-      message: `Logging you into Smart Crop (${session.role.toUpperCase()})...`,
-      targetRoute,
-    });
-    setCurrentView('success');
-
-    setTimeout(() => {
-      router.push(targetRoute);
-    }, 1200);
-  };
+  }, [handleLoginSuccess]);
 
   // Handle successful registration
   const handleRegisterSuccess = (session: UserSession) => {
-    setActiveSession(session);
     const targetRoute = smartCropAuth.getDashboardRoute(session.role);
 
     let message = 'Welcome to Smart Crop. Redirecting you to your dashboard...';

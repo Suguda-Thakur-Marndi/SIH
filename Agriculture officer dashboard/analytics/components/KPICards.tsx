@@ -13,22 +13,22 @@ interface OverviewData {
 export function KPICards({ data, loading }: { data: OverviewData | null, loading: boolean }) {
   if (loading || !data) {
     const skeletonColors = [
-      { bg: 'bg-red-500/20', border: 'border-red-500/30', accent: 'bg-red-950/40' },
-      { bg: 'bg-amber-500/10', border: 'border-amber-500/20', accent: 'bg-black/40' },
-      { bg: 'bg-blue-500/10', border: 'border-blue-500/20', accent: 'bg-black/40' },
-      { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', accent: 'bg-black/40' },
+      { bg: 'bg-red-500/20', border: 'border-red-500/30' },
+      { bg: 'bg-amber-500/20', border: 'border-amber-500/30' },
+      { bg: 'bg-blue-500/20', border: 'border-blue-500/30' },
+      { bg: 'bg-emerald-500/20', border: 'border-emerald-500/30' },
     ];
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8" role="status" aria-busy="true" aria-label="Loading KPI cards">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8" role="status" aria-busy="true" aria-label="Loading KPI cards">
         {skeletonColors.map((s, i) => (
-          <div key={i} className={`relative overflow-hidden rounded-2xl p-5 border backdrop-blur-md ${i === 0 ? s.accent : 'bg-black/40'} ${s.border} animate-pulse`}>
+          <div key={i} className={`relative overflow-hidden rounded-3xl p-6 border border-white/80 glass bg-white/70 backdrop-blur-2xl shadow-lg animate-pulse`}>
             <div className="flex justify-between items-start">
               <div className="space-y-2">
-                <div className="h-4 w-28 rounded bg-white/10" />
-                <div className="h-9 w-20 rounded bg-white/10" />
-                {i === 0 && <div className="h-4 w-32 rounded bg-white/10 mt-2" />}
+                <div className="h-4 w-28 rounded bg-slate-900/10" />
+                <div className="h-9 w-20 rounded bg-slate-900/10" />
+                {i === 0 && <div className="h-4 w-32 rounded bg-slate-900/10 mt-2" />}
               </div>
-              <div className={`w-12 h-12 rounded-full ${s.bg}`} />
+              <div className={`w-13 h-13 rounded-2xl ${s.bg}`} />
             </div>
           </div>
         ))}
@@ -42,9 +42,10 @@ export function KPICards({ data, loading }: { data: OverviewData | null, loading
       title: "High-Risk Farmers",
       value: data.highRiskFarmers.count,
       icon: AlertTriangle,
-      color: "text-red-400",
-      bg: "bg-red-500/20",
-      border: "border-red-500/30",
+      color: "text-red-700",
+      bg: "bg-red-500/15",
+      border: "border-red-500/40",
+      glow: "shadow-[0_15px_35px_-5px_rgba(239,68,68,0.25)]",
       trend: data.highRiskFarmers.delta,
       trendPercent: data.highRiskFarmers.deltaPercent,
       isFocus: true,
@@ -53,20 +54,22 @@ export function KPICards({ data, loading }: { data: OverviewData | null, loading
       title: "Moderate Risk",
       value: data.moderateRiskFarmers.count,
       icon: Activity,
-      color: "text-amber-400",
-      bg: "bg-amber-500/10",
-      border: "border-amber-500/20",
+      color: "text-amber-800",
+      bg: "bg-amber-500/15",
+      border: "border-amber-500/30",
+      glow: "shadow-[0_15px_35px_-5px_rgba(245,158,11,0.15)]",
       trend: 0,
       trendPercent: 0,
       isFocus: false,
     },
     {
-      title: "Active Alerts",
+      title: "Active Distress Alerts",
       value: data.activeDistressAlerts.count,
       icon: Users,
-      color: "text-blue-400",
-      bg: "bg-blue-500/10",
-      border: "border-blue-500/20",
+      color: "text-blue-800",
+      bg: "bg-blue-500/15",
+      border: "border-blue-500/30",
+      glow: "shadow-[0_15px_35px_-5px_rgba(59,130,246,0.15)]",
       trend: 0,
       trendPercent: 0,
       isFocus: false,
@@ -75,9 +78,10 @@ export function KPICards({ data, loading }: { data: OverviewData | null, loading
       title: "Pending Interventions",
       value: data.pendingInterventions.count,
       icon: CheckCircle,
-      color: "text-emerald-400",
-      bg: "bg-emerald-500/10",
-      border: "border-emerald-500/20",
+      color: "text-emerald-800",
+      bg: "bg-emerald-500/15",
+      border: "border-emerald-500/30",
+      glow: "shadow-[0_15px_35px_-5px_rgba(16,185,129,0.15)]",
       trend: 0,
       trendPercent: 0,
       isFocus: false,
@@ -85,21 +89,21 @@ export function KPICards({ data, loading }: { data: OverviewData | null, loading
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
       {kpis.map((kpi, idx) => {
         const containerClass = [
-          "relative overflow-hidden rounded-2xl p-5 border backdrop-blur-md transition-all duration-300 hover:-translate-y-1",
+          "relative overflow-hidden rounded-3xl p-6 border glass backdrop-blur-2xl transition-all duration-300 transform hover:-translate-y-1.5",
           kpi.isFocus
-            ? "bg-red-950/40 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
-            : "bg-black/40 border-white/10 hover:bg-black/60"
+            ? `bg-white/90 ${kpi.border} ${kpi.glow}`
+            : `bg-white/80 hover:bg-white/95 border-white/80 shadow-lg hover:shadow-xl`
         ].join(" ");
 
         const trendClass = [
-          "flex items-center gap-1 mt-2 text-sm",
-          kpi.trend > 0 ? "text-red-400" : kpi.trend < 0 ? "text-emerald-400" : "text-white/40"
+          "flex items-center gap-1 mt-2 text-xs font-bold",
+          kpi.trend > 0 ? "text-red-700" : kpi.trend < 0 ? "text-emerald-700" : "text-slate-500"
         ].join(" ");
 
-        const iconBgClass = "w-12 h-12 rounded-full flex items-center justify-center " + kpi.bg;
+        const iconBgClass = "w-13 h-13 rounded-2xl flex items-center justify-center border border-white/80 shadow-sm " + kpi.bg;
         const iconColorClass = "w-6 h-6 " + kpi.color;
         const IconComponent = kpi.icon;
 
@@ -107,8 +111,8 @@ export function KPICards({ data, loading }: { data: OverviewData | null, loading
           <div key={idx} className={containerClass}>
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-white/60 text-sm font-medium mb-1">{kpi.title}</p>
-                <h3 className="text-3xl font-bold text-white">{kpi.value.toLocaleString()}</h3>
+                <p className="text-slate-600 text-xs font-bold uppercase tracking-wider mb-1">{kpi.title}</p>
+                <h3 className="text-4xl font-black text-slate-900 tracking-tight">{kpi.value.toLocaleString()}</h3>
                 
                 {kpi.isFocus && (
                   <div className={trendClass}>
@@ -116,7 +120,7 @@ export function KPICards({ data, loading }: { data: OverviewData | null, loading
                     <span>
                       {Math.abs(kpi.trend)} ({Math.abs(kpi.trendPercent)}%)
                     </span>
-                    <span className="text-white/40 ml-1">vs last period</span>
+                    <span className="text-slate-500 font-medium ml-0.5">vs last period</span>
                   </div>
                 )}
               </div>

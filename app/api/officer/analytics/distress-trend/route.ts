@@ -4,7 +4,7 @@ import { extractBearerToken, verifyJwt } from '@/lib/auth-jwt';
 
 async function getOfficerUser(req: NextRequest) {
   let userId = 'usr_admin_demo_1';
-  let district = 'Mayurbhanj';
+  const district = 'Mayurbhanj';
 
   const token = extractBearerToken(req) || req.cookies.get('smartcrop_token')?.value;
   if (token) {
@@ -30,8 +30,6 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const timeRange = searchParams.get('timeRange') || '7d';
     const block = searchParams.get('block');
-    const crop = searchParams.get('crop');
-    const riskFactor = searchParams.get('riskFactor'); // weather, market, loan
 
     const days = parseInt(timeRange.replace('d', '')) || 7;
 
@@ -42,13 +40,6 @@ export async function GET(req: NextRequest) {
     if (block && block !== 'ALL') {
       baseWhere += ` AND f.village = ?`;
       queryParams.push(block);
-    }
-    
-    // Aggregate average score per day, and high-risk count per day
-    let joinCrops = '';
-    if (crop && crop !== 'ALL') {
-      // In a real app we might join crops table, here we filter if crop logic allows
-      // For simplicity assuming farmer crop is passed or ignoring if too complex
     }
 
     const query = `

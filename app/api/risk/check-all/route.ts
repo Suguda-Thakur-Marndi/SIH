@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
              try {
                const expl = JSON.parse(scores[0].ai_explanation);
                if (expl && expl.factors) reasons = expl.factors;
-             } catch(e) {
+             } catch {
                reasons = [scores[0].ai_explanation.substring(0, 50)];
              }
           }
