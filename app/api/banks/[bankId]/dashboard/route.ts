@@ -17,12 +17,12 @@ export async function GET(
         `SELECT id, bank_name, institution_type, verification_status, state, district
          FROM banks WHERE id = ?`,
         [bankId],
-        2500
+        8000
       ),
       query<{ status: string; count: number }[]>(
         "SELECT status, COUNT(*) AS count FROM financial_facilities WHERE bank_id = ? AND status != 'deleted' GROUP BY status",
         [bankId],
-        2500
+        8000
       ),
       query<Record<string, any>[]>(
         `SELECT id, facility_name, facility_type, status, interest_rate, updated_at
@@ -31,7 +31,7 @@ export async function GET(
          ORDER BY updated_at DESC
          LIMIT 5`,
         [bankId],
-        2500
+        8000
       ),
     ]);
 

@@ -329,7 +329,7 @@ export default function ManageFacilitiesPage() {
                         ✏️ Edit
                       </Link>
                       <Link
-                        href={`/financial-support/detail?id=${f.id}`}
+                        href={`/financial-support/detail?id=${encodeURIComponent(f.id)}&bankId=${encodeURIComponent(bankId)}`}
                         className="facility-action-link"
                         style={{
                           color: '#475569',

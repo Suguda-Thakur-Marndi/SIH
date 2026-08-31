@@ -212,7 +212,7 @@ export const smartCropAuth = {
       case 'administrator':
         return '/admin/dashboard';
       case 'bank':
-        return '/bank/dashboard';
+        return '/bank-portal/dashboard';
       case 'farmer':
       default:
         return '/dashboard';

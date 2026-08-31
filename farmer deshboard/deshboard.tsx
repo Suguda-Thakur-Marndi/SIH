@@ -196,8 +196,8 @@ export default function SmartCropDashboard() {
                   onClick={() => setActiveNav(item.id)}
                   onMouseEnter={() => setHoveredNav(item.id)}
                   onMouseLeave={() => setHoveredNav(null)}
-                  className={`relative flex items-center justify-center h-11 rounded-full cursor-pointer select-none transition-all duration-300 ${
-                    isExpanded ? 'px-5' : 'w-11'
+                  className={`relative flex items-center justify-center h-11 rounded-full cursor-pointer select-none transition-all duration-300 min-w-[2.75rem] px-2.5 ${
+                    isExpanded ? 'pr-4 pl-3' : ''
                   } ${
                     isActive
                       ? 'bg-[#1B1E19] text-[#F7F8F4] shadow-md shadow-black/20'
@@ -270,9 +270,7 @@ export default function SmartCropDashboard() {
             <button
               onMouseEnter={() => setHoveredAction('search')}
               onMouseLeave={() => setHoveredAction(null)}
-              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm cursor-pointer group ${
-                hoveredAction === 'search' ? 'px-4' : 'w-11'
-              }`}
+              className="h-11 min-w-[2.75rem] px-2.5 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm cursor-pointer group"
             >
               <motion.div
                 animate={{ y: hoveredAction === 'search' ? -2 : 0 }}
@@ -289,7 +287,7 @@ export default function SmartCropDashboard() {
                   marginLeft: hoveredAction === 'search' ? 6 : 0,
                 }}
                 transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19]"
+                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19] pointer-events-none"
               >
                 Search
               </motion.span>
@@ -300,9 +298,7 @@ export default function SmartCropDashboard() {
               onClick={() => router.push('/notifications')}
               onMouseEnter={() => setHoveredAction('bell')}
               onMouseLeave={() => setHoveredAction(null)}
-              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group ${
-                hoveredAction === 'bell' ? 'px-4' : 'w-11'
-              }`}
+              className="h-11 min-w-[2.75rem] px-2.5 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group"
             >
               <motion.div
                 animate={{ y: hoveredAction === 'bell' ? -2 : 0 }}
@@ -320,7 +316,7 @@ export default function SmartCropDashboard() {
                   marginLeft: hoveredAction === 'bell' ? 6 : 0,
                 }}
                 transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19]"
+                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19] pointer-events-none"
               >
                 {t('alerts', 'Alerts')}
               </motion.span>
@@ -331,9 +327,7 @@ export default function SmartCropDashboard() {
               onClick={() => router.push('/farmer-profile')}
               onMouseEnter={() => setHoveredAction('user')}
               onMouseLeave={() => setHoveredAction(null)}
-              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group ${
-                hoveredAction === 'user' ? 'px-4' : 'w-11'
-              }`}
+              className="h-11 min-w-[2.75rem] px-2.5 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group"
             >
               <motion.div
                 animate={{ y: hoveredAction === 'user' ? -2 : 0 }}
@@ -351,7 +345,7 @@ export default function SmartCropDashboard() {
                   marginLeft: hoveredAction === 'user' ? 6 : 0,
                 }}
                 transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19]"
+                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19] pointer-events-none"
               >
                 Profile
               </motion.span>
@@ -366,9 +360,7 @@ export default function SmartCropDashboard() {
               onMouseEnter={() => setHoveredAction('logout')}
               onMouseLeave={() => setHoveredAction(null)}
               title="Sign Out to Authentication"
-              className={`h-11 rounded-full flex items-center justify-center bg-red-50/90 hover:bg-red-100 border border-red-200/80 transition-all duration-300 shadow-sm relative cursor-pointer group ${
-                hoveredAction === 'logout' ? 'px-4' : 'w-11'
-              }`}
+              className="h-11 min-w-[2.75rem] px-2.5 rounded-full flex items-center justify-center bg-red-50/90 hover:bg-red-100 border border-red-200/80 transition-all duration-300 shadow-sm relative cursor-pointer group"
             >
               <motion.div
                 animate={{ y: hoveredAction === 'logout' ? -2 : 0 }}
@@ -385,7 +377,7 @@ export default function SmartCropDashboard() {
                   marginLeft: hoveredAction === 'logout' ? 6 : 0,
                 }}
                 transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-red-700"
+                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-red-700 pointer-events-none"
               >
                 Logout
               </motion.span>
