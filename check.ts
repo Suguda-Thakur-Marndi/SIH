@@ -1,0 +1,1 @@
+require('dotenv').config({path: '.env.local'}); import { pool } from './lib/db'; pool.query('DESCRIBE weather_observations').then(([r]) => console.log(r)).catch(console.error).finally(() => process.exit(0))

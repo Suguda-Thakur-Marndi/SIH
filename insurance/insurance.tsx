@@ -18,7 +18,7 @@ import { FarmerProfile, InsuranceState, DocumentItem, BankScheme } from "./types
  * 100% Transparent 4K background (BG_3.png) with crystal-clear white frosted glass surfaces.
  */
 export default function InsurancePage() {
-  const [lang, setLang] = useState<"EN" | "HI" | "OR">("EN");
+  const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<InsuranceState>("NOT_REGISTERED");
   const [farmer, setFarmer] = useState<FarmerProfile>(mockFarmer);
   const [documents, setDocuments] = useState<DocumentItem[]>(initialDocuments);
@@ -30,62 +30,176 @@ export default function InsurancePage() {
   const [showLossReported, setShowLossReported] = useState(false);
 
   React.useEffect(() => {
-    async function loadData() {
-      try {
-        const [farmerRes, schemesRes] = await Promise.all([
-          fetch('/api/farmer/FARMER-001'),
-          fetch('/api/insurance/schemes')
-        ]);
-        
-        const f = await farmerRes.json();
-        const s = await schemesRes.json();
-        
-        if (f && !f.error) {
-          setFarmer(prev => ({
-            ...prev,
-            name: f.name || prev.name,
-            mobile: f.phone || f.mobile || prev.mobile,
-            village: f.village || prev.village,
-            district: f.district || prev.district,
-            state: f.state || prev.state,
-          }));
-          if (f.insurance && f.insurance.length > 0) {
-            setStatus(f.insurance[0].status === 'Active' ? 'ACTIVE' : (f.insurance[0].status === 'Pending' ? 'APPLICATION_PENDING' : 'NOT_REGISTERED'));
-          }
-        }
-        
-        if (s && !s.error && Array.isArray(s) && s.length > 0) {
-          setSchemes(s.map((scheme: any) => ({
-            id: scheme.schemeId,
-            bankId: scheme.bank?.id || "bank-1",
-            bankName: scheme.bank?.bankName || "Unknown Bank",
-            schemeName: scheme.schemeName,
-            subsidy: scheme.coverage ? `₹${Number(scheme.coverage).toLocaleString('en-IN')}` : "Up to ₹1,00,000",
-            premium: scheme.premium ? `₹${Number(scheme.premium).toLocaleString('en-IN')}/season` : "₹500/season",
-            cropsCovered: ["Paddy", "Wheat"],
-            eligibilitySummary: ["Covers localized calamities", "Post-harvest losses included"],
-            requiredDocuments: ["Aadhaar", "Land Record", "Bank Passbook"],
-            availabilityStatus: "available"
-          })));
-        }
-      } catch (e) {
-        console.warn('Could not fetch insurance data:', e);
-      }
-    }
-    loadData();
+    // Use mock data for development – no API calls
+    setFarmer(mockFarmer);
+    setSchemes(mockBankSchemes);
+    setLoading(false);
   }, []);
 
   return (
-    <div className="relative min-h-screen font-sans selection:bg-emerald-600 selection:text-white text-gray-900 pb-16">
-      {/* 4K Transparent Bright Background (BG_3.png / BG_2.png) */}
-      <InsuranceBackground />
+    loading ? (
+      <div className="relative min-h-screen font-sans text-gray-900 overflow-hidden">
+        {/* Skeleton Background — matches real page gradient */}
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-emerald-50 via-white to-indigo-50" />
+        <div className="fixed inset-0 -z-10 bg-white/30" />
+
+        {/* Skeleton Header */}
+        <header className="w-full sticky top-0 z-30 px-3 sm:px-6 py-3">
+          <div className="max-w-7xl mx-auto rounded-2xl bg-white/85 backdrop-blur-xl border border-white/80 shadow-md px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+            {/* Left: back + icon + title */}
+            <div className="flex items-center gap-3">
+              <div className="w-20 h-8 rounded-xl bg-gray-200 animate-pulse" />
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-200 animate-pulse flex-shrink-0" />
+                <div className="space-y-1.5">
+                  <div className="w-28 h-4 bg-gray-200 rounded animate-pulse" />
+                  <div className="w-44 h-3 bg-gray-100 rounded animate-pulse hidden sm:block" />
+                </div>
+              </div>
+            </div>
+            {/* Right: TTS button */}
+            <div className="w-24 h-8 rounded-xl bg-gray-200 animate-pulse" />
+          </div>
+        </header>
+
+        {/* Skeleton Main */}
+        <main className="w-full max-w-7xl mx-auto px-4 sm:px-8 py-8 lg:py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+
+            {/* LEFT STAGE Skeleton */}
+            <div className="lg:col-span-6 space-y-8">
+              {/* Tag row */}
+              <div className="flex flex-wrap items-center gap-2.5">
+                <div className="w-28 h-7 rounded-full bg-emerald-100 animate-pulse" />
+                <div className="w-40 h-7 rounded-full bg-gray-100 animate-pulse" />
+              </div>
+
+              {/* Headline */}
+              <div className="space-y-3">
+                <div className="w-full h-10 bg-gray-200 rounded-2xl animate-pulse" />
+                <div className="w-5/6 h-10 bg-gray-200 rounded-2xl animate-pulse" />
+                <div className="w-full h-5 bg-gray-100 rounded animate-pulse" />
+                <div className="w-4/5 h-5 bg-gray-100 rounded animate-pulse" />
+              </div>
+
+              {/* Telemetry Card */}
+              <div className="rounded-3xl bg-white/90 border border-white p-6 sm:p-7 shadow-lg space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-200/80">
+                  <div className="w-40 h-5 bg-gray-200 rounded animate-pulse" />
+                  <div className="w-32 h-7 rounded-full bg-rose-100 animate-pulse" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="p-3.5 rounded-2xl bg-gray-50 border border-gray-200 space-y-2">
+                      <div className="w-20 h-4 bg-gray-200 rounded animate-pulse" />
+                      <div className="w-16 h-4 bg-rose-100 rounded animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+                <div className="w-full h-4 bg-gray-100 rounded animate-pulse" />
+              </div>
+
+              {/* Trust pillars */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="p-4 rounded-2xl bg-white/90 border border-white shadow-sm space-y-2">
+                    <div className="w-20 h-5 bg-emerald-100 rounded animate-pulse" />
+                    <div className="w-full h-3 bg-gray-100 rounded animate-pulse" />
+                    <div className="w-3/4 h-3 bg-gray-100 rounded animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT STAGE Skeleton */}
+            <div className="lg:col-span-6">
+              <div className="rounded-3xl bg-white/95 border border-white p-7 sm:p-9 shadow-2xl space-y-6">
+                {/* Widget header */}
+                <div className="flex items-center justify-between pb-4 border-b border-gray-200/90">
+                  <div className="space-y-1.5">
+                    <div className="w-36 h-3 bg-gray-100 rounded animate-pulse" />
+                    <div className="w-48 h-6 bg-gray-200 rounded animate-pulse" />
+                  </div>
+                  <div className="w-28 h-8 rounded-full bg-amber-100 animate-pulse" />
+                </div>
+
+                {/* Pre-filled farm profile */}
+                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="w-36 h-4 bg-gray-200 rounded animate-pulse" />
+                    <div className="w-20 h-4 bg-emerald-100 rounded animate-pulse" />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <div key={i} className="h-7 rounded-lg bg-white border border-gray-200 animate-pulse" style={{ width: `${60 + i * 12}px` }} />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Financial subsidy box */}
+                <div className="p-5 rounded-2xl bg-emerald-50 border-2 border-emerald-200 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <div className="w-48 h-4 bg-emerald-100 rounded animate-pulse" />
+                    <div className="w-20 h-5 bg-gray-200 rounded animate-pulse" />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="w-52 h-4 bg-emerald-100 rounded animate-pulse" />
+                    <div className="w-16 h-4 bg-emerald-200 rounded animate-pulse" />
+                  </div>
+                  <div className="pt-3 border-t border-emerald-200 flex justify-between items-center">
+                    <div className="space-y-1.5">
+                      <div className="w-36 h-4 bg-emerald-100 rounded animate-pulse" />
+                      <div className="w-44 h-3 bg-gray-100 rounded animate-pulse" />
+                    </div>
+                    <div className="w-20 h-9 bg-amber-100 rounded animate-pulse" />
+                  </div>
+                </div>
+
+                {/* Document checklist skeleton */}
+                <div className="space-y-2">
+                  <div className="w-32 h-4 bg-gray-200 rounded animate-pulse" />
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                      <div className="w-5 h-5 rounded bg-gray-200 animate-pulse flex-shrink-0" />
+                      <div className="flex-1 h-4 bg-gray-200 rounded animate-pulse" />
+                      <div className="w-12 h-4 bg-gray-100 rounded animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA button */}
+                <div className="pt-2">
+                  <div className="w-full h-14 rounded-2xl bg-emerald-200 animate-pulse" />
+                </div>
+
+                {/* Bottom triggers */}
+                <div className="pt-3 border-t border-gray-200 flex items-center justify-between gap-3">
+                  <div className="w-36 h-4 bg-rose-100 rounded animate-pulse" />
+                  <div className="w-28 h-4 bg-gray-100 rounded animate-pulse" />
+                </div>
+
+                {/* Claim support box */}
+                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-2">
+                  <div className="w-24 h-3 bg-gray-200 rounded animate-pulse" />
+                  <div className="w-full h-3 bg-gray-100 rounded animate-pulse" />
+                  <div className="w-4/5 h-3 bg-gray-100 rounded animate-pulse" />
+                  <div className="w-32 h-4 bg-emerald-100 rounded animate-pulse" />
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </main>
+      </div>
+    ) : (
+      <div className="relative min-h-screen font-sans selection:bg-emerald-600 selection:text-white text-gray-900 pb-16">
+        {/* 4K Transparent Bright Background (BG_3.png / BG_2.png) */}
+        <InsuranceBackground />
 
       {/* Foreground Container */}
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* Top Header Navigation */}
         <InsuranceHeader
-          lang={lang}
-          onLangChange={setLang}
           onBack={activeView !== "dashboard" ? () => setActiveView("dashboard") : undefined}
         />
 
@@ -399,6 +513,7 @@ export default function InsurancePage() {
           )}
         </main>
       </div>
-    </div>
+      </div>
+    )
   );
 }

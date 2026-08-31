@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { processSmsAlert } from '@/SMS/notification/lib/notifications/service';
 
 /**
  * POST /api/notifications/emit — Create a new notification (event-driven fan-in per PRD §1).
@@ -27,6 +28,9 @@ export async function POST(req: NextRequest) {
       sourceFeature,
       sourceEntityId,
       correlationId,
+      channel = 'IN_APP',
+      score,
+      reasons = [],
     } = body;
 
     // Validate required fields
@@ -38,17 +42,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate priority
-    if (!['critical', 'warning', 'info'].includes(priority)) {
+    if (!['critical', 'high', 'warning', 'medium', 'info', 'low'].includes(priority.toLowerCase())) {
       return NextResponse.json(
-        { success: false, error: 'Priority must be critical, warning, or info' },
+        { success: false, error: 'Priority must be critical, high, warning, medium, info, or low' },
         { status: 400 }
       );
     }
-
-    // Generate notification ID
-    const ts = Date.now();
-    const rand = Math.floor(100 + Math.random() * 900);
-    const id = `NTF_${ts}_${rand}`;
 
     // Map category to type field (backward compat)
     const categoryToType: Record<string, string> = {
@@ -62,18 +61,40 @@ export async function POST(req: NextRequest) {
     };
     const type = categoryToType[category] || category.toLowerCase().replace(/\s+/g, '_');
 
+    if (channel === 'SMS') {
+      const smsResult = await processSmsAlert({
+        farmerId,
+        type: type.toUpperCase(),
+        priority: priority.toUpperCase() as any,
+        score,
+        reasons,
+        language,
+        channel: 'SMS',
+      });
+      return NextResponse.json({
+        success: true,
+        message: smsResult ? 'SMS Notification processed' : 'SMS Notification skipped (cooldown or error)',
+        data: smsResult
+      }, { status: smsResult ? 201 : 200 });
+    }
+
+    // Generate notification ID for IN_APP
+    const ts = Date.now();
+    const rand = Math.floor(100 + Math.random() * 900);
+    const id = `NTF_${ts}_${rand}`;
+
     await connection.query(
       `INSERT INTO notifications 
        (id, user_id, farmer_id, type, category, priority, title, message, body,
         voice_text, language, action_label, action_url, action_status,
-        source_feature, source_entity_id, correlation_id, is_read, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NOW())`,
+        source_feature, source_entity_id, correlation_id, is_read, created_at, channel)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NOW(), ?)`,
       [
         id, farmerId, farmerId, type, category, priority, title, message,
         bodyData ? JSON.stringify(bodyData) : null,
         voiceText || `${title}. ${message}`,
         language, actionLabel, actionUrl, actionStatus,
-        sourceFeature, sourceEntityId, correlationId
+        sourceFeature, sourceEntityId, correlationId, channel
       ]
     );
 

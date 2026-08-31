@@ -42,7 +42,7 @@ export async function GET() {
     const schemes = await prisma.scheme.findMany().catch(() => []);
     
     if (schemes && schemes.length > 0) {
-      const mappedSchemes = schemes.map((s) => ({
+      const mappedSchemes = schemes.map((s: any) => ({
         schemeId: s.id,
         schemeName: s.name,
         coverage: 100000, 

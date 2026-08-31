@@ -152,8 +152,42 @@ const CROPS_CATALOG: CropInfo[] = [
 
 export default function CropDetails() {
   const [selectedCrop, setSelectedCrop] = useState<CropInfo>(CROPS_CATALOG[0]);
+  const [loading, setLoading] = useState(true);
+  React.useEffect(() => {
+    // Simulate data/background load
+    setLoading(false);
+  }, []);
   const cal = selectedCrop.calendar;
 
+  if (loading) {
+    return (
+      <div className="min-h-screen p-4 md:p-8 bg-white/60 relative">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-b from-emerald-50 to-white opacity-50" />
+        {/* Header skeleton */}
+        <div className="max-w-6xl mx-auto space-y-6 relative z-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-32 h-6 bg-gray-200 rounded animate-pulse" />
+            <div className="w-24 h-6 bg-gray-200 rounded animate-pulse" />
+          </div>
+          {/* Header card */}
+          <div className="bg-white/85 backdrop-blur-md rounded-2xl p-6 md:p-8 animate-pulse" style={{ height: '120px' }} />
+          {/* Tabs skeleton */}
+          <div className="flex flex-wrap gap-2 mt-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="w-24 h-8 bg-gray-200 rounded animate-pulse" />
+            ))}
+          </div>
+          {/* Grid skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 animate-pulse" style={{ height: '200px' }} />
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 animate-pulse" style={{ height: '200px' }} />
+          </div>
+          {/* Calendar skeleton */}
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 animate-pulse" style={{ height: '300px' }} />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen text-slate-900 p-4 md:p-8 relative">
       {/* Background Image Layer */}

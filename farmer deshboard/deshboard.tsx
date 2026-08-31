@@ -70,24 +70,37 @@ export default function SmartCropDashboard() {
   ];
 
   useEffect(() => {
-    // Connect to the custom server socket
-    const newSocket = io();
-    socketRef.current = newSocket;
-
-    newSocket.on('farmerLocationUpdate', (data: FarmerLocation) => {
-      setFarmerLocations(prev => {
-        const existing = prev.findIndex(loc => loc.farmerId === data.farmerId);
-        if (existing !== -1) {
-          const updated = [...prev];
-          updated[existing] = data;
-          return updated;
-        }
-        return [...prev, data];
+    // Connect to the custom server socket with resilient connection options
+    let newSocket: Socket | null = null;
+    try {
+      newSocket = io({
+        reconnectionAttempts: 2,
+        timeout: 3000,
+        autoConnect: true,
       });
-    });
+      socketRef.current = newSocket;
+
+      newSocket.on('farmerLocationUpdate', (data: FarmerLocation) => {
+        setFarmerLocations(prev => {
+          const existing = prev.findIndex(loc => loc.farmerId === data.farmerId);
+          if (existing !== -1) {
+            const updated = [...prev];
+            updated[existing] = data;
+            return updated;
+          }
+          return [...prev, data];
+        });
+      });
+
+      newSocket.on('connect_error', () => {
+        // Silently handle fallback when socket server is optional
+      });
+    } catch {
+      // Ignore if websocket is not supported in current environment
+    }
 
     return () => {
-      newSocket.disconnect();
+      newSocket?.disconnect();
       socketRef.current = null;
     };
   }, []);

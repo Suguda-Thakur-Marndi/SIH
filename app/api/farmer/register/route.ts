@@ -14,7 +14,10 @@ export async function POST(req: NextRequest) {
       password,
       state = 'Odisha',
       district,
+      block = 'Baripada',
       village = 'Baripada',
+      latitude,
+      longitude,
       landArea = 3.5,
       soilType = 'Red Loamy',
       currentCrop = 'Rice / Paddy',
@@ -27,10 +30,13 @@ export async function POST(req: NextRequest) {
     const farmerPhone = (mobileNumber || phone || '').trim().replace(/\D/g, '');
     const farmerEmail = email ? email.trim().toLowerCase() : null;
     const farmerDistrict = (district || 'Mayurbhanj').trim();
+    const farmerBlock = (block || 'Baripada').trim();
     const farmerVillage = (village || 'Baripada').trim();
     const farmerState = (state || 'Odisha').trim();
     const farmerLang = preferredLanguage || language || 'en';
     const parsedArea = parseFloat(String(landArea)) || 3.50;
+    const parsedLat = parseFloat(String(latitude)) || 21.9324;
+    const parsedLon = parseFloat(String(longitude)) || 86.7351;
 
     // 1. Validation
     if (!farmerName || farmerName.length < 2) {
@@ -106,8 +112,6 @@ export async function POST(req: NextRequest) {
       );
 
       // Insert into `farms`
-      const defaultLat = 21.9322000;
-      const defaultLon = 86.7483000;
       await connection.query(
         `INSERT INTO farms (id, farmer_id, name, latitude, longitude, area, soil_type, village, district)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
@@ -115,8 +119,8 @@ export async function POST(req: NextRequest) {
           farmId,
           farmerId,
           `${farmerName}'s Farm`,
-          defaultLat,
-          defaultLon,
+          parsedLat,
+          parsedLon,
           parsedArea,
           soilType,
           farmerVillage,

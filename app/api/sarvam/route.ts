@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'tts' || action === 'text-to-speech') {
-      const { text, targetLanguage = 'hi-IN', speaker = 'meera' } = body;
+      const { text, targetLanguage = 'hi-IN', speaker = 'priya' } = body;
       if (!text) {
         return NextResponse.json({ error: 'Missing text for TTS' }, { status: 400 });
       }

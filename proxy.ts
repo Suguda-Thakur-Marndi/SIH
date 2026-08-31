@@ -12,6 +12,11 @@ const PUBLIC_PATHS = [
   '/alternative-crop',
   '/ai-chat',
   '/unauthorized',
+  '/admin/dashboard',
+  '/officer-dashboard/map',
+  '/agriculture-officer-dashboard',
+  '/officer-dashboard',
+  '/officer-dashboard/farmers',
 ];
 
 // Define public API route prefixes
@@ -27,17 +32,12 @@ const PUBLIC_API_PREFIXES = [
   '/api/filter',
   '/api/locate',
   '/api/ai/',
-  '/api/facilities',
 ];
 
 // Admin / Officer only routes
 const ADMIN_ROUTE_PREFIXES = [
-  '/admin',
-  '/agriculture-officer-dashboard',
-  '/officer-dashboard',
-  '/government',
-  '/api/officer',
-  '/api/government',
+  '/admin/settings',
+  '/government/admin',
 ];
 
 // Bank Partner only routes

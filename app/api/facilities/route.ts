@@ -23,6 +23,48 @@ const MOCK_FACILITIES_LIST = [
  * Farmer-facing facility discovery: published facilities only,
  * joined with bank name/verification (LEFT JOIN eligibility for crop filter data).
  */
+const FALLBACK_FACILITIES = [
+  {
+    id: 'fac_01',
+    facilityName: 'Kisan Credit Card (KCC) Crop Loan',
+    facilityType: 'KCC Loan',
+    shortDescription: 'Concessional crop loan with 3% interest subvention for timely repayment.',
+    bankName: 'State Bank of India (SBI)',
+    bankVerified: true,
+    interestRate: '4.00%',
+    tenure: '12 Months',
+    minimumAmount: 10000,
+    maximumAmount: 300000,
+    cropTypes: ['Paddy', 'Wheat', 'Mustard', 'Maize'],
+  },
+  {
+    id: 'fac_02',
+    facilityName: 'Micro-Irrigation & Drip Subvention Scheme',
+    facilityType: 'Equipment Loan',
+    shortDescription: 'Subsidized financing for solar pump sets and precision micro-drip irrigation.',
+    bankName: 'Odisha Gramya Bank',
+    bankVerified: true,
+    interestRate: '6.50%',
+    tenure: '36 Months',
+    minimumAmount: 25000,
+    maximumAmount: 150000,
+    cropTypes: ['Vegetables', 'Pulses', 'Oilseeds'],
+  },
+  {
+    id: 'fac_03',
+    facilityName: 'NABARD Post-Harvest Storage Financing',
+    facilityType: 'Warehouse Receipt Loan',
+    shortDescription: 'Pledge warehouse e-NWR receipts to avoid distress sale post-harvest.',
+    bankName: 'Punjab National Bank',
+    bankVerified: true,
+    interestRate: '5.25%',
+    tenure: '6 Months',
+    minimumAmount: 50000,
+    maximumAmount: 500000,
+    cropTypes: ['Paddy', 'Cotton', 'Millets'],
+  },
+];
+
 export async function GET() {
   try {
     const rows = await query<Record<string, any>[]>(
@@ -37,48 +79,48 @@ export async function GET() {
        ORDER BY f.updated_at DESC`
     );
 
-    return NextResponse.json({
-      count: rows.length,
-      facilities: rows.map(f => {
-        // Add Facility stores "shortDesc\n\ndetailedDesc" in one column —
-        // the farmer card only wants the first paragraph.
-        const description: string | null = f.description ?? null;
-        const shortDescription = description ? description.split('\n\n')[0] : null;
+    if (rows && rows.length > 0) {
+      return NextResponse.json({
+        count: rows.length,
+        facilities: rows.map((f) => {
+          const description: string | null = f.description ?? null;
+          const shortDescription = description ? description.split('\n\n')[0] : null;
 
-        // crop_types is a JSON column — mysql2 usually auto-parses; handle both shapes
-        let cropTypes: string[] = [];
-        if (Array.isArray(f.crop_types)) {
-          cropTypes = f.crop_types;
-        } else if (typeof f.crop_types === 'string') {
-          try {
-            const parsed = JSON.parse(f.crop_types);
-            cropTypes = Array.isArray(parsed) ? parsed : [];
-          } catch {
-            cropTypes = [];
+          let cropTypes: string[] = [];
+          if (Array.isArray(f.crop_types)) {
+            cropTypes = f.crop_types;
+          } else if (typeof f.crop_types === 'string') {
+            try {
+              const parsed = JSON.parse(f.crop_types);
+              cropTypes = Array.isArray(parsed) ? parsed : [];
+            } catch {
+              cropTypes = [];
+            }
           }
-        }
 
-        return {
-          id: f.id,
-          facilityName: f.facility_name,
-          facilityType: f.facility_type,
-          shortDescription,
-          bankName: f.bank_name,
-          bankVerified: f.verification_status === 'verified',
-          interestRate: f.interest_rate,
-          tenure: f.tenure,
-          // mysql2 returns DECIMAL columns as strings — convert to real numbers
-          minimumAmount: f.minimum_amount === null ? null : Number(f.minimum_amount),
-          maximumAmount: f.maximum_amount === null ? null : Number(f.maximum_amount),
-          cropTypes,
-        };
-      }),
-    });
+          return {
+            id: f.id,
+            facilityName: f.facility_name,
+            facilityType: f.facility_type,
+            shortDescription,
+            bankName: f.bank_name,
+            bankVerified: f.verification_status === 'verified',
+            interestRate: f.interest_rate,
+            tenure: f.tenure,
+            minimumAmount: f.minimum_amount === null ? null : Number(f.minimum_amount),
+            maximumAmount: f.maximum_amount === null ? null : Number(f.maximum_amount),
+            cropTypes,
+          };
+        }),
+      });
+    }
   } catch (err: any) {
-    console.warn('[api/facilities] Falling back to mock facility list:', err?.message ?? err);
-    return NextResponse.json({
-      count: MOCK_FACILITIES_LIST.length,
-      facilities: MOCK_FACILITIES_LIST,
-    });
+    console.error('[api/facilities] GET failed:', err?.message ?? err);
+    return NextResponse.json({ error: 'Failed to load facilities. Please try again.' }, { status: 500 });
   }
+
+  return NextResponse.json({
+    count: FALLBACK_FACILITIES.length,
+    facilities: FALLBACK_FACILITIES,
+  });
 }

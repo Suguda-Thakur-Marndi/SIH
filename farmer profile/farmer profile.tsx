@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import {
   User,
   MapPin,
-  Globe,
   Sprout,
   Layers,
   Activity,
@@ -38,7 +37,7 @@ export default function FarmerProfilePage() {
     village: "Demo Village",
     district: "Mayurbhanj",
     state: "Odisha",
-    language: "or", // 'en' | 'hi' | 'or'
+
     phone: "+91 98451 28210",
     maskedPhone: "+91 9XXXX XX210",
     landArea: "2.5 acres",
@@ -67,6 +66,7 @@ export default function FarmerProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedFarm, setExpandedFarm] = useState<string | null>(null);
@@ -88,7 +88,7 @@ export default function FarmerProfilePage() {
             maskedPhone: f.phone ? f.phone.slice(0, 5) + "XXXX" + f.phone.slice(-3) : prev.maskedPhone,
             village: f.village || prev.village,
             district: f.district || prev.district,
-            language: f.language || prev.language,
+
             landArea: f.landArea ? `${f.landArea} acres` : prev.landArea,
             loanAmount: f.loans && f.loans.length > 0 ? `₹${Number(f.loans[0].loanAmount).toLocaleString('en-IN')}` : prev.loanAmount,
             loanDueDate: f.loans && f.loans.length > 0 ? new Date(f.loans[0].dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : prev.loanDueDate,
@@ -104,6 +104,8 @@ export default function FarmerProfilePage() {
         }
       } catch (e) {
         console.warn('Could not fetch farmer profile:', e);
+      } finally {
+        setLoading(false);
       }
     }
     loadFarmerProfile();
@@ -114,8 +116,7 @@ export default function FarmerProfilePage() {
     name: farmer.name,
     phone: farmer.phone,
     village: farmer.village,
-    district: farmer.district,
-    language: farmer.language
+    district: farmer.district
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -124,17 +125,7 @@ export default function FarmerProfilePage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const handleLanguageChange = async (lang: string) => {
-    setFarmer(prev => ({ ...prev, language: lang }));
-    try {
-      await fetch('/api/farmers', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: 'farmer-001', language: lang })
-      });
-    } catch {}
-    showToast(lang === "or" ? "ଭାଷା ସଫଳତାର ସହିତ ପରିବର୍ତ୍ତିତ ହୋଇଛି (Odia)" : lang === "hi" ? "भाषा सफलतापूर्वक बदल दी गई (Hindi)" : "Language updated to English");
-  };
+
 
   const handleNotificationToggle = (key: keyof typeof farmer.notifications) => {
     setFarmer(prev => ({
@@ -147,7 +138,134 @@ export default function FarmerProfilePage() {
     showToast("Farm parcel successfully registered!");
   };
 
-  if (!mounted) return null;
+  // Skeleton loader — shown while not yet mounted or still loading data
+  if (!mounted || loading) {
+    return (
+      <div className="relative min-h-screen w-full bg-[#e8ece9] font-sans antialiased overflow-x-hidden">
+        {/* Background shimmer */}
+        <div className="fixed inset-0 pointer-events-none z-0 bg-gradient-to-b from-[#d4e4d8]/80 via-[#e8ece9]/60 to-[#c8dece]/70" />
+        <div className="fixed inset-0 pointer-events-none z-0 bg-gradient-to-b from-white/50 via-white/10 to-black/20" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-28 space-y-6">
+
+          {/* Navbar Skeleton */}
+          <div className="w-full bg-white/70 backdrop-blur-xl border border-white/60 shadow rounded-full px-5 py-3.5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gray-200 animate-pulse" />
+              <div className="flex flex-col gap-1">
+                <div className="w-16 h-4 bg-gray-200 rounded animate-pulse" />
+                <div className="w-20 h-2.5 bg-gray-100 rounded animate-pulse" />
+              </div>
+            </div>
+            <div className="hidden md:flex gap-2">
+              {[80, 64, 72, 60].map((w, i) => (
+                <div key={i} className="h-7 rounded-full bg-gray-200 animate-pulse" style={{ width: w }} />
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse" />
+              <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse" />
+              <div className="w-24 h-9 rounded-full bg-gray-200 animate-pulse" />
+            </div>
+          </div>
+
+          {/* Hero Banner Skeleton */}
+          <div className="rounded-3xl bg-white/75 backdrop-blur-2xl border border-white/80 shadow p-6 sm:p-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div className="lg:col-span-8 space-y-4">
+                <div className="w-48 h-6 bg-gray-200 rounded-full animate-pulse" />
+                <div className="w-3/4 h-9 bg-gray-200 rounded-2xl animate-pulse" />
+                <div className="w-full h-5 bg-gray-100 rounded animate-pulse" />
+                <div className="w-4/5 h-5 bg-gray-100 rounded animate-pulse" />
+                <div className="flex gap-3 pt-2">
+                  <div className="w-36 h-10 rounded-full bg-gray-200 animate-pulse" />
+                  <div className="w-40 h-10 rounded-full bg-gray-100 animate-pulse" />
+                  <div className="w-28 h-10 rounded-full bg-red-100 animate-pulse" />
+                </div>
+              </div>
+              <div className="lg:col-span-4">
+                <div className="bg-gray-800/70 rounded-2xl p-5 space-y-3">
+                  <div className="w-24 h-4 bg-gray-600 rounded animate-pulse" />
+                  <div className="w-20 h-10 bg-gray-500 rounded animate-pulse" />
+                  <div className="w-full h-2 bg-gray-600 rounded-full animate-pulse" />
+                </div>
+              </div>
+            </div>
+            {/* Metrics bar */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-black/5">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="bg-white/80 border border-black/5 rounded-2xl p-3.5 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-gray-200 animate-pulse" />
+                  <div className="space-y-1.5">
+                    <div className="w-14 h-3 bg-gray-100 rounded animate-pulse" />
+                    <div className="w-20 h-4 bg-gray-200 rounded animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Two column content skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left column */}
+            <div className="space-y-6">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="bg-white/80 backdrop-blur-xl border border-white/90 rounded-3xl p-6 shadow space-y-4">
+                  <div className="flex items-center gap-2.5 pb-4 border-b border-black/5">
+                    <div className="w-8 h-8 rounded-lg bg-gray-200 animate-pulse" />
+                    <div className="space-y-1.5">
+                      <div className="w-36 h-4 bg-gray-200 rounded animate-pulse" />
+                      <div className="w-24 h-3 bg-gray-100 rounded animate-pulse" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[1, 2, 3, 4].map(j => (
+                      <div key={j} className="bg-white/60 p-3 rounded-2xl border border-black/5 space-y-1.5">
+                        <div className="w-16 h-3 bg-gray-100 rounded animate-pulse" />
+                        <div className="w-24 h-4 bg-gray-200 rounded animate-pulse" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Right column */}
+            <div className="space-y-6">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="bg-white/80 backdrop-blur-xl border border-white/90 rounded-3xl p-6 shadow space-y-4">
+                  <div className="flex items-center justify-between pb-4 border-b border-black/5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-gray-200 animate-pulse" />
+                      <div className="space-y-1.5">
+                        <div className="w-40 h-4 bg-gray-200 rounded animate-pulse" />
+                        <div className="w-28 h-3 bg-gray-100 rounded animate-pulse" />
+                      </div>
+                    </div>
+                    <div className="w-20 h-6 rounded-full bg-gray-100 animate-pulse" />
+                  </div>
+                  <div className="space-y-2">
+                    {[1, 2, 3].map(j => (
+                      <div key={j} className="h-12 rounded-2xl bg-gray-100 animate-pulse" />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile bottom nav skeleton */}
+        <div className="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-xl border-t border-black/10 py-2 px-6 flex justify-around items-center z-40 md:hidden">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="flex flex-col items-center gap-1">
+              <div className="w-5 h-5 rounded bg-gray-200 animate-pulse" />
+              <div className="w-8 h-2.5 rounded bg-gray-100 animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const handleAddFarm = async () => {
     const newFarm = {
@@ -184,8 +302,7 @@ export default function FarmerProfilePage() {
       name: farmer.name,
       phone: farmer.phone,
       village: farmer.village,
-      district: farmer.district,
-      language: farmer.language
+      district: farmer.district
     });
     setErrors({});
     setIsEditModalOpen(true);
@@ -214,8 +331,7 @@ export default function FarmerProfilePage() {
       phone: editFormData.phone,
       maskedPhone: masked,
       village: editFormData.village,
-      district: editFormData.district,
-      language: editFormData.language
+      district: editFormData.district
     }));
 
     try {
@@ -227,8 +343,7 @@ export default function FarmerProfilePage() {
           name: editFormData.name,
           phone: editFormData.phone,
           village: editFormData.village,
-          district: editFormData.district,
-          language: editFormData.language
+          district: editFormData.district
         })
       });
     } catch (err) {
@@ -811,43 +926,7 @@ export default function FarmerProfilePage() {
               </div>
             </div>
 
-            {/* 6. LANGUAGE PREFERENCES (Multilingual Choice) */}
-            <div className="bg-white/80 backdrop-blur-xl border border-white/90 rounded-3xl p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-              <div className="flex items-center gap-2.5 pb-4 mb-4 border-b border-black/5">
-                <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-900 flex items-center justify-center">
-                  <Globe className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-[#16271c]">Preferred Language / ଭାଷା</h2>
-                  <p className="text-xs text-[#7a8b6f]">Instant interface & SMS translation</p>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-3 gap-2.5">
-                {[
-                  { code: "en", label: "English", native: "English" },
-                  { code: "hi", label: "Hindi", native: "हिंदी" },
-                  { code: "or", label: "Odia", native: "ଓଡ଼ିଆ" }
-                ].map(item => {
-                  const isSelected = farmer.language === item.code;
-                  return (
-                    <button
-                      key={item.code}
-                      onClick={() => handleLanguageChange(item.code)}
-                      className={`p-3 rounded-2xl border text-center transition-all ${isSelected
-                          ? "bg-[#1c2e22] text-[#d8e678] border-[#1c2e22] shadow-md scale-[1.02]"
-                          : "bg-white/70 hover:bg-white text-gray-700 border-black/5"
-                        }`}
-                    >
-                      <span className="text-sm font-bold block">{item.native}</span>
-                      <span className={`text-[10px] block mt-0.5 ${isSelected ? "text-[#a2c7a9]" : "text-gray-500"}`}>
-                        {item.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
 
             {/* 7. NOTIFICATION PREFERENCES */}
             <div className="bg-white/80 backdrop-blur-xl border border-white/90 rounded-3xl p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
@@ -981,18 +1060,7 @@ export default function FarmerProfilePage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">Default Language</label>
-                <select
-                  value={editFormData.language}
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, language: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2f6b3c]"
-                >
-                  <option value="or">ଓଡ଼ିଆ (Odia)</option>
-                  <option value="hi">हिंदी (Hindi)</option>
-                  <option value="en">English</option>
-                </select>
-              </div>
+
 
               <div className="flex items-center justify-end gap-2 pt-4 border-t border-black/10">
                 <button
