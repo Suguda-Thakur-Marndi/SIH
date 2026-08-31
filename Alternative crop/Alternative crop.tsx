@@ -6,21 +6,13 @@ import Image from 'next/image';
 import {
   ArrowLeft,
   Sparkles,
-  TrendingUp,
   Droplets,
-  ShieldCheck,
-  Calendar,
   IndianRupee,
   Sprout,
   ArrowRight,
-  CheckCircle2,
-  HelpCircle,
   Clock,
-  Layers,
   ChevronRight,
   BookOpen,
-  Check,
-  Zap,
 } from 'lucide-react';
 import { CROPS_GUIDE_DATA, CropFullGuide } from '@/lib/cropGuideData';
 import CropAudioPlayer from '@/components/CropAudioPlayer';

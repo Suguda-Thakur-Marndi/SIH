@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Volume2, VolumeX, Play, Pause, RotateCcw, Sparkles } from 'lucide-react';
+import { Volume2, Play, Pause, RotateCcw, Sparkles } from 'lucide-react';
 
 interface CropAudioPlayerProps {
   odiaText: string;

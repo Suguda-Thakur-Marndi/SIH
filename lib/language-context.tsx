@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 
 export type LanguageCode =
   | 'en'
@@ -1145,6 +1146,7 @@ const LanguageContext = createContext<LanguageContextType>({
 });
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const pathname = usePathname();
   const [language, setLanguageState] = useState<LanguageCode>('en');
   const [isAutoDetected, setIsAutoDetected] = useState(false);
   const [detectedLocation, setDetectedLocation] = useState<string | null>(null);
@@ -1153,30 +1155,55 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [translationCache, setTranslationCache] = useState<Record<string, string>>({});
 
   // Helper function to sync Google Translate
-  const syncGoogleTranslate = (lang: LanguageCode) => {
+  const syncGoogleTranslate = useCallback((lang: LanguageCode) => {
     if (typeof window === 'undefined') return;
     const domain = window.location.hostname;
-    
-    // Set googtrans cookie
+    const hostParts = domain.split('.');
+    const topDomain = hostParts.length > 1 ? '.' + hostParts.slice(-2).join('.') : domain;
+
+    const clearCookie = (name: string) => {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
+      if (topDomain !== domain) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${topDomain};`;
+      }
+    };
+
+    clearCookie('googtrans');
+
     if (lang === 'en') {
-      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
+      document.cookie = `googtrans=/auto/en; path=/;`;
+      document.cookie = `googtrans=/auto/en; path=/; domain=${domain};`;
       document.cookie = `googtrans=/en/en; path=/;`;
       document.cookie = `googtrans=/en/en; path=/; domain=${domain};`;
     } else {
+      document.cookie = `googtrans=/auto/${lang}; path=/;`;
+      document.cookie = `googtrans=/auto/${lang}; path=/; domain=${domain};`;
       document.cookie = `googtrans=/en/${lang}; path=/;`;
       document.cookie = `googtrans=/en/${lang}; path=/; domain=${domain};`;
     }
 
-    // Trigger google translate dropdown if mounted
-    const combo = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
-    if (combo) {
-      combo.value = lang;
-      combo.dispatchEvent(new Event('change'));
-    }
-  };
+    // Trigger google translate dropdown if mounted with retry
+    let attempts = 0;
+    const maxAttempts = 20;
 
-  // 1. Initialize language from localStorage or Geolocation
+    const tryTrigger = () => {
+      const combo = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+      if (combo) {
+        if (combo.value !== lang) {
+          combo.value = lang;
+          combo.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      } else if (attempts < maxAttempts) {
+        attempts++;
+        setTimeout(tryTrigger, 150);
+      }
+    };
+
+    tryTrigger();
+  }, []);
+
+  // 1. Initialize language from localStorage or Browser/Geolocation
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -1188,7 +1215,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
 
-    // Auto-detect based on Indian Geolocation
+    // Auto-detect based on Indian Geolocation or browser
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -1247,21 +1274,29 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setLanguageState(browserLang as LanguageCode);
             syncGoogleTranslate(browserLang as LanguageCode);
           } else {
-            setLanguageState('or');
-            setIsAutoDetected(true);
-            setDetectedLocation('Mayurbhanj, Odisha (Default)');
-            syncGoogleTranslate('or');
+            setLanguageState('en');
+            syncGoogleTranslate('en');
           }
         },
         { timeout: 4000 }
       );
     } else {
-      setLanguageState('or');
-      syncGoogleTranslate('or');
+      setLanguageState('en');
+      syncGoogleTranslate('en');
     }
-  }, []);
+  }, [syncGoogleTranslate]);
 
-  // 2. Set language handler
+  // 2. Listen to route transitions and re-sync translation on newly mounted pages
+  useEffect(() => {
+    if (typeof window !== 'undefined' && language) {
+      const timer = setTimeout(() => {
+        syncGoogleTranslate(language);
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [pathname, language, syncGoogleTranslate]);
+
+  // 3. Set language handler
   const setLanguage = (lang: LanguageCode) => {
     setLanguageState(lang);
     setIsAutoDetected(false);
@@ -1272,7 +1307,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  // 3. Fast translation dictionary lookup
+  // 4. Fast translation dictionary lookup
   const t = useCallback(
     (key: string, fallback?: string): string => {
       const langDict = UI_DICTIONARY[language] || UI_DICTIONARY.en;
@@ -1288,7 +1323,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     [language]
   );
 
-  // 4. Dynamic AI/Cloud translation helper
+  // 5. Dynamic AI/Cloud translation helper
   const translateDynamic = useCallback(
     async (text: string): Promise<string> => {
       if (!text || language === 'en') return text;
@@ -1337,3 +1372,4 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 };
 
 export const useLanguage = () => useContext(LanguageContext);
+

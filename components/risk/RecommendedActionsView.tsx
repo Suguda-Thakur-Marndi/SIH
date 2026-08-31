@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
-  ArrowLeft, CheckCircle2, Circle, Clock, Sparkles, AlertTriangle, 
-  ArrowRight, ShieldCheck, PhoneCall, ExternalLink, Calendar, Droplets
+  ArrowLeft, CheckCircle2, Circle, Clock, Sparkles, 
+  ShieldCheck, PhoneCall, ExternalLink
 } from 'lucide-react';
 
 export default function RecommendedActionsView() {
@@ -84,7 +84,11 @@ export default function RecommendedActionsView() {
 
         {/* Action Directives List */}
         <div className="space-y-4">
-          {actions.map((act) => {
+          {loading ? (
+            <div className="p-8 text-center bg-white/70 rounded-[24px] text-neutral-500 font-medium animate-pulse">
+              Loading recommended actionable protocols...
+            </div>
+          ) : actions.map((act) => {
             const isHigh = act.priority === 'HIGH';
             return (
               <div 

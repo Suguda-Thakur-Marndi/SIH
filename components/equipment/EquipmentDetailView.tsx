@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
-  Tractor, ArrowLeft, Calendar, ShieldCheck, MapPin, 
-  CheckCircle2, Clock, Phone, DollarSign, Sparkles
+  Tractor, ArrowLeft, CheckCircle2
 } from 'lucide-react';
 
 export default function EquipmentDetailView({ equipmentId }: { equipmentId: string }) {

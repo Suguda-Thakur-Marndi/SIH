@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
-  Landmark, ShieldCheck, TrendingUp, AlertTriangle, ArrowLeft, 
-  FileText, Users, DollarSign, ExternalLink, Plus, LogOut
+  ArrowLeft, 
+  FileText, 
+  Plus, 
+  LogOut
 } from 'lucide-react';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/lib/language-context';

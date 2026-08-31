@@ -11,12 +11,30 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  const MAYURBHANJ_BLOCK_COORDS: Record<string, [number, number]> = {
+    'Baripada': [21.9324, 86.7351],
+    'Betnoti': [21.7382, 86.8524],
+    'Badasahi': [21.7241, 86.7583],
+    'Kuliana': [22.0425, 86.6342],
+    'Rairangpur': [22.2684, 86.1682],
+    'Udala': [21.5842, 86.5721],
+    'Karanjia': [21.7845, 85.9723],
+    'Jashipur': [21.9681, 86.0824],
+    'Morada': [21.8482, 86.9925],
+    'Samakhunta': [21.9083, 86.7121],
+    'Khunta': [21.6243, 86.6281],
+    'Bangriposi': [22.1582, 86.5342],
+  };
+
   // Farmer form state matching DB schema
   const [farmerForm, setFarmerForm] = useState({
     name: 'Ramesh Mohanty',
     phone: '+91 94371 88291',
     district: 'Mayurbhanj',
+    block: 'Baripada',
     village: 'Baripada Rural',
+    latitude: 21.9324,
+    longitude: 86.7351,
     language: 'or',
     land_area: '4.8',
     loan_amount: '50000',
@@ -24,6 +42,42 @@ export default function OnboardingPage() {
     crop_stage: 'Vegetative - Tillering',
     sowing_date: '2026-06-15'
   });
+
+  const [gpsDetecting, setGpsDetecting] = useState(false);
+  const [gpsStatus, setGpsStatus] = useState<string | null>(null);
+
+  const handleDetectGPS = () => {
+    if (!navigator.geolocation) {
+      setGpsStatus('Geolocation not supported');
+      return;
+    }
+    setGpsDetecting(true);
+    setGpsStatus('Detecting farm GPS...');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setFarmerForm((prev) => ({
+          ...prev,
+          latitude: parseFloat(latitude.toFixed(6)),
+          longitude: parseFloat(longitude.toFixed(6)),
+        }));
+        setGpsDetecting(false);
+        setGpsStatus(`GPS Locked: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+      },
+      (err) => {
+        console.warn('GPS error, using block center:', err.message);
+        const blockCoord = MAYURBHANJ_BLOCK_COORDS[farmerForm.block] || [21.9324, 86.7351];
+        setFarmerForm((prev) => ({
+          ...prev,
+          latitude: blockCoord[0],
+          longitude: blockCoord[1],
+        }));
+        setGpsDetecting(false);
+        setGpsStatus(`Locked to ${farmerForm.block} block coords`);
+      },
+      { timeout: 8000, enableHighAccuracy: true }
+    );
+  };
 
   // Admin / Officer form state
   const [officerForm, setOfficerForm] = useState({
@@ -84,7 +138,27 @@ export default function OnboardingPage() {
           });
         }
 
-        // 3. Save Profile
+        // 3. Dynamically Broadcast & Save Location to District Distress Map Telemetry
+        await fetch('/api/officer/farmers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: farmerForm.name,
+            phone: farmerForm.phone,
+            district: farmerForm.district,
+            block: farmerForm.block,
+            village: farmerForm.village,
+            latitude: farmerForm.latitude,
+            longitude: farmerForm.longitude,
+            crop: farmerForm.crop_name,
+            landArea: `${farmerForm.land_area} Acres`,
+            riskScore: 78,
+            riskLevel: 'HIGH',
+            primaryReason: 'Newly Registered Farm - Telemetry Active',
+          }),
+        }).catch(() => {});
+
+        // 4. Save Profile
         await fetch('/api/profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -104,7 +178,7 @@ export default function OnboardingPage() {
 
         setSuccess(true);
         setTimeout(() => {
-          router.push('/farmer-profile');
+          router.push('/admin/dashboard');
         }, 1200);
 
       } else if (role === 'admin') {
@@ -268,7 +342,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1.5">District (district)</label>
+                  <label className="block text-xs font-medium text-zinc-300 mb-1.5">District</label>
                   <div className="relative">
                     <MapPin className="absolute left-3.5 top-3 w-4 h-4 text-zinc-400" />
                     <input
@@ -279,6 +353,60 @@ export default function OnboardingPage() {
                       className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-1.5">Administrative Block</label>
+                  <select
+                    value={farmerForm.block}
+                    onChange={(e) => {
+                      const newBlock = e.target.value;
+                      const coords = MAYURBHANJ_BLOCK_COORDS[newBlock] || [21.9324, 86.7351];
+                      setFarmerForm({
+                        ...farmerForm,
+                        block: newBlock,
+                        latitude: coords[0],
+                        longitude: coords[1],
+                      });
+                    }}
+                    className="w-full bg-zinc-800 border border-white/10 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-4 py-2.5 text-sm text-white outline-none"
+                  >
+                    <option value="Baripada">Baripada Block</option>
+                    <option value="Betnoti">Betnoti Block</option>
+                    <option value="Badasahi">Badasahi Block</option>
+                    <option value="Kuliana">Kuliana Block</option>
+                    <option value="Rairangpur">Rairangpur Block</option>
+                    <option value="Udala">Udala Block</option>
+                    <option value="Karanjia">Karanjia Block</option>
+                    <option value="Jashipur">Jashipur Block</option>
+                    <option value="Morada">Morada Block</option>
+                    <option value="Samakhunta">Samakhunta Block</option>
+                    <option value="Khunta">Khunta Block</option>
+                    <option value="Bangriposi">Bangriposi Block</option>
+                  </select>
+                </div>
+
+                <div className="sm:col-span-2 bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">📍 Farm Geo-Location:</span>
+                      <span className="text-xs font-mono text-white bg-black/40 px-2 py-0.5 rounded-md border border-white/10">
+                        {farmerForm.latitude.toFixed(4)}° N, {farmerForm.longitude.toFixed(4)}° E
+                      </span>
+                    </div>
+                    {gpsStatus && (
+                      <p className="text-[11px] text-emerald-300 mt-1">{gpsStatus}</p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDetectGPS}
+                    disabled={gpsDetecting}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95"
+                  >
+                    {gpsDetecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <MapPin className="w-3.5 h-3.5" />}
+                    <span>{gpsDetecting ? 'Locating...' : 'Detect Live Farm GPS'}</span>
+                  </button>
                 </div>
 
                 <div>

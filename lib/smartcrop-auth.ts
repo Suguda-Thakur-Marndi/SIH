@@ -1,5 +1,3 @@
-import { insforge } from './insforge';
-
 export type UserRole = 'farmer' | 'administrator' | 'bank';
 
 export interface UserSession {
@@ -212,7 +210,7 @@ export const smartCropAuth = {
       case 'administrator':
         return '/admin/dashboard';
       case 'bank':
-        return '/bank/dashboard';
+        return '/bank-portal/dashboard';
       case 'farmer':
       default:
         return '/dashboard';
@@ -232,29 +230,6 @@ export const smartCropAuth = {
       }
     } catch {
       // ignore parse error
-    }
-
-    try {
-      const { data, error } = await insforge.auth.getCurrentUser();
-      if (!error && data?.user) {
-        const user = data.user;
-        const profile = (user.profile as any) || {};
-        const metadata = (user.metadata as any) || {};
-
-        const session: UserSession = {
-          id: user.id,
-          role: profile.role || metadata.role || 'farmer',
-          fullName: profile.name || profile.full_name || user.email?.split('@')[0] || 'Smart Crop User',
-          email: user.email?.includes('@smartcrop.local') ? undefined : user.email,
-          mobileNumber: profile.mobile_number || metadata.mobile_number,
-          accountStatus: profile.account_status || 'active',
-          metadata: { ...metadata, ...profile },
-        };
-        this.saveSession(session);
-        return session;
-      }
-    } catch (e) {
-      // ignore
     }
 
     return null;
@@ -563,34 +538,6 @@ export const smartCropAuth = {
 
     saveStoredAccount(newAccount);
 
-    // Save cloud user if InsForge connected
-    try {
-      await insforge.auth.signUp({
-        email: cleanEmail,
-        password: data.password,
-        name: data.fullName.trim(),
-      });
-      const { data: signInData } = await insforge.auth.signInWithPassword({
-        email: cleanEmail,
-        password: data.password,
-      });
-      if (signInData?.user) {
-        await insforge.auth.setProfile({
-          role: 'administrator',
-          name: data.fullName.trim(),
-          mobile_number: cleanPhone,
-          organization: data.organization,
-          designation: data.designation,
-          administrator_id: data.administratorId,
-          state: data.state,
-          district: data.district,
-          account_status: 'pending',
-        });
-      }
-    } catch {
-      // Cloud signup is optional best-effort
-    }
-
     const session: UserSession = {
       id: userId,
       role: 'administrator',
@@ -652,35 +599,6 @@ export const smartCropAuth = {
 
     saveStoredAccount(newAccount);
 
-    // Save cloud user if InsForge connected
-    try {
-      await insforge.auth.signUp({
-        email: cleanEmail,
-        password: data.password,
-        name: data.fullName.trim(),
-      });
-      const { data: signInData } = await insforge.auth.signInWithPassword({
-        email: cleanEmail,
-        password: data.password,
-      });
-      if (signInData?.user) {
-        await insforge.auth.setProfile({
-          role: 'bank',
-          name: data.fullName.trim(),
-          mobile_number: cleanPhone,
-          organization_name: data.organizationName,
-          organization_type: data.organizationType,
-          employee_id: data.employeeId,
-          branch: data.branch,
-          state: data.state,
-          district: data.district,
-          account_status: 'pending',
-        });
-      }
-    } catch {
-      // Cloud signup is optional best-effort
-    }
-
     const session: UserSession = {
       id: userId,
       role: 'bank',
@@ -696,32 +614,14 @@ export const smartCropAuth = {
   },
 
   /**
-   * Log in with Google OAuth (InsForge BaaS / Provider redirect)
+   * Log in with Google OAuth
    */
   async signInWithGoogle(role: UserRole = 'farmer'): Promise<{ url?: string }> {
     if (typeof window === 'undefined') return {};
 
     localStorage.setItem('smartcrop_oauth_intended_role', role);
     const redirectUrl = `${window.location.origin}/authentication`;
-
-    try {
-      const { data, error } = await insforge.auth.signInWithOAuth('google', {
-        redirectTo: redirectUrl,
-      });
-
-      if (!error && data?.url) {
-        window.location.href = data.url;
-        return { url: data.url };
-      }
-      if (error) {
-        throw new Error(error.message || 'Failed to start Google sign-in.');
-      }
-    } catch (err: any) {
-      console.warn('[SmartCropAuth] InsForge Google OAuth notice:', err);
-      throw err;
-    }
-
-    return {};
+    return { url: redirectUrl };
   },
 
   /**
@@ -738,16 +638,9 @@ export const smartCropAuth = {
       throw new Error('Please enter a valid email address or 10-digit mobile number.');
     }
 
-    try {
-      const targetEmail = account?.email || (isValidIndianPhone(clean) ? phoneToEmail(clean) : clean);
-      await insforge.auth.sendResetPasswordEmail({ email: targetEmail });
-    } catch {
-      // ignore
-    }
-
     return {
       success: true,
-      message: 'Password reset link and OTP instructions have been dispatched to your registered contact.',
+      message: 'Password reset instructions have been dispatched to your registered contact.',
     };
   },
 
@@ -757,7 +650,6 @@ export const smartCropAuth = {
   async signOut(): Promise<void> {
     try {
       await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
-      await insforge.auth.signOut().catch(() => {});
     } catch {
       // ignore
     }

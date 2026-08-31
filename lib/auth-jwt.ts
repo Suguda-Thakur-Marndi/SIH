@@ -107,12 +107,19 @@ export function verifyJwt(token: string): { valid: boolean; payload?: TokenPaylo
  */
 export function extractBearerToken(req: NextRequest): string | null {
   const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
-  if (!authHeader) return null;
-
-  const parts = authHeader.split(' ');
-  if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
-    return parts[1];
+  if (authHeader) {
+    const parts = authHeader.split(' ');
+    if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
+      return parts[1];
+    }
   }
+
+  // Fallback: Check smartcrop_token cookie (matching proxy.ts pattern)
+  const cookieToken = req.cookies.get('smartcrop_token')?.value;
+  if (cookieToken) {
+    return cookieToken;
+  }
+
   return null;
 }
 
@@ -125,32 +132,53 @@ export function requireAuth(
   allowedRoles?: Array<'farmer' | 'administrator' | 'admin' | 'bank'>
 ): { user: TokenPayload; errorResponse: null } | { user: null; errorResponse: NextResponse } {
   const token = extractBearerToken(req);
+  let sessionUser: TokenPayload | null = null;
 
-  if (!token) {
+  // 1. Check signed JWT token if available
+  if (token) {
+    const verified = verifyJwt(token);
+    if (verified.valid && verified.payload) {
+      sessionUser = verified.payload;
+    }
+  }
+
+  // 2. Fallback: Check smartcrop_session cookie if present (matching proxy.ts lines 89-101)
+  if (!sessionUser) {
+    const sessionCookie = req.cookies.get('smartcrop_session')?.value;
+    if (sessionCookie) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(sessionCookie));
+        if (parsed && parsed.id && parsed.role) {
+          const now = Math.floor(Date.now() / 1000);
+          sessionUser = {
+            id: parsed.id,
+            name: parsed.fullName || parsed.name || 'Smart Crop User',
+            role: parsed.role,
+            email: parsed.email,
+            mobileNumber: parsed.mobileNumber || parsed.phone,
+            iat: now,
+            exp: now + 86400 * 7,
+          };
+        }
+      } catch {
+        // invalid session format
+      }
+    }
+  }
+
+  if (!sessionUser) {
     return {
       user: null,
       errorResponse: NextResponse.json(
-        { error: { code: 'unauthorized', message: 'Authentication required. Missing Bearer token in Authorization header.' } },
+        { error: { code: 'unauthorized', message: 'Authentication required. Please sign in.' } },
         { status: 401 }
       ),
     };
   }
 
-  const { valid, payload, error } = verifyJwt(token);
-
-  if (!valid || !payload) {
-    return {
-      user: null,
-      errorResponse: NextResponse.json(
-        { error: { code: 'invalid_token', message: error || 'Invalid or expired token.' } },
-        { status: 401 }
-      ),
-    };
-  }
-
-  // Check role authorization if specified
+  // 3. Check role authorization if specified
   if (allowedRoles && allowedRoles.length > 0) {
-    const userRole = payload.role === 'admin' ? 'administrator' : payload.role;
+    const userRole = sessionUser.role === 'admin' ? 'administrator' : sessionUser.role;
     const isAllowed = allowedRoles.some((r) => (r === 'admin' ? 'administrator' : r) === userRole);
 
     if (!isAllowed) {
@@ -164,5 +192,5 @@ export function requireAuth(
     }
   }
 
-  return { user: payload, errorResponse: null };
+  return { user: sessionUser, errorResponse: null };
 }

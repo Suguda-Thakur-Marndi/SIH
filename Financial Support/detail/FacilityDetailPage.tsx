@@ -48,6 +48,7 @@ function formatInr(val: number | string | null | undefined): string {
 export default function FacilityDetailPage() {
   const params = useSearchParams();
   const id = params?.get('id');
+  const bankId = params?.get('bankId');
 
   const [facility, setFacility] = useState<FacilityDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,7 +80,8 @@ export default function FacilityDetailPage() {
     setLoading(true);
     setError(null);
 
-    fetch(`/api/facilities/${encodeURIComponent(id)}`)
+    const bankIdParam = (bankId && bankId.trim() !== '') ? `?bankId=${encodeURIComponent(bankId)}` : '';
+    fetch(`/api/facilities/${encodeURIComponent(id)}${bankIdParam}`)
       .then(async res => {
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
@@ -109,7 +111,7 @@ export default function FacilityDetailPage() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, bankId]);
 
   const InfoRow = ({ label, value }: { label: string; value: string }) => (
     <div

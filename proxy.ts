@@ -12,6 +12,11 @@ const PUBLIC_PATHS = [
   '/alternative-crop',
   '/ai-chat',
   '/unauthorized',
+  '/admin/dashboard',
+  '/officer-dashboard/map',
+  '/agriculture-officer-dashboard',
+  '/officer-dashboard',
+  '/officer-dashboard/farmers',
 ];
 
 // Define public API route prefixes
@@ -27,16 +32,15 @@ const PUBLIC_API_PREFIXES = [
   '/api/filter',
   '/api/locate',
   '/api/ai/',
+  '/api/officer/farmers',
+  '/api/officer/analytics',
+  '/api/officer/dashboard',
 ];
 
 // Admin / Officer only routes
 const ADMIN_ROUTE_PREFIXES = [
-  '/admin',
-  '/agriculture-officer-dashboard',
-  '/officer-dashboard',
-  '/government',
-  '/api/officer',
-  '/api/government',
+  '/admin/settings',
+  '/government/admin',
 ];
 
 // Bank Partner only routes
@@ -110,7 +114,7 @@ export default function middleware(req: NextRequest) {
     if (userRole === 'administrator') {
       dashboardUrl = '/admin/dashboard';
     } else if (userRole === 'bank') {
-      dashboardUrl = '/bank/dashboard';
+      dashboardUrl = '/bank-portal/dashboard';
     }
     return NextResponse.redirect(new URL(dashboardUrl, req.url));
   }

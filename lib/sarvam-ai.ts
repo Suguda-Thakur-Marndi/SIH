@@ -1,7 +1,7 @@
 const SARVAM_API_KEY =
   process.env.SARVAM_API_KEY ||
   process.env.NEXT_PUBLIC_SARVAM_API_KEY ||
-  '';
+  'sk_cp3z4img_VFPPoSzUXLUZj1hE1WbH8o0O';
 
 /**
  * Mapping from short codes to Sarvam AI language codes (BCP-47)
@@ -47,7 +47,7 @@ export async function translateWithSarvam({
   input,
   sourceLanguageCode = 'en-IN',
   targetLanguageCode,
-  model = 'sarvam-translate:v1',
+  model = 'mayura:v1',
 }: TranslateOptions) {
   const sourceCode = SARVAM_LANGUAGE_MAP[sourceLanguageCode] || sourceLanguageCode;
   const targetCode = SARVAM_LANGUAGE_MAP[targetLanguageCode] || targetLanguageCode;
@@ -102,11 +102,13 @@ export async function translateWithSarvam({
 export async function textToSpeechWithSarvam({
   text,
   targetLanguageCode = 'hi-IN',
-  speaker = 'meera',
+  speaker = 'priya',
+  model = 'bulbul:v3',
 }: {
   text: string;
   targetLanguageCode?: string;
   speaker?: string;
+  model?: string;
 }) {
   const targetCode = SARVAM_LANGUAGE_MAP[targetLanguageCode] || targetLanguageCode;
 
@@ -128,6 +130,7 @@ export async function textToSpeechWithSarvam({
         inputs: [text],
         target_language_code: targetCode,
         speaker,
+        model,
       }),
     });
 
@@ -150,3 +153,4 @@ export async function textToSpeechWithSarvam({
     };
   }
 }
+

@@ -22,7 +22,7 @@ export async function GET(
     if (farmer) {
       return NextResponse.json(farmer);
     }
-  } catch (err) {
+  } catch {
     // Prisma query error, continue to MySQL / fallback
   }
 
@@ -66,7 +66,7 @@ export async function GET(
         crops: crops
       });
     }
-  } catch (err) {
+  } catch {
     // MySQL query fallback
   }
 

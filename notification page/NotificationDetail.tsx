@@ -60,7 +60,7 @@ export default function NotificationDetail({ id }: { id: string }) {
       }
     }
     fetchDetail();
-  }, [id]);
+  }, [id, markAsRead]);
 
   // Fallback to store data if API fails
   const notification = detail || notifications.find((n: any) => n.id === id);

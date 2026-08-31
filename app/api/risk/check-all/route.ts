@@ -57,12 +57,12 @@ export async function POST(req: NextRequest) {
           // Parse reasons from DB if possible, otherwise use a default
           let reasons = ['Severe distress indicators detected'];
           if (scores[0].ai_explanation) {
-            try {
-              const expl = JSON.parse(scores[0].ai_explanation);
-              if (expl && expl.factors) reasons = expl.factors;
-            } catch (e) {
-              reasons = [scores[0].ai_explanation.substring(0, 50)];
-            }
+             try {
+               const expl = JSON.parse(scores[0].ai_explanation);
+               if (expl && expl.factors) reasons = expl.factors;
+             } catch(e) {
+               reasons = [scores[0].ai_explanation.substring(0, 50)];
+             }
           }
 
           // Dispatch Alert

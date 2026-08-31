@@ -6,18 +6,18 @@ import { useLanguage } from "@/lib/language-context";
 import { smartCropAuth } from "@/lib/smartcrop-auth";
 
 const navItems = [
-  { key: "command_center", defaultName: "Command Center", icon: Home },
+  { key: "command_center", defaultName: "Command Center", icon: Home, href: "/officer-dashboard" },
   { key: "high_risk_farmers", defaultName: "High Risk Farmers", icon: AlertTriangle, href: "/officer-dashboard/farmers" },
-  { key: "distress_map", defaultName: "Distress Map", icon: MapPin },
-  { key: "analytics", defaultName: "Analytics", icon: BarChart2 },
+  { key: "distress_map", defaultName: "Distress Map", icon: MapPin, href: "/officer-dashboard/map" },
+  { key: "analytics", defaultName: "Analytics", icon: BarChart2, href: "/officer-dashboard/analytics" },
   { key: "alerts", defaultName: "Alerts", icon: Bell, href: "/notifications" },
   { key: "farmer_database", defaultName: "Farmer Database", icon: Database, href: "/officer-dashboard/farmers" },
-  { key: "intervention_history", defaultName: "Intervention History", icon: Clock },
-  { key: "settings", defaultName: "Settings", icon: Settings },
+  { key: "intervention_history", defaultName: "Intervention History", icon: Clock, href: "/officer-dashboard/interventions" },
+  { key: "settings", defaultName: "Settings", icon: Settings, href: "/officer-dashboard/settings" },
   { key: "government_schemes", defaultName: "Government Schemes", icon: Globe, href: "/schemes" },
 ];
 
-export default function Sidebar({ isOpen }: { isOpen: boolean }) {
+export default function Sidebar({ isOpen, activeKey = "command_center" }: { isOpen: boolean; activeKey?: string }) {
   const { t } = useLanguage();
   const router = useRouter();
 
@@ -32,9 +32,9 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
       </div>
       {/* Navigation */}
       <nav className="flex-1 flex flex-row md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-none">
-        {navItems.map((item, idx) => {
+        {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = idx === 0;
+          const isActive = item.key === activeKey;
           const translatedName = t(item.key, item.defaultName);
           return (
             <a

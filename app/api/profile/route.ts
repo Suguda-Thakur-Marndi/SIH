@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { requireAuth, extractBearerToken, verifyJwt } from '@/lib/auth-jwt';
+import { requireAuth } from '@/lib/auth-jwt';
 
 export interface UserProfile {
   id: string;

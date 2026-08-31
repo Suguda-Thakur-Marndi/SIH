@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     
-    const { farmerId, schemeId, documents } = body;
+    const { farmerId, schemeId } = body;
     
     if (!farmerId || !schemeId) {
       return NextResponse.json({ error: 'Missing farmerId or schemeId' }, { status: 400 });

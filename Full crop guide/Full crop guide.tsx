@@ -10,18 +10,10 @@ import {
   Calendar,
   Droplets,
   ShieldAlert,
-  ArrowRight,
-  TrendingUp,
   Award,
   Sparkles,
   Info,
-  Layers,
-  Clock,
-  IndianRupee,
   Leaf,
-  Volume2,
-  ChevronRight,
-  Filter,
 } from 'lucide-react';
 import { CROPS_GUIDE_DATA, CropFullGuide, CultivationStage } from '@/lib/cropGuideData';
 import CropAudioPlayer from '@/components/CropAudioPlayer';

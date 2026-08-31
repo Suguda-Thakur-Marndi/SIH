@@ -1,27 +1,20 @@
 'use client';
 
-import React, { useState, useRef, useEffect, Suspense } from 'react';
+import React, { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
   ArrowLeft,
   Bot,
-  User,
   Send,
   Mic,
   MicOff,
   Volume2,
-  VolumeX,
   Sparkles,
-  RotateCcw,
   Sprout,
-  Droplets,
-  ShieldAlert,
-  IndianRupee,
-  Lightbulb,
-  Headphones,
 } from 'lucide-react';
 import { CROPS_GUIDE_DATA } from '@/lib/cropGuideData';
+import AIChatSkeleton from '@/components/skeletons/AIChatSkeleton';
 
 interface ChatMessage {
   id: string;
@@ -58,57 +51,7 @@ function AiChatPageContent() {
     },
   ]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if ('speechSynthesis' in window) {
-        synthRef.current = window.speechSynthesis;
-      }
-      const SpeechRecognition =
-        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = false;
-        recognitionRef.current.lang = 'en-IN';
-        recognitionRef.current.onresult = (e: any) => {
-          const transcript = e.results[0][0].transcript;
-          setInputText(transcript);
-          setIsListening(false);
-          if (transcript.trim().length > 3) {
-            handleSend(transcript);
-          }
-        };
-        recognitionRef.current.onerror = () => setIsListening(false);
-        recognitionRef.current.onend = () => setIsListening(false);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const toggleMic = () => {
-    if (!recognitionRef.current) {
-      alert('Speech recognition is not supported in this browser.');
-      return;
-    }
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    } else {
-      try {
-        if (synthRef.current && synthRef.current.speaking) {
-          synthRef.current.cancel();
-        }
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  };
-
-  const handleSpeak = (id: string, text: string) => {
+  const handleSpeak = useCallback((id: string, text: string) => {
     if (!synthRef.current) return;
     if (speakingMessageId === id) {
       synthRef.current.cancel();
@@ -137,9 +80,9 @@ function AiChatPageContent() {
     utterance.onend = () => setSpeakingMessageId(null);
     utterance.onerror = () => setSpeakingMessageId(null);
     synthRef.current.speak(utterance);
-  };
+  }, [speakingMessageId]);
 
-  const handleSend = async (queryOverride?: string) => {
+  const handleSend = useCallback(async (queryOverride?: string) => {
     const query = (queryOverride || inputText).trim();
     if (!query || isLoading) return;
 
@@ -210,6 +153,56 @@ function AiChatPageContent() {
       ]);
     } finally {
       setIsLoading(false);
+    }
+  }, [inputText, isLoading, activeCrop.name, activeCrop.id, autoSpeak, handleSpeak]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if ('speechSynthesis' in window) {
+        synthRef.current = window.speechSynthesis;
+      }
+      const SpeechRecognition =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.lang = 'en-IN';
+        recognitionRef.current.onresult = (e: any) => {
+          const transcript = e.results[0][0].transcript;
+          setInputText(transcript);
+          setIsListening(false);
+          if (transcript.trim().length > 3) {
+            handleSend(transcript);
+          }
+        };
+        recognitionRef.current.onerror = () => setIsListening(false);
+        recognitionRef.current.onend = () => setIsListening(false);
+      }
+    }
+  }, [handleSend]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const toggleMic = () => {
+    if (!recognitionRef.current) {
+      alert('Speech recognition is not supported in this browser.');
+      return;
+    }
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        if (synthRef.current && synthRef.current.speaking) {
+          synthRef.current.cancel();
+        }
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
@@ -411,11 +404,19 @@ function AiChatPageContent() {
             })}
 
             {isLoading && (
-              <div className="flex items-center gap-2 text-slate-600 text-xs p-3 bg-emerald-50 rounded-2xl border border-emerald-200 w-fit">
-                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
-                <span className="font-bold text-emerald-800">
-                  Gemini AI is analyzing agricultural protocols...
-                </span>
+              <div className="flex items-start gap-3 max-w-[85%] animate-pulse" role="status" aria-busy="true" aria-label="AI analyzing">
+                <div className="p-2 rounded-2xl bg-emerald-600 text-white shrink-0 shadow-xs">
+                  <Bot className="w-4 h-4 animate-spin" />
+                </div>
+                <div className="flex-1 space-y-2 p-4 rounded-3xl bg-slate-50 border border-slate-200/90 rounded-tl-xs">
+                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 mb-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
+                    <span>AI Agronomist is analyzing agricultural protocols...</span>
+                  </div>
+                  <div className="h-3.5 w-3/4 rounded bg-slate-300"></div>
+                  <div className="h-3.5 w-full rounded bg-slate-200"></div>
+                  <div className="h-3.5 w-4/5 rounded bg-slate-200"></div>
+                </div>
               </div>
             )}
 
@@ -467,7 +468,7 @@ function AiChatPageContent() {
 
 export default function AiChatPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center font-bold text-emerald-800">Loading AI Agronomist Chat...</div>}>
+    <Suspense fallback={<AIChatSkeleton />}>
       <AiChatPageContent />
     </Suspense>
   );

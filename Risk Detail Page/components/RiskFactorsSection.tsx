@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, CloudRain, Droplets, DollarSign, Bug, ShieldCheck } from 'lucide-react';
+import { TrendingUp, CloudRain, Droplets, DollarSign, Bug } from 'lucide-react';
 
 interface Factor {
   name: string;

@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateAIChatResponse } from '@/lib/gemini';
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const lat = parseFloat(searchParams.get('lat') || '18.52');
     const lon = parseFloat(searchParams.get('lon') || '73.85');
-    const query = searchParams.get('query') || 'recommend crops';
 
     // Mock geolocation detection or reverse geocoding
     const location = {

@@ -70,24 +70,37 @@ export default function SmartCropDashboard() {
   ];
 
   useEffect(() => {
-    // Connect to the custom server socket
-    const newSocket = io();
-    socketRef.current = newSocket;
-
-    newSocket.on('farmerLocationUpdate', (data: FarmerLocation) => {
-      setFarmerLocations(prev => {
-        const existing = prev.findIndex(loc => loc.farmerId === data.farmerId);
-        if (existing !== -1) {
-          const updated = [...prev];
-          updated[existing] = data;
-          return updated;
-        }
-        return [...prev, data];
+    // Connect to the custom server socket with resilient connection options
+    let newSocket: Socket | null = null;
+    try {
+      newSocket = io({
+        reconnectionAttempts: 2,
+        timeout: 3000,
+        autoConnect: true,
       });
-    });
+      socketRef.current = newSocket;
+
+      newSocket.on('farmerLocationUpdate', (data: FarmerLocation) => {
+        setFarmerLocations(prev => {
+          const existing = prev.findIndex(loc => loc.farmerId === data.farmerId);
+          if (existing !== -1) {
+            const updated = [...prev];
+            updated[existing] = data;
+            return updated;
+          }
+          return [...prev, data];
+        });
+      });
+
+      newSocket.on('connect_error', () => {
+        // Silently handle fallback when socket server is optional
+      });
+    } catch {
+      // Ignore if websocket is not supported in current environment
+    }
 
     return () => {
-      newSocket.disconnect();
+      newSocket?.disconnect();
       socketRef.current = null;
     };
   }, []);
@@ -193,7 +206,11 @@ export default function SmartCropDashboard() {
                   key={item.id}
                   href={item.href}
                   onClick={() => setActiveNav(item.id)}
-                  className={`relative flex items-center justify-center h-11 w-11 rounded-full cursor-pointer select-none transition-all duration-300 ${
+                  onMouseEnter={() => setHoveredNav(item.id)}
+                  onMouseLeave={() => setHoveredNav(null)}
+                  className={`relative flex items-center justify-center h-11 rounded-full cursor-pointer select-none transition-all duration-300 ${
+                    isExpanded ? 'px-5' : 'w-11'
+                  } ${
                     isActive
                       ? 'bg-[#1B1E19] text-[#F7F8F4] shadow-md shadow-black/20'
                       : 'text-[#6B6F63] hover:text-[#1B1E19] hover:bg-white/80'
@@ -233,22 +250,95 @@ export default function SmartCropDashboard() {
             {/* Language Selector Dropdown */}
             <LanguageSelector variant="glass" />
 
+            {/* Search */}
+            <button
+              onMouseEnter={() => setHoveredAction('search')}
+              onMouseLeave={() => setHoveredAction(null)}
+              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm cursor-pointer group ${
+                hoveredAction === 'search' ? 'px-4' : 'w-11'
+              }`}
+            >
+              <motion.div
+                animate={{ y: hoveredAction === 'search' ? -2 : 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                className="flex items-center justify-center shrink-0"
+              >
+                <Search size={18} className="text-[#1B1E19] group-hover:scale-105 transition-transform" />
+              </motion.div>
+              <motion.span
+                initial={false}
+                animate={{
+                  width: hoveredAction === 'search' ? 'auto' : 0,
+                  opacity: hoveredAction === 'search' ? 1 : 0,
+                  marginLeft: hoveredAction === 'search' ? 6 : 0,
+                }}
+                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19]"
+              >
+                Search
+              </motion.span>
+            </button>
+
             {/* Notification Bell */}
             <button
               onClick={() => router.push('/notifications')}
-              className="h-11 w-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group"
+              onMouseEnter={() => setHoveredAction('bell')}
+              onMouseLeave={() => setHoveredAction(null)}
+              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group ${
+                hoveredAction === 'bell' ? 'px-4' : 'w-11'
+              }`}
             >
-              <Bell size={18} className="text-[#1B1E19] transition-colors duration-300" />
-              <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#E4572E] ring-2 ring-white animate-pulse"></div>
+              <motion.div
+                animate={{ y: hoveredAction === 'bell' ? -2 : 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                className="relative flex items-center justify-center shrink-0"
+              >
+                <Bell size={18} className="text-[#1B1E19] group-hover:scale-105 transition-transform" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#E4572E] ring-2 ring-white animate-pulse"></div>
+              </motion.div>
+              <motion.span
+                initial={false}
+                animate={{
+                  width: hoveredAction === 'bell' ? 'auto' : 0,
+                  opacity: hoveredAction === 'bell' ? 1 : 0,
+                  marginLeft: hoveredAction === 'bell' ? 6 : 0,
+                }}
+                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19]"
+              >
+                {t('alerts', 'Alerts')}
+              </motion.span>
             </button>
 
             {/* Profile User */}
             <button
               onClick={() => router.push('/farmer-profile')}
-              className="h-11 w-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group"
+              onMouseEnter={() => setHoveredAction('user')}
+              onMouseLeave={() => setHoveredAction(null)}
+              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group ${
+                hoveredAction === 'user' ? 'px-4' : 'w-11'
+              }`}
             >
-              <User size={18} className="text-[#1B1E19] transition-colors duration-300" />
-              <div className="absolute bottom-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#D6F24B] border-2 border-white"></div>
+              <motion.div
+                animate={{ y: hoveredAction === 'user' ? -2 : 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                className="relative flex items-center justify-center shrink-0"
+              >
+                <User size={18} className="text-[#1B1E19] group-hover:scale-105 transition-transform" />
+                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#D6F24B] border-2 border-white"></div>
+              </motion.div>
+              <motion.span
+                initial={false}
+                animate={{
+                  width: hoveredAction === 'user' ? 'auto' : 0,
+                  opacity: hoveredAction === 'user' ? 1 : 0,
+                  marginLeft: hoveredAction === 'user' ? 6 : 0,
+                }}
+                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19]"
+              >
+                Profile
+              </motion.span>
             </button>
 
             {/* Logout Button */}
@@ -258,9 +348,29 @@ export default function SmartCropDashboard() {
                 router.push('/authentication');
               }}
               title="Sign Out to Authentication"
-              className="h-11 w-11 rounded-full flex items-center justify-center bg-red-50/90 hover:bg-red-100 border border-red-200/80 transition-all duration-300 shadow-sm relative cursor-pointer group"
+              className={`h-11 rounded-full flex items-center justify-center bg-red-50/90 hover:bg-red-100 border border-red-200/80 transition-all duration-300 shadow-sm relative cursor-pointer group ${
+                hoveredAction === 'logout' ? 'px-4' : 'w-11'
+              }`}
             >
-              <LogOut size={17} className="text-red-700 transition-colors duration-300" />
+              <motion.div
+                animate={{ y: hoveredAction === 'logout' ? -2 : 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                className="relative flex items-center justify-center shrink-0"
+              >
+                <LogOut size={17} className="text-red-700 group-hover:scale-105 transition-transform" />
+              </motion.div>
+              <motion.span
+                initial={false}
+                animate={{
+                  width: hoveredAction === 'logout' ? 'auto' : 0,
+                  opacity: hoveredAction === 'logout' ? 1 : 0,
+                  marginLeft: hoveredAction === 'logout' ? 6 : 0,
+                }}
+                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-red-700"
+              >
+                Logout
+              </motion.span>
             </button>
           </div>
         </div>
@@ -302,7 +412,7 @@ export default function SmartCropDashboard() {
             transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-wrap justify-center items-center gap-4"
           >
-            <Link href="/crop-monitoring">
+            <Link href="/risk-details">
               <button className="whitespace-nowrap px-8 py-4 rounded-full bg-[#1B1E19] text-[#F7F8F4] font-medium flex items-center gap-2 hover:bg-black transition-colors shadow-lg shadow-black/10">
                 {t('view_farm_health', 'View Farm Health')}
               </button>
@@ -343,8 +453,9 @@ export default function SmartCropDashboard() {
       {/* SECTION 1.5: Quick Insights 2x2 Grid */}
       <section className="relative z-10 py-24 px-6 md:px-12 max-w-7xl mx-auto flex flex-col items-center">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 md:gap-14 lg:gap-20 w-fit pointer-events-auto">
-          {/* Stat 1 */}
+          {/* Stat 1 (Farm Health) */}
           <motion.div 
+            onClick={() => router.push('/risk-details')}
             whileHover={{ scale: 1.045, y: -6, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
             whileTap={{ scale: 0.96 }}
             className="group relative w-full sm:w-80 md:w-90 lg:w-105 overflow-hidden rounded-4xl p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
@@ -444,6 +555,7 @@ export default function SmartCropDashboard() {
 
           {/* Stat 4 (Risk Card) */}
           <motion.div 
+            onClick={() => router.push('/risk-details')}
             whileHover={{ scale: 1.045, y: -6, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
             whileTap={{ scale: 0.96 }}
             className="group relative w-full sm:w-80 md:w-90 lg:w-105 overflow-hidden rounded-4xl p-8 lg:p-10 font-sans cursor-pointer transition-colors duration-300"
@@ -572,6 +684,7 @@ export default function SmartCropDashboard() {
 
               {/* Crop Health Monitoring Card */}
               <motion.div
+                onClick={() => router.push('/risk-details')}
                 whileHover={{ scale: 1.045, y: -8, transition: { type: 'spring', stiffness: 450, damping: 12 } }}
                 whileTap={{ scale: 0.92, transition: { type: 'spring', stiffness: 550, damping: 14 } }}
                 className="relative overflow-hidden rounded-[28px] p-6 text-[#1B1E19] transition-colors duration-300 hover:shadow-[0_24px_50px_-10px_rgba(214,242,75,0.35)] cursor-pointer"

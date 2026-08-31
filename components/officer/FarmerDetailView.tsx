@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
-  ArrowLeft, Phone, MapPin, ShieldAlert, Sparkles, Calendar, 
-  Send, UserCheck, Droplets, ThermometerSun, AlertTriangle, CheckCircle2
+  ArrowLeft, MapPin, ShieldAlert, Sparkles, Send, Droplets, CheckCircle2
 } from 'lucide-react';
 
 export default function FarmerDetailView({ farmerId }: { farmerId: string }) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { translateWithSarvam, textToSpeechWithSarvam, SARVAM_LANGUAGE_MAP } from '@/lib/sarvam-ai';
+import { translateWithSarvam, textToSpeechWithSarvam } from '@/lib/sarvam-ai';
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'tts' || action === 'text-to-speech') {
-      const { text, targetLanguage = 'hi-IN', speaker = 'meera' } = body;
+      const { text, targetLanguage = 'hi-IN', speaker = 'priya' } = body;
       if (!text) {
         return NextResponse.json({ error: 'Missing text for TTS' }, { status: 400 });
       }

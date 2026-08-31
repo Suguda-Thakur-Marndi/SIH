@@ -1,7 +1,6 @@
 import mysql, { Pool } from 'mysql2/promise';
 
 declare global {
-  // eslint-disable-next-line no-var
   var _mysqlPool: Pool | undefined;
 }
 
@@ -18,7 +17,7 @@ const dbConfig = {
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 10000,
-  connectTimeout: 3500,
+  connectTimeout: 15000,
   ssl: {
     rejectUnauthorized: false,
   },
@@ -34,7 +33,7 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Helper to execute parameterized SQL queries against AWS RDS MySQL with a quick timeout.
  */
-export async function query<T = any>(sql: string, params?: any[], timeoutMs = 4000): Promise<T> {
+export async function query<T = any>(sql: string, params?: any[], timeoutMs = 10000): Promise<T> {
   const queryPromise = pool.execute(sql, params).then(([rows]) => rows as T);
   
   const timeoutPromise = new Promise<never>((_, reject) => {
@@ -257,14 +256,34 @@ export async function initDatabase(): Promise<boolean> {
           id VARCHAR(64) PRIMARY KEY,
           officer_id VARCHAR(64) NOT NULL,
           farmer_id VARCHAR(64) NOT NULL,
+          farmer_name VARCHAR(255),
           intervention_type VARCHAR(100) NOT NULL,
           notes TEXT,
+          outcome TEXT,
+          risk_level VARCHAR(50) DEFAULT 'MEDIUM',
           status VARCHAR(50) DEFAULT 'SCHEDULED',
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          INDEX idx_officer (officer_id),
+          INDEX idx_farmer (farmer_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
 
-      // 12. Notifications table
+      // 12. Officer Settings table
+      await connection.query(`
+        CREATE TABLE IF NOT EXISTS officer_settings (
+          id INT PRIMARY KEY AUTO_INCREMENT,
+          user_id VARCHAR(100) NOT NULL,
+          notify_high_distress BOOLEAN DEFAULT TRUE,
+          notify_weather_emergency BOOLEAN DEFAULT TRUE,
+          notify_new_assignment BOOLEAN DEFAULT TRUE,
+          notify_loan_insurance BOOLEAN DEFAULT FALSE,
+          preferred_language VARCHAR(10) DEFAULT 'en',
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          INDEX idx_officer_settings_user (user_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+      `);
+
+      // 13. Notifications table
       await connection.query(`
         CREATE TABLE IF NOT EXISTS notifications (
           id VARCHAR(64) PRIMARY KEY,

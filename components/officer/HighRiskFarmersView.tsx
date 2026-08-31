@@ -1,16 +1,22 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { 
-  ArrowLeft, Search, Filter, AlertTriangle, Phone, MapPin, 
-  ChevronRight, ShieldAlert, ArrowUpDown, UserCheck, CheckCircle2
+  ArrowLeft, Search, Filter, AlertTriangle, MapPin, 
+  ChevronRight
 } from 'lucide-react';
 
-export default function HighRiskFarmersView() {
+function HighRiskFarmersContent() {
+  const searchParams = useSearchParams();
+  const initialRisk = searchParams.get('risk') || searchParams.get('riskLevel') || 'all';
+  const initialBlock = searchParams.get('block') || '';
+  const initialQuery = searchParams.get('q') || '';
+
   const [farmers, setFarmers] = useState<any[]>([]);
-  const [search, setSearch] = useState('');
-  const [filterRisk, setFilterRisk] = useState('all');
+  const [search, setSearch] = useState(initialBlock || initialQuery);
+  const [filterRisk, setFilterRisk] = useState(initialRisk);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,18 +24,27 @@ export default function HighRiskFarmersView() {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          setFarmers(data.data);
+          setFarmers(data.data || data.farmers || []);
         }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredFarmers = farmers.filter(f => {
-    const matchesSearch = f.name.toLowerCase().includes(search.toLowerCase()) || 
-                          f.village.toLowerCase().includes(search.toLowerCase()) ||
-                          f.crop.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = filterRisk === 'all' ? true : f.riskLevel.toLowerCase() === filterRisk.toLowerCase();
+  const filteredFarmers = farmers.filter((f) => {
+    const q = search.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      (f.name && f.name.toLowerCase().includes(q)) ||
+      (f.farmerId && f.farmerId.toLowerCase().includes(q)) ||
+      (f.id && f.id.toLowerCase().includes(q)) ||
+      (f.village && f.village.toLowerCase().includes(q)) ||
+      (f.block && f.block.toLowerCase().includes(q)) ||
+      (f.crop && f.crop.toLowerCase().includes(q)) ||
+      (f.primaryReason && f.primaryReason.toLowerCase().includes(q));
+
+    const matchesFilter =
+      filterRisk === 'all' ? true : f.riskLevel?.toLowerCase() === filterRisk.toLowerCase();
     return matchesSearch && matchesFilter;
   });
 
@@ -110,7 +125,11 @@ export default function HighRiskFarmersView() {
 
         {/* Farmer Triage Cards / Table */}
         <div className="space-y-3">
-          {filteredFarmers.map((farmer) => {
+          {loading ? (
+            <div className="p-8 text-center bg-white/70 rounded-[22px] text-neutral-500 font-medium animate-pulse">
+              Loading high-risk farmer telemetry...
+            </div>
+          ) : filteredFarmers.map((farmer) => {
             const isHigh = farmer.riskLevel === 'HIGH';
             return (
               <div 
@@ -176,5 +195,17 @@ export default function HighRiskFarmersView() {
 
       </div>
     </div>
+  );
+}
+
+export default function HighRiskFarmersView() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#F2F2EF] p-8 flex items-center justify-center font-sans">
+        <div className="w-8 h-8 border-3 border-neutral-300 border-t-neutral-900 rounded-full animate-spin mx-auto" />
+      </div>
+    }>
+      <HighRiskFarmersContent />
+    </Suspense>
   );
 }

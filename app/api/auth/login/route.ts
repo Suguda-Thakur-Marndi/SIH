@@ -6,7 +6,7 @@ import { signJwt } from '@/lib/auth-jwt';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { username, password, email, mobileNumber, phone, role } = body;
+    const { username, password, email, mobileNumber, phone } = body;
 
     const identifier = (mobileNumber || phone || email || username || '').trim();
     if (!identifier || !password) {
