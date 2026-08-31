@@ -21,7 +21,37 @@ interface Props {
 export function WeatherStressPanel({ data, loading }: Props) {
   if (loading || !data) {
     return (
-      <div className="w-full h-72 bg-white/5 border border-white/10 rounded-2xl animate-pulse"></div>
+      <div className="bg-black/40 border border-white/10 rounded-2xl p-5 backdrop-blur-md animate-pulse" role="status" aria-busy="true" aria-label="Loading weather stress data">
+        <div className="flex items-center gap-2 mb-5">
+          <div className="w-5 h-5 rounded bg-white/10" />
+          <div className="space-y-1">
+            <div className="h-6 w-36 rounded bg-white/10" />
+            <div className="h-4 w-48 rounded bg-white/10" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="bg-white/5 rounded-xl p-3 space-y-2">
+              <div className="h-3 w-24 rounded bg-white/10" />
+              <div className="h-6 w-14 rounded bg-white/10" />
+            </div>
+          ))}
+        </div>
+        <div className="h-48 w-full rounded-xl bg-white/[0.02] relative overflow-hidden">
+          {[0, 1, 2, 3].map(i => (
+            <div key={i} className="absolute left-6 right-4 h-px bg-white/5" style={{ top: `${25 + i * 20}%` }} />
+          ))}
+          <div className="absolute bottom-6 left-10 right-8 flex items-end justify-around gap-3 h-[55%]">
+            {[45, 60, 30, 55, 40, 50].map((h, i) => (
+              <div key={i} className="flex-1 flex gap-1 items-end">
+                <div className="flex-1 rounded-t bg-blue-500/10" style={{ height: `${h}%` }} />
+                <div className="flex-1 rounded-t bg-white/5" style={{ height: `${h * 0.7}%` }} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <span className="sr-only">Loading weather stress data</span>
+      </div>
     );
   }
 

@@ -14,7 +14,27 @@ export function RiskDistribution({ data, loading }: Props) {
 
   if (loading || !data) {
     return (
-      <div className="w-full h-48 bg-white/5 border border-white/10 rounded-2xl animate-pulse"></div>
+      <div className="bg-black/40 border border-white/10 rounded-2xl p-5 backdrop-blur-md animate-pulse" role="status" aria-busy="true" aria-label="Loading risk distribution">
+        <div className="space-y-1 mb-4">
+          <div className="h-6 w-36 rounded bg-white/10" />
+          <div className="h-4 w-48 rounded bg-white/10" />
+        </div>
+        <div className="space-y-4">
+          {['bg-red-500/20', 'bg-amber-500/20', 'bg-emerald-500/20'].map((color, i) => (
+            <div key={i} className="space-y-2">
+              <div className="flex justify-between">
+                <div className="h-4 w-20 rounded bg-white/10" />
+                <div className="h-4 w-12 rounded bg-white/10" />
+              </div>
+              <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${color}`} style={{ width: `${65 - i * 20}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="h-10 w-full rounded-xl bg-white/5 mt-4" />
+        <span className="sr-only">Loading risk distribution</span>
+      </div>
     );
   }
 

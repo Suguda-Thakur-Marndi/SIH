@@ -65,7 +65,34 @@ export function DistressFactorsExpanded({ data, loading, timeRange, block }: Pro
 
   if (loading || !data) {
     return (
-      <div className="w-full h-72 bg-white/5 border border-white/10 rounded-2xl animate-pulse"></div>
+      <div className="bg-black/40 border border-white/10 rounded-2xl p-5 backdrop-blur-md animate-pulse" role="status" aria-busy="true" aria-label="Loading distress factors">
+        <div className="flex items-center justify-between mb-5">
+          <div className="space-y-1">
+            <div className="h-6 w-48 rounded bg-white/10" />
+            <div className="h-4 w-64 rounded bg-white/10" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { color: 'bg-blue-500/10', border: 'border-blue-500/20' },
+            { color: 'bg-orange-500/10', border: 'border-orange-500/20' },
+            { color: 'bg-purple-500/10', border: 'border-purple-500/20' },
+          ].map((s, i) => (
+            <div key={i} className={`${s.color} border ${s.border} rounded-xl p-4 space-y-3`}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/10" />
+                <div className="h-5 w-28 rounded bg-white/10" />
+              </div>
+              <div className="h-8 w-16 rounded bg-white/10" />
+              <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                <div className="h-full rounded-full bg-white/10" style={{ width: `${55 - i * 12}%` }} />
+              </div>
+              <div className="h-8 w-full rounded-lg bg-white/5" />
+            </div>
+          ))}
+        </div>
+        <span className="sr-only">Loading distress factors</span>
+      </div>
     );
   }
 

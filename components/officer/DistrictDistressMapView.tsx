@@ -12,9 +12,67 @@ import Header from '@/Agriculture officer dashboard/components/Header';
 const DistrictDistressMap = dynamic(() => import('./DistrictDistressMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[650px] glass bg-white/80 backdrop-blur-2xl rounded-3xl border border-white/60 flex flex-col items-center justify-center space-y-4">
-      <div className="w-10 h-10 border-4 border-[#1A1A1A] border-t-transparent rounded-full animate-spin" />
-      <p className="text-sm font-bold text-[#1A1A1A]">Loading Spatial District Distress Map...</p>
+    <div
+      role="status"
+      aria-busy="true"
+      aria-label="Loading Spatial District Distress Map"
+      className="w-full h-[650px] bg-white/80 backdrop-blur-2xl rounded-3xl border border-white/60 relative overflow-hidden animate-pulse shadow-xl"
+    >
+      {/* Map grid background pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            'linear-gradient(#1A1A1A 1px, transparent 1px), linear-gradient(90deg, #1A1A1A 1px, transparent 1px)',
+          backgroundSize: '36px 36px',
+        }}
+      />
+
+      {/* Top Search & Filter Bar Skeleton */}
+      <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 gap-3">
+        <div className="flex items-center gap-2 flex-1 max-w-md">
+          <div className="h-11 w-full rounded-2xl bg-slate-900/10 backdrop-blur-md" />
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-11 w-28 rounded-2xl bg-slate-900/10 backdrop-blur-md" />
+          <div className="h-11 w-11 rounded-2xl bg-slate-900/10 backdrop-blur-md" />
+        </div>
+      </div>
+
+      {/* Layer Toggles Left Skeleton */}
+      <div className="absolute top-20 left-4 space-y-2 z-10 hidden sm:block">
+        {['Overall Distress', 'Weather Stress', 'Market Volatility', 'Loan Overdue'].map((_, i) => (
+          <div key={i} className="h-9 w-40 rounded-xl bg-slate-900/10 backdrop-blur-md" />
+        ))}
+      </div>
+
+      {/* Center Spinner & Status */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center space-y-3 z-10">
+        <div className="w-12 h-12 border-4 border-emerald-800 border-t-transparent rounded-full animate-spin shadow-lg" />
+        <p className="text-sm font-bold text-slate-800 bg-white/70 px-4 py-1.5 rounded-full border border-white/80 shadow-xs">
+          Loading Spatial District Distress Map & Layers...
+        </p>
+      </div>
+
+      {/* Legend Bottom Right Skeleton */}
+      <div className="absolute bottom-4 right-4 bg-white/90 rounded-2xl p-3.5 space-y-2 z-10 border border-slate-200 shadow-md">
+        <div className="h-3 w-20 rounded bg-slate-900/15" />
+        <div className="flex items-center gap-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex flex-col items-center gap-1">
+              <div className="h-3 w-7 rounded bg-slate-900/10" />
+              <div className="h-1.5 w-7 rounded-full bg-slate-900/20" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Zoom Controls Bottom Left Skeleton */}
+      <div className="absolute bottom-4 left-4 flex flex-col gap-1.5 z-10">
+        <div className="h-9 w-9 rounded-xl bg-slate-900/10 backdrop-blur-md" />
+        <div className="h-9 w-9 rounded-xl bg-slate-900/10 backdrop-blur-md" />
+      </div>
+      <span className="sr-only">Loading Spatial District Distress Map</span>
     </div>
   ),
 });

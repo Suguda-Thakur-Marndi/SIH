@@ -21,7 +21,25 @@ interface Props {
 export function CombinedRiskMatrix({ data, loading }: Props) {
   if (loading || !data) {
     return (
-      <div className="w-full h-64 bg-white/5 border border-white/10 rounded-2xl animate-pulse"></div>
+      <div className="bg-black/40 border border-white/10 rounded-2xl p-5 backdrop-blur-md animate-pulse" role="status" aria-busy="true" aria-label="Loading combined risk matrix">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-5 h-5 rounded bg-white/10" />
+          <div className="h-6 w-48 rounded bg-white/10" />
+        </div>
+        <div className="h-4 w-72 rounded bg-white/10 mb-5" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[1, 2, 3, 4, 5, 6, 7].map(i => (
+            <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-white/10" />
+                <div className="h-4 w-20 rounded bg-white/10" />
+              </div>
+              <div className="h-8 w-12 rounded bg-white/10" />
+            </div>
+          ))}
+        </div>
+        <span className="sr-only">Loading combined risk matrix</span>
+      </div>
     );
   }
 

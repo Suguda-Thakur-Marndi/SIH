@@ -22,6 +22,7 @@ import {
   Headphones,
 } from 'lucide-react';
 import { CROPS_GUIDE_DATA } from '@/lib/cropGuideData';
+import AIChatSkeleton from '@/components/skeletons/AIChatSkeleton';
 
 interface ChatMessage {
   id: string;
@@ -411,11 +412,19 @@ function AiChatPageContent() {
             })}
 
             {isLoading && (
-              <div className="flex items-center gap-2 text-slate-600 text-xs p-3 bg-emerald-50 rounded-2xl border border-emerald-200 w-fit">
-                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
-                <span className="font-bold text-emerald-800">
-                  Gemini AI is analyzing agricultural protocols...
-                </span>
+              <div className="flex items-start gap-3 max-w-[85%] animate-pulse" role="status" aria-busy="true" aria-label="AI analyzing">
+                <div className="p-2 rounded-2xl bg-emerald-600 text-white shrink-0 shadow-xs">
+                  <Bot className="w-4 h-4 animate-spin" />
+                </div>
+                <div className="flex-1 space-y-2 p-4 rounded-3xl bg-slate-50 border border-slate-200/90 rounded-tl-xs">
+                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 mb-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
+                    <span>AI Agronomist is analyzing agricultural protocols...</span>
+                  </div>
+                  <div className="h-3.5 w-3/4 rounded bg-slate-300"></div>
+                  <div className="h-3.5 w-full rounded bg-slate-200"></div>
+                  <div className="h-3.5 w-4/5 rounded bg-slate-200"></div>
+                </div>
               </div>
             )}
 
@@ -467,7 +476,7 @@ function AiChatPageContent() {
 
 export default function AiChatPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center font-bold text-emerald-800">Loading AI Agronomist Chat...</div>}>
+    <Suspense fallback={<AIChatSkeleton />}>
       <AiChatPageContent />
     </Suspense>
   );

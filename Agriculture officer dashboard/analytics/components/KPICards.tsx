@@ -12,11 +12,27 @@ interface OverviewData {
 
 export function KPICards({ data, loading }: { data: OverviewData | null, loading: boolean }) {
   if (loading || !data) {
+    const skeletonColors = [
+      { bg: 'bg-red-500/20', border: 'border-red-500/30', accent: 'bg-red-950/40' },
+      { bg: 'bg-amber-500/10', border: 'border-amber-500/20', accent: 'bg-black/40' },
+      { bg: 'bg-blue-500/10', border: 'border-blue-500/20', accent: 'bg-black/40' },
+      { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', accent: 'bg-black/40' },
+    ];
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
-        {[1, 2, 3, 4].map(i => (
-          <div key={i} className="h-32 bg-white/5 border border-white/10 rounded-2xl"></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8" role="status" aria-busy="true" aria-label="Loading KPI cards">
+        {skeletonColors.map((s, i) => (
+          <div key={i} className={`relative overflow-hidden rounded-2xl p-5 border backdrop-blur-md ${i === 0 ? s.accent : 'bg-black/40'} ${s.border} animate-pulse`}>
+            <div className="flex justify-between items-start">
+              <div className="space-y-2">
+                <div className="h-4 w-28 rounded bg-white/10" />
+                <div className="h-9 w-20 rounded bg-white/10" />
+                {i === 0 && <div className="h-4 w-32 rounded bg-white/10 mt-2" />}
+              </div>
+              <div className={`w-12 h-12 rounded-full ${s.bg}`} />
+            </div>
+          </div>
         ))}
+        <span className="sr-only">Loading KPI cards</span>
       </div>
     );
   }

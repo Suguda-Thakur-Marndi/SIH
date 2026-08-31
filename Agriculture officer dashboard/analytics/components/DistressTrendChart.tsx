@@ -18,7 +18,34 @@ interface Props {
 export function DistressTrendChart({ data, loading, insight }: Props) {
   if (loading || !data) {
     return (
-      <div className="w-full h-72 bg-white/5 border border-white/10 rounded-2xl animate-pulse"></div>
+      <div className="bg-black/40 border border-white/10 rounded-2xl p-5 backdrop-blur-md animate-pulse" role="status" aria-busy="true" aria-label="Loading distress trend chart">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <div className="space-y-1">
+            <div className="h-6 w-36 rounded bg-white/10" />
+            <div className="h-4 w-56 rounded bg-white/10" />
+          </div>
+          <div className="mt-2 md:mt-0 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full">
+            <div className="h-4 w-40 rounded bg-white/10" />
+          </div>
+        </div>
+        <div className="w-full h-72 rounded-xl relative overflow-hidden bg-white/[0.02]">
+          {/* Horizontal grid lines */}
+          {[0, 1, 2, 3, 4].map(i => (
+            <div key={i} className="absolute left-8 right-4 h-px bg-white/5" style={{ top: `${20 + i * 15}%` }} />
+          ))}
+          {/* Vertical axis */}
+          <div className="absolute top-4 bottom-8 left-8 w-px bg-white/5" />
+          {/* Bottom axis */}
+          <div className="absolute bottom-8 left-8 right-4 h-px bg-white/5" />
+          {/* Fake bar charts */}
+          <div className="absolute bottom-8 left-12 right-8 flex items-end justify-around gap-2 h-[60%]">
+            {[40, 55, 35, 65, 50, 45, 60].map((h, i) => (
+              <div key={i} className="flex-1 rounded-t bg-white/5" style={{ height: `${h}%` }} />
+            ))}
+          </div>
+        </div>
+        <span className="sr-only">Loading distress trend chart</span>
+      </div>
     );
   }
 

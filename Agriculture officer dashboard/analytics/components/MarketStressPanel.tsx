@@ -19,7 +19,38 @@ interface Props {
 export function MarketStressPanel({ data, insight, loading }: Props) {
   if (loading || !data) {
     return (
-      <div className="w-full h-64 bg-white/5 border border-white/10 rounded-2xl animate-pulse"></div>
+      <div className="bg-black/40 border border-white/10 rounded-2xl p-5 backdrop-blur-md animate-pulse" role="status" aria-busy="true" aria-label="Loading market stress data">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded bg-white/10" />
+              <div className="h-6 w-36 rounded bg-white/10" />
+            </div>
+            <div className="h-4 w-56 rounded bg-white/10" />
+          </div>
+          <div className="px-3 py-1.5 bg-orange-500/10 border border-orange-500/20 rounded-full">
+            <div className="h-4 w-40 rounded bg-white/10" />
+          </div>
+        </div>
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white/10" />
+                <div className="space-y-1">
+                  <div className="h-4 w-20 rounded bg-white/10" />
+                  <div className="h-3 w-28 rounded bg-white/10" />
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="h-6 w-16 rounded bg-white/10" />
+                <div className="h-4 w-20 rounded bg-white/10" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <span className="sr-only">Loading market stress data</span>
+      </div>
     );
   }
 

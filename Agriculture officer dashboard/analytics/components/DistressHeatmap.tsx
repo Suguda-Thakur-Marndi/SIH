@@ -24,7 +24,31 @@ export function DistressHeatmap({ data, loading }: Props) {
 
   if (loading || !data) {
     return (
-      <div className="w-full h-64 bg-white/5 border border-white/10 rounded-2xl animate-pulse"></div>
+      <div className="bg-black/40 border border-white/10 rounded-2xl p-5 backdrop-blur-md animate-pulse" role="status" aria-busy="true" aria-label="Loading distress heatmap">
+        <div className="space-y-1 mb-5">
+          <div className="h-6 w-40 rounded bg-white/10" />
+          <div className="h-4 w-56 rounded bg-white/10" />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+            <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
+              <div className="h-4 w-20 rounded bg-white/10" />
+              <div className="h-8 w-12 rounded bg-white/10" />
+              <div className="h-3 w-24 rounded bg-white/10" />
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 pt-4">
+          <div className="h-3 w-8 rounded bg-white/10" />
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="h-4 w-8 rounded bg-white/10" />
+            ))}
+          </div>
+          <div className="h-3 w-8 rounded bg-white/10" />
+        </div>
+        <span className="sr-only">Loading distress heatmap</span>
+      </div>
     );
   }
 

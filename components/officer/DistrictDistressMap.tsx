@@ -408,7 +408,9 @@ export default function DistrictDistressMap({
   }, [filteredFarmers]);
 
   const farmersRef = useRef<DistressFarmer[]>([]);
-  farmersRef.current = farmers;
+  useEffect(() => {
+    farmersRef.current = farmers;
+  }, [farmers]);
 
   // 3. Initialize MapLibre GL Map
   useEffect(() => {
