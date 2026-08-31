@@ -5,6 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 [![AWS RDS](https://img.shields.io/badge/AWS-RDS_MySQL-orange?style=flat-square&logo=amazon-aws)](https://aws.amazon.com/rds/)
+[![Gemini AI](https://img.shields.io/badge/Google-Gemini_AI-4285F4?style=flat-square&logo=google)](https://ai.google.dev/)
 [![Sarvam AI](https://img.shields.io/badge/Sarvam_AI-Indic_NLP-purple?style=flat-square)](https://www.sarvam.ai/)
 [![Multilingual](https://img.shields.io/badge/Languages-22+_Indic_Languages-emerald?style=flat-square)](https://translate.google.com/)
 
@@ -15,6 +16,9 @@
 ## 📑 Table of Contents
 
 - [Core Stakeholder Portals](#-core-stakeholder-portals)
+- [AI Agronomist & Decision Support Engines](#-ai-agronomist--decision-support-engines)
+- [Agriculture Officer Distress Analytics System](#-agriculture-officer-distress-analytics-system)
+- [Spatial District Distress Telemetry Map](#-spatial-district-distress-telemetry-map)
 - [Multilingual & Real-Time Translation System](#-multilingual--real-time-translation-system)
 - [Security, Middleware & Authentication Architecture](#-security-middleware--authentication-architecture)
 - [Application Routes & Navigation Directory](#-application-routes--navigation-directory)
@@ -23,48 +27,92 @@
 - [Database Schema (AWS RDS MySQL)](#-database-schema-aws-rds-mysql)
 - [Folder & Directory Structure](#-folder--directory-structure)
 - [Getting Started & Local Setup](#-getting-started--local-setup)
-- [Environment Variables Configuration](#-environment-variables-configuration)
-- [Verification & Quality Assurance](#-verification--quality-assurance)
+- [Automated Verification & Test Suite](#-automated-verification--test-suite)
 
 ---
 
 ## 🎯 Core Stakeholder Portals
 
 ### 🧑‍🌾 1. Farmer Portal
-- **Real-Time Farm Dashboard**: Live weather observation, soil moisture/temperature telemetry, active crop lifecycle tracking, and localized danger alerts.
-- **AI Crop Health & Distress Engine**: Multi-factor risk scoring (pest attacks, drought, excessive precipitation, soil nutrient deficits) with prescriptive remedies.
-- **Crop Monitoring & Phenology Calendar**: Stage-by-stage crop calendar, irrigation schedule optimization, and daily agronomy tasks.
-- **Climate-Resilient Alternative Crops**: AI recommendation engine suggesting optimal alternative crops based on soil chemistry and regional monsoon forecasts.
-- **Live Mandi Rates**: Real-time APMC commodity price feeds and historical trend charts across Odisha and nationwide markets.
-- **Custom Hiring Center (CHC) Equipment Hub**: Tractors, Harvesters, Power Tillers, and Spraying Drones available for hourly/daily rental with instant booking.
-- **Financial Facilities & KCC Loans**: Direct discovery, interest subvention calculation, and 1-click loan applications.
-- **PMFBY Crop Insurance**: Policy matching, premium estimation, and insurance claim tracking.
-- **Farmer Profile Management**: Land parcel records, soil health parameters, and one-click Sign Out.
+- **Real-Time Farm Dashboard (`/dashboard`)**: Live weather observation, soil moisture/temperature telemetry, active crop lifecycle tracking, and localized danger alerts.
+- **AI Crop Health & Distress Engine (`/risk-details`)**: Multi-factor 3-signal risk scoring (Rainfall Deficit, Mandi Price Volatility, Loan Proximity) with prescriptive agronomic remedies.
+- **Crop Monitoring & Phenology Calendar (`/crop-monitoring`, `/crop-details`)**: Stage-by-stage crop calendar, irrigation schedule optimization, and daily agronomy tasks.
+- **Climate-Resilient Alternative Crops (`/alternative-crop`)**: AI engine recommending drought-tolerant crops (Finger Millet, Black Gram, Mustard) with water saving %, expected ROI %, and growth duration.
+- **Full Agronomic Guide (`/full-crop-guide`)**: Comprehensive crop production and protection handbook with interactive voice playback and disease diagnostic keys.
+- **Live Mandi Rates & Net Realization (`/market`)**: Real-time APMC commodity price feeds, MSP comparisons, and logistics cost calculators across Odisha and nationwide markets.
+- **Custom Hiring Center (CHC) Equipment Hub (`/equipment`)**: Tractors, Harvesters, Power Tillers, and Spraying Drones available for hourly/daily rental with instant booking.
+- **Financial Facilities & KCC Loans (`/financial-support`)**: Direct discovery, interest subvention calculation, and 1-click loan applications.
+- **PMFBY Crop Insurance (`/insurance`)**: Policy matching, premium estimation, localized loss reporting, and insurance claim tracking.
+- **Farmer Profile Management (`/farmer-profile`)**: Land parcel records (RoR), soil health parameters, linked credit facilities, and task manager.
 
 ### 🧑‍💼 2. Agriculture Extension Officer & Administrator Portal
-- **Agricultural Distress Command Center**: District distress heatmaps and high-stress farmer triage.
-- **Assigned Farmers Directory**: Geo-tagged farmer mapping with real-time risk stratification (High, Moderate, Low).
-- **Field Inspection & Interventions**: Schedule on-site farm visits, log diagnostic reports, trigger emergency advisories, and fast-track relief funds.
+- **Command Center (`/officer-dashboard`)**: High-level jurisdictional distress metrics, emergency alerts, and recent farmer telemetries.
+- **Distress Analytics Engine (`/officer-dashboard/analytics`)**: 10-section analytical dashboard addressing *Where is distress? How is it changing? Why is it happening? Who needs intervention?*
+- **Spatial District Distress Map (`/officer-dashboard/map`)**: Real-time geospatial telemetry mapping with cluster markers, isochrone travel distances, and interactive farm detail flyouts.
+- **High-Risk Farmers Triage Directory (`/officer-dashboard/farmers`)**: Filterable queue by risk severity (>70 critical score), block/village, crop, and distress driver.
+- **Intervention History & Dispatch (`/officer-dashboard/interventions`)**: Log field inspections, dispatch emergency advisories, schedule soil testing, and track resolution statuses.
+- **Officer Settings (`/officer-dashboard/settings`)**: Officer credentials, jurisdiction assignment (Mayurbhanj District), alert notification thresholds, and security controls.
 
 ### 🏦 3. Bank & Financial Partner Portal
-- **Credit & Loan Facility Management**: Create, customize, publish, draft, or suspend agricultural loan products with interest subvention details.
-- **Loan Applications Pipeline**: Review applicant risk profiles, land records, creditworthiness scores, and approve/reject loan requests.
-- **Institutional Risk & Insurance Dashboard**: Underwriting metrics, active policy tracking, and PMFBY claim adjudication.
+- **Credit & Loan Facility Management (`/bank-portal/facilities`)**: Create, customize, publish, draft, or suspend agricultural loan products with interest subvention details.
+- **Loan Applications Pipeline (`/bank-portal/dashboard`)**: Review applicant risk profiles, land records, creditworthiness scores, and approve/reject loan requests.
+- **Institutional Risk & Insurance Dashboard (`/bank-insurance/dashboard`)**: Underwriting metrics, active policy tracking, and PMFBY claim adjudication.
 
 ### 🏛️ 4. Government & CHC Administration Console
-- **Regional Macro Analytics**: District and state-level crop distribution, yield projections, and stress indices.
+- **Regional Macro Analytics (`/government/dashboard`)**: District and state-level crop distribution, yield projections, and stress indices.
 - **CHC Equipment Allocation**: Public machinery pool management and custom hiring center dispatching.
-- **Scheme Impact Assessment**: Direct Benefit Transfer (DBT) fund disbursement tracking and subsidy delivery auditing.
+- **Scheme Impact Assessment (`/schemes`)**: Direct Benefit Transfer (DBT) fund disbursement tracking and subsidy delivery auditing.
+
+---
+
+## 🤖 AI Agronomist & Decision Support Engines
+
+SmartCrop integrates Google Gemini 2.5 and Sarvam AI Indic NLP for intelligent, localized advisory:
+
+1. **AI Agronomist Chatbot (`/ai-chat`, `POST /api/ai/chat`)**:
+   - Conversational AI capable of diagnosing crop stress symptoms, prescribing exact chemical/fertilizer dosages per acre, and conversing in **English, Hindi, and Odia**.
+2. **Alternative Crop Recommendation Engine (`POST /api/ai/alternative-crop`)**:
+   - Evaluates soil chemistry, seasonal monsoon deficits, and market MSPs to generate high-profit, water-efficient alternative crop substitutions.
+3. **AI Risk Diagnostics (`POST /api/ai/risk-explanation`)**:
+   - Transforms raw sensor telemetry (soil moisture, NDVI, rainfall variance, APMC mandi trends) into clear, multi-paragraph plain-language risk explanations.
+
+---
+
+## 📊 Agriculture Officer Distress Analytics System
+
+Implemented strictly following [`officer-analytics-prd.md`](officer-analytics-prd.md):
+
+| Section | Component | Description & Functionality |
+|---|---|---|
+| **§1. Global Filters** | District / Block / Crop / Risk Level / Risk Factor / Time Range | Independent per-section query loading, Mayurbhanj district locking, and fast filter reset. |
+| **§2. Overview KPIs** | [`KPICards.tsx`](Agriculture%20officer%20dashboard/analytics/components/KPICards.tsx) | High-Risk count with period-over-period delta %, Moderate-Risk count, Active Alerts, and Pending Interventions. |
+| **§3. Distress Trend** | [`DistressTrendChart.tsx`](Agriculture%20officer%20dashboard/analytics/components/DistressTrendChart.tsx) | Daily average risk score area chart vs high-risk bar volume with a visible `>70` critical threshold line and trend insight banner. |
+| **§4. Risk Distribution** | [`RiskDistribution.tsx`](Agriculture%20officer%20dashboard/analytics/components/RiskDistribution.tsx) | High (>70), Moderate (31–70), and Low (≤30) risk bands clickable to filter the high-risk directory. |
+| **§5. Distress Factors** | [`DistressFactorsExpanded.tsx`](Agriculture%20officer%20dashboard/analytics/components/DistressFactorsExpanded.tsx) | 3-signal breakdown percentages (Weather, Market, Loan) with on-demand expansion metrics and top affected farmer lists. |
+| **§6. Distress Heatmap** | [`DistressHeatmap.tsx`](Agriculture%20officer%20dashboard/analytics/components/DistressHeatmap.tsx) | Block-level severity grid across Mayurbhanj blocks (Baripada, Betnoti, Badasahi, Kuliana, Udala, Karanjia, Rairangpur, Jashipur). |
+| **§7. Weather Stress** | [`WeatherStressPanel.tsx`](Agriculture%20officer%20dashboard/analytics/components/WeatherStressPanel.tsx) | Rainfall deviation %, affected farmer counts, and 7-day expected vs actual precipitation comparison chart. |
+| **§8. Market Stress** | [`MarketStressPanel.tsx`](Agriculture%20officer%20dashboard/analytics/components/MarketStressPanel.tsx) | Mandi price drops vs MSP, affected farmer counts, and dual-stress (weather + market) overlap insights. |
+| **§9. Combined Risk** | [`CombinedRiskMatrix.tsx`](Agriculture%20officer%20dashboard/analytics/components/CombinedRiskMatrix.tsx) | Single, double, and all-three concurrent signal distress matrix highlighting compounded farmer vulnerability. |
+| **§10. Priority Actions** | [`PriorityTable.tsx`](Agriculture%20officer%20dashboard/analytics/components/PriorityTable.tsx) | Interactive action dialogs for **Direct Call (`tel:`)**, **SMS Advisory Broadcast**, **Assign Field Visit**, and **View Dossier**. |
+
+---
+
+## 🗺️ Spatial District Distress Telemetry Map
+
+Located at [`/officer-dashboard/map`](app/officer-dashboard/map/page.tsx):
+- **MapLibre GL Integration**: High-performance GPU-accelerated spatial vector map with smooth clustering.
+- **Telemetry Layers**: Toggle between Weather Stress, Market Volatility, Loan Overdue, and Overall Distress layers.
+- **Farmer Nodes**: Color-coded risk markers (Red >70, Amber 31-70, Green ≤30) with rich popups showing land area, crops, phone, and 1-click intervention routing.
 
 ---
 
 ## 🌐 Multilingual & Real-Time Translation System
 
-SmartCrop features a hybrid, low-latency multilingual engine designed for rural accessibility across all 22+ Scheduled Indian Languages:
+SmartCrop features a hybrid multilingual engine designed for rural accessibility across all 22+ Scheduled Indian Languages:
 
 ### 1. Dual-Layer Translation Architecture
 - **Layer 1: Instant Client UI Dictionary**: Pre-compiled translation dictionary (`UI_DICTIONARY` in [`lib/language-context.tsx`](lib/language-context.tsx)) for zero-latency instant rendering of navigational elements, labels, buttons, and headings.
-- **Layer 2: Real-Time Full-DOM Google Translate Engine**: Automatic full-page DOM translation powered by Google Translate runtime scripts in [`app/layout.tsx`](app/layout.tsx), translating dynamic text, cards, tables, modals, and descriptions in real time.
+- **Layer 2: Real-Time Full-DOM Google Translate Engine**: Automatic full-page DOM translation powered by Google Translate runtime scripts in [`app/layout.tsx`](app/layout.tsx).
 - **Layer 3: Indic Neural NLP (Sarvam AI)**: Server-side machine translation (`/api/translate`) and natural Text-to-Speech voice synthesis (`/api/sarvam`) for conversational AI agronomist advisory.
 
 ### 2. Supported Languages (22+ Indian Languages + English)
@@ -83,241 +131,180 @@ SmartCrop features a hybrid, low-latency multilingual engine designed for rural 
 | `brx`| Bodo | बर' | `doi`| Dogri | डोगरी |
 | `sat`| Santali | ᱥᱟᱱᱛᱟᱲᱤ | — | — | — |
 
-### 3. Persistent Global Switcher & Cross-Page State
-- **Global Floating Switcher**: Accessible from any page via `<LanguageSelector variant="floating" />` pinned at the bottom-right corner.
-- **In-Navbar Switchers**: Inlined glassmorphic dropdowns in Farmer, Officer, and Bank headers.
-- **Cross-Route Persistence**: Active language choice is saved in `localStorage` and `googtrans` cookies, automatically applying when navigating between **Farmer**, **Administrator**, **Bank**, and **Government** portals.
-
 ---
 
 ## 🛡️ Security, Middleware & Authentication Architecture
 
-### 1. Role-Based Access Control (RBAC) & Next.js Proxy Middleware
-Protected routes are strictly enforced via the root Next.js proxy middleware ([`proxy.ts`](proxy.ts)) compatible with Next.js 16.3.2 Turbopack:
+Protected routes are strictly enforced via the root Next.js proxy middleware ([`proxy.ts`](proxy.ts)) with genuine cryptographic JWT tokens and bcrypt password hashing:
 
 | Path Prefix | Minimum Required Role | Unauthenticated Behavior | Unauthorized Role Behavior |
 | :--- | :--- | :--- | :--- |
-| `/dashboard`, `/farmer-profile`, `/crop-*`, `/risk-details` | `farmer` or `administrator` | Redirect to `/authentication?redirectUrl=...` | Redirect to `/unauthorized` |
-| `/admin/*`, `/officer-dashboard/*`, `/government/*` | `administrator` / `admin` | Redirect to `/authentication?redirectUrl=...` | Redirect to `/unauthorized` |
-| `/bank/*`, `/bank-portal/*`, `/bank-insurance/*` | `bank` or `administrator` | Redirect to `/authentication?redirectUrl=...` | Redirect to `/unauthorized` |
-| `/api/officer/*`, `/api/government/*` | `administrator` | HTTP `401 Unauthorized` | HTTP `403 Forbidden` |
-| `/api/banks/*`, `/api/facilities/create` | `bank` or `administrator` | HTTP `401 Unauthorized` | HTTP `403 Forbidden` |
-
-### 2. Dual Cookie & JWT Session Management
-- **Token Handling**: Standard signed JSON Web Tokens (`smartcrop_token`) and persistent state cookies (`smartcrop_session`) set with `SameSite=Lax` and `HttpOnly` security flags.
-- **Centralized Sign Out**: All profile headers, navigation sidebars, and dashboard action bars feature an instant **Logout / Sign Out** button that calls `smartCropAuth.signOut()` to clear client state, destroy session cookies, and route the user back to `/authentication`.
+| `/dashboard`, `/farmer-profile`, `/crop-*`, `/risk-details` | `farmer` or `administrator` | Redirect to `/authentication` | Redirect to `/unauthorized` |
+| `/officer-dashboard`, `/officer-dashboard/*` | `officer` or `administrator` | Redirect to `/authentication` | Redirect to `/unauthorized` |
+| `/bank-portal`, `/bank-portal/*`, `/bank-insurance/*` | `bank_partner` or `administrator` | Redirect to `/authentication` | Redirect to `/unauthorized` |
+| `/government/*` | `government` or `administrator` | Redirect to `/authentication` | Redirect to `/unauthorized` |
 
 ---
 
-## 🗺️ Application Routes & Navigation Directory
+## 🧭 Application Routes & Navigation Directory
 
-### 🌐 1. Public & Discovery Pages
-| Route | URL Link | Description |
-| :--- | :--- | :--- |
-| **Landing / Home** | `http://localhost:3000/` | Interactive product overview & ecosystem entry (redirects to `/dashboard`) |
-| **Authentication** | `http://localhost:3000/authentication` | Unified Sign In & Registration with role selection |
-| **Farmer Onboarding** | `http://localhost:3000/onboarding` | Step-by-step land parcel, soil, and crop onboarding |
-| **Mandi Market Rates** | `http://localhost:3000/market` | Live APMC mandi commodity prices & trend charts |
-| **Government Schemes** | `http://localhost:3000/schemes` | Central & State agricultural subsidy directory |
-| **Scheme Detail** | `http://localhost:3000/schemes/pm-kisan` | Dynamic subsidy milestone checklist & eligibility |
-| **Full Crop Guide** | `http://localhost:3000/full-crop-guide` | Complete agronomic sowing-to-harvest cultivation guide |
-| **Alternative Crops** | `http://localhost:3000/alternative-crop` | AI climate-resilient alternative crop suggestions |
-| **AI Agronomist Chat** | `http://localhost:3000/ai-chat` | Voice & text AI assistant in Indic languages |
-| **Unauthorized View** | `http://localhost:3000/unauthorized` | Security barrier for insufficient permissions |
-
-### 🌾 2. Farmer Portal *(Requires `farmer` or `administrator`)*
-| Route | URL Link | Description |
-| :--- | :--- | :--- |
-| **Farmer Dashboard** | `http://localhost:3000/dashboard` | Main telemetry, farm health index & danger alerts |
-| **Farmer Profile** | `http://localhost:3000/farmer-profile` | Personal details, plot boundaries, and Logout |
-| **Crop Monitoring** | `http://localhost:3000/crop-monitoring` | Satellite NDVI, soil metrics & interactive calendar |
-| **Crop Details** | `http://localhost:3000/crop-details` | Stage timeline, irrigation needs & pest protocols |
-| **Risk Diagnostics** | `http://localhost:3000/risk-details` | Pest, weather & soil moisture distress scores |
-| **Recommended Actions** | `http://localhost:3000/recommended-actions` | Priority prescriptive advisory interventions |
-| **Equipment Marketplace**| `http://localhost:3000/equipment` | CHC Machinery rental catalog & booking engine |
-| **Financial Support** | `http://localhost:3000/financial-support` | KCC crop loans & low-interest credit schemes |
-| **Support Application** | `http://localhost:3000/financial-support/detail` | Credit application & subvention calculator |
-| **Application Receipt** | `http://localhost:3000/financial-support/acknowledgement` | Submission confirmation & tracking token |
-| **Crop Insurance** | `http://localhost:3000/insurance` | PMFBY policy matching, claims & premium calculator |
-| **Notifications** | `http://localhost:3000/notifications` | Real-time weather warnings & credit alerts |
-
-### 🧑‍💼 3. Agriculture Officer & Administrator Portal *(Requires `administrator`)*
-| Route | URL Link | Description |
-| :--- | :--- | :--- |
-| **Admin Route Connector**| `http://localhost:3000/admin` | Quick redirect to active administrator dashboard |
-| **Admin Command Center**| `http://localhost:3000/admin/dashboard` | District distress heatmap & high-risk triage |
-| **Officer Dashboard** | `http://localhost:3000/agriculture-officer-dashboard` | Field officer workspace & advisory broadcaster |
-| **District Overview** | `http://localhost:3000/officer-dashboard` | Block-wise monitoring across Mayurbhanj |
-| **High-Risk Directory** | `http://localhost:3000/officer-dashboard/farmers` | Distress scores, crop status & intervention tools |
-| **Government Route** | `http://localhost:3000/government` | Quick redirect to government administration hub |
-| **Government CHC Hub** | `http://localhost:3000/government/dashboard` | State machinery allocation & DBT subsidy stats |
-
-### 🏦 4. Bank Partner Portal *(Requires `bank` or `administrator`)*
-| Route | URL Link | Description |
-| :--- | :--- | :--- |
-| **Bank Route Connector** | `http://localhost:3000/bank` | Quick redirect to bank dashboard |
-| **Bank Portal** | `http://localhost:3000/bank-portal` | Bank partner landing & quick actions |
-| **Bank Dashboard** | `http://localhost:3000/bank-portal/dashboard` | Credit portfolio overview & verification badge |
-| **Credit Facilities** | `http://localhost:3000/bank-portal/facilities` | Manage, publish, draft or suspend credit schemes |
-| **Create Facility** | `http://localhost:3000/bank-portal/facilities/add` | New credit facility creation wizard |
-| **Bank Registration** | `http://localhost:3000/bank-portal/register` | Financial institution verification & onboarding |
-| **Bank Underwriting** | `http://localhost:3000/bank-insurance/dashboard` | Credit risk scoring & PMFBY insurance claims |
+```
+Frontend Routes (32 Pages):
+├─ /                                     -> Root Landing & Role Discovery
+├─ /authentication                       -> Unified Multi-Role Authentication
+├─ /onboarding                           -> Step-by-Step Farmer Registration
+├─ /dashboard                            -> Farmer Command Center & Farm Telemetry
+├─ /crop-monitoring                      -> Real-Time Crop Lifecycle & Soil Health
+├─ /crop-details                         -> Crop Calendar, Soil & Irrigation Guide
+├─ /risk-details                         -> 3-Signal Crop Distress Diagnostics
+├─ /recommended-actions                  -> Agronomic Interventions & Spraying Schedule
+├─ /alternative-crop                     -> Climate-Smart Crop Substitution Engine
+├─ /full-crop-guide                      -> Comprehensive Agronomic Handbook
+├─ /market                               -> APMC Mandi Rates & Net Realization Calculator
+├─ /schemes                              -> Central & State Government Schemes Hub
+├─ /equipment                            -> Subsidized CHC Machinery Rentals
+├─ /financial-support                    -> Kisan Credit Card (KCC) & Credit Discovery
+├─ /financial-support/detail             -> Credit Facility Terms & Application
+├─ /financial-support/acknowledgement    -> Official Loan Application Receipt
+├─ /insurance                            -> PMFBY Crop Insurance & Claims Management
+├─ /farmer-profile                       -> Farmer Dossier, RoR Land Records & Tasks
+├─ /notifications                        -> Push Alerts & Weather Warnings Hub
+├─ /ai-chat                              -> AI Agronomist Interactive Chat
+├─ /officer-dashboard                    -> Extension Officer Command Center
+├─ /officer-dashboard/analytics          -> 10-Section Distress Analytics Engine
+├─ /officer-dashboard/map                -> Spatial District Distress Telemetry Map
+├─ /officer-dashboard/farmers            -> High-Risk Farmers Triage Directory
+├─ /officer-dashboard/interventions      -> Field Visit & Action History Log
+├─ /officer-dashboard/settings           -> Officer Profile, Notifications & Security
+├─ /bank-portal                          -> Bank Partner Portal Landing
+├─ /bank-portal/dashboard                -> Bank Portfolio Overview & Loan Pipeline
+├─ /bank-portal/facilities               -> Credit Products Management
+├─ /bank-portal/facilities/add           -> Add Credit Facility Wizard
+├─ /bank-insurance/dashboard             -> Insurance Underwriting & Claims Adjudication
+└─ /government/dashboard                 -> Government CHC Machinery & DBT Hub
+```
 
 ---
 
 ## ⚡ Backend REST API Endpoints
 
-### 🔐 Authentication & Session
-- `POST /api/auth/login` — Authenticate user (Email/Phone + Password) with signed JWT and cookies
-- `POST /api/auth/register` — Register a new Farmer, Officer, or Bank user
-- `POST /api/auth/logout` — Invalidate user session and clear browser cookies
-- `GET /api/profile` — Fetch current authenticated user profile & farm holdings
-- `GET /api/db-check` — Real-time AWS RDS MySQL health test
+### 1. Officer Analytics (`/api/officer/analytics/*`)
+- `GET /api/officer/analytics/overview` — 4 KPI cards + delta calculations.
+- `GET /api/officer/analytics/distress-trend` — Daily time series + dynamic trend insights.
+- `GET /api/officer/analytics/risk-distribution` — High, Moderate, Low tier counts.
+- `GET /api/officer/analytics/distress-factors` — 3-signal percentage breakdown.
+- `GET /api/officer/analytics/distress-factors/[factor]` — On-demand factor expansion metrics.
+- `GET /api/officer/analytics/heatmap` — Block-level severity aggregation for Mayurbhanj.
+- `GET /api/officer/analytics/weather-stress` — Rainfall variance & expected-vs-actual chart series.
+- `GET /api/officer/analytics/market-stress` — Mandi price declines & dual-stress overlaps.
+- `GET /api/officer/analytics/combined-risk` — Single, double, and all-three signal matrix.
+- `GET /api/officer/analytics/priority-interventions` — Prioritized action queue joined with `loans`.
 
-### 🌾 Farmer & Agronomy
-- `GET /api/farmer/dashboard` — Aggregated telemetry, weather forecast & distress score
-- `POST /api/farmer/register` — Onboard new farmer profile & land details
-- `GET /api/farmer/risk` — Multi-factor distress risk score breakdown
-- `GET /api/farmer/recommendations` — Prescriptive mitigation action items
-- `GET /api/equipment` — Custom Hiring Center (CHC) equipment inventory
-- `POST /api/equipment/[id]/book` — Book machinery rental slot
+### 2. AI & Indic NLP Services (`/api/ai/*`, `/api/translate`, `/api/sarvam`)
+- `POST /api/ai/chat` — Gemini AI agronomist conversational chat.
+- `POST /api/ai/alternative-crop` — Climate-smart crop substitution generator.
+- `POST /api/ai/risk-explanation` — Plain-language risk diagnostics generator.
+- `POST /api/translate` — Sarvam / Indic neural translation.
+- `POST /api/sarvam` — Sarvam AI multi-modal translation, TTS, and language detection.
 
-### 🤖 AI Advisory & Indic NLP (Sarvam AI & Google Translate)
-- `POST /api/ai/chat` — Conversational multilingual agricultural assistant
-- `POST /api/ai/risk-explanation` — Natural language risk diagnostic generator
-- `POST /api/ai/alternative-crop` — Recommendation engine for alternate crops
-- `POST /api/translate` — Indic text translation across 22 scheduled Indian languages
-- `POST /api/sarvam` — Sarvam AI translation & Text-to-Speech (TTS) voice generation
+### 3. Authentication & User Management (`/api/auth/*`, `/api/users/*`)
+- `POST /api/auth/login` — Bcrypt credential check + JWT token issuance.
+- `POST /api/auth/register` — Multi-role user registration with DB persistence.
+- `POST /api/auth/logout` — Cookie invalidation & session cleanup.
+- `POST /api/users/[id]/approve` — Administrator user approval.
+- `POST /api/users/[id]/reject` — Administrator user rejection.
 
-### 🧑‍💼 Extension Officer APIs
-- `GET /api/officer/dashboard` — Jurisdiction statistics & pending field tasks
-- `GET /api/officer/farmers` — Filtered list of monitored farmers under jurisdiction
-- `GET /api/officer/farmers/[farmerId]` — Detailed farmer history & inspection records
-
-### 🏦 Banking & Credit Facilities
-- `GET /api/facilities` — List all active and published financial facilities
-- `POST /api/facilities/create` — Create a new credit facility
-- `PATCH /api/facilities/[facilityId]/status` — Toggle facility lifecycle status
-- `GET /api/banks/[bankId]/dashboard` — Bank-specific portfolio analytics
-- `GET /api/banks/[bankId]/facilities` — Retrieve facilities created by a bank
-
-### 🔔 Notifications & Alerts
-- `GET /api/notifications` — Retrieve user notifications
-- `POST /api/notifications/emit` — Broadcast emergency weather/distress alert
-- `POST /api/notifications/read-all` — Mark all notifications as read
+### 4. Farmer Services & Marketplace (`/api/farmer/*`, `/api/equipment/*`, `/api/facilities/*`)
+- `GET /api/farmer/dashboard` — Live farm telemetry and distress metrics.
+- `GET /api/farmer/risk` — Multi-factor risk scores.
+- `GET /api/farmer/recommendations` — Prescribed agronomic tasks.
+- `GET /api/farmer/[id]` — Farmer dossier and linked land parcels.
+- `GET /api/equipment` — Subsidized machinery catalog.
+- `GET /api/facilities` — Bank loan facilities with subventions.
+- `GET /api/notifications` — Real-time notification feed.
 
 ---
 
-## 🛠️ System Architecture & Technology Stack
+## 🏗️ System Architecture & Technology Stack
 
-```text
-┌────────────────────────────────────────────────────────────────────────┐
-│               Frontend: Next.js 16 (Turbopack) + React 19              │
-│       Tailwind CSS v4 • Framer Motion • Lucide Icons • Recharts        │
-│       Global Floating Language Switcher • Realtime Translation Engine  │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │
-                         (Next.js Proxy Middleware)
-                                    │
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│             Backend API Route Handlers (Edge & Node.js Runtime)        │
-│              JWT Auth • RBAC • Dual Cookies • Input Validation         │
-└───────────────┬───────────────────┬────────────────────┬───────────────┘
-                │                   │                    │
-                ▼                   ▼                    ▼
-┌───────────────────────┐ ┌───────────────────┐ ┌────────────────────────┐
-│  AWS RDS MySQL Pool   │ │   Sarvam AI API   │ │   Google Translate     │
-│  (Connection Manager) │ │ (Indic NLP & TTS) │ │ (Full-DOM Translation) │
-└───────────────────────┘ └───────────────────┘ └────────────────────────┘
-```
-
-- **Framework**: [Next.js 16.3.2](https://nextjs.org/) (App Router, Turbopack)
-- **UI Library**: [React 19](https://reactjs.org/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Motion & Micro-interactions**: [Framer Motion](https://www.framer.com/motion/)
-- **Database Engine**: [AWS RDS MySQL](https://aws.amazon.com/rds/) via singleton connection pool (`mysql2/promise`)
-- **Indic NLP Gateway**: [Sarvam AI](https://www.sarvam.ai/) REST API
-- **Translation Runtime**: Google Translate API + Custom React Localization Context
-- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/) & React Context
+| Layer | Technologies Used | Purpose |
+|---|---|---|
+| **Frontend Framework** | **Next.js 16.3.2 (App Router)** with **React 19.2.8** | Server-side rendering, streaming SSR, and client interactivity. |
+| **Styling & UI** | **Tailwind CSS v4**, Glassmorphism CSS, Lucide React | Clean, modern, responsive interface with customized light & dark modes. |
+| **Data Visualization** | **Recharts**, MapLibre GL | Dynamic charts, area curves, composed trend lines, and geospatial maps. |
+| **AI & NLP** | **Google Gemini 2.5**, **Sarvam AI Indic NLP** | Conversational agronomist, crop recommendations, and Indic voice synthesis. |
+| **Database** | **AWS RDS MySQL 8.0** & **Prisma ORM** | ACID transactional storage for farmers, crops, telemetry, loans, and interventions. |
+| **Authentication** | **Signed JWTs (HS256)**, **bcryptjs**, HTTP Cookies | Secure role-based session and access token handling. |
+| **Realtime** | Socket.IO Client / Server | Live geolocation tracking and instant alert broadcasting. |
 
 ---
 
 ## 🗄️ Database Schema (AWS RDS MySQL)
 
-The system utilizes structured relational tables in AWS RDS MySQL (`sih` database):
+The platform is backed by a fully normalized MySQL relational database hosted on AWS RDS:
 
-1. **`users`**: Authentication credentials, role mapping (`farmer`, `administrator`, `bank`), account status.
-2. **`farmer_profiles` / `farmers`**: Land acreage, soil classification, irrigation type, KYC status, contact info.
-3. **`crops`**: Active crop cycles, sowing date, growth stage, health index, yield forecast.
-4. **`crop_risk` & `risk_scores`**: Multi-dimensional risk ratings (pest, weather, soil moisture).
-5. **`financial_facilities`**: Loan products, subvention percentage, interest rates, tenure, collateral limits.
-6. **`bank_applications` & `loans`**: Loan application tracking and adjudication history.
-7. **`banks` & `bank_users`**: Financial institution directory & authorized credit officers.
-8. **`officer_interventions`**: Scheduled field visits, emergency advisories, calls.
-9. **`notifications`**: Role-based broadcast alerts with priority and read receipts.
-10. **`equipment` & `equipment_rentals`**: Farm machinery specs, hourly pricing, and bookings.
-11. **`mandi_prices`**: Regional APMC commodity pricing feeds.
+```sql
+users (id, email, name, phone, username, password, role, account_status, profile_id, metadata, created_at)
+farmers (id, user_id, name, phone, email, password_hash, district, village, state, land_area, soil_type, loan_amount, loan_due_date, language, created_at)
+farms (id, farmer_id, name, area, soil_type, village, district, state, created_at)
+crops (id, farm_id, farmer_id, name, variety, season, stage, sowing_date, harvest_date, health_status, created_at)
+risk_scores (id, farm_id, farmer_id, rainfall_risk, market_risk, loan_risk, score, calculated_at, created_at)
+crop_risk (id, crop_id, overall_risk, pest_risk, weather_risk, market_risk, soil_moisture_risk, risk_factors, recommendations, created_at)
+loans (id, farmer_id, bank_id, loan_type, principal_amount, outstanding_amount, interest_rate, due_date, status, created_at)
+financial_facilities (id, bank_id, title, category, interest_rate, max_amount, tenure_months, subvention_available, status, created_at)
+equipment (id, name, type, owner, location, price_per_hour, availability, specifications, created_at)
+mandi_prices (id, crop_name, market_name, district, state, modal_price, min_price, max_price, msp, recorded_at)
+weather_observations (id, farm_id, district, temperature, rainfall, forecast_rainfall, humidity, recorded_at)
+notifications (id, farmer_id, title, message, category, priority, is_read, source_feature, created_at)
+officer_interventions (id, farmer_id, officer_id, type, notes, risk_level, status, scheduled_at, created_at)
+```
 
 ---
 
 ## 📁 Folder & Directory Structure
 
-```text
+```
 SIH/
-├── app/                                # Next.js App Router (Pages & API Handlers)
-│   ├── admin/                          # Admin Routes (/admin & /admin/dashboard)
-│   ├── agriculture-officer-dashboard/  # Officer Dashboard View
-│   ├── alternative-crop/               # AI Alternate Crop Recommendation Page
-│   ├── authentication/                 # Login & Registration Portal
-│   ├── bank/                           # Bank Route Connector (/bank & /bank/dashboard)
-│   ├── bank-insurance/dashboard/       # Bank & Insurance Console
-│   ├── bank-portal/                    # Bank Portal, Facilities & Registration
-│   ├── crop-details/                   # Crop Analytics & Calendar Page
-│   ├── crop-monitoring/                # Real-Time Sensor & Satellite Monitoring
-│   ├── dashboard/                      # Main Farmer Dashboard
-│   ├── equipment/                      # Equipment Rental Marketplace
-│   ├── farmer-profile/                 # Farmer Profile Management
-│   ├── financial-support/              # Loan & Grant Applications
-│   ├── full-crop-guide/                # Agricultural Manual
-│   ├── government/                     # Government Routes (/government & /government/dashboard)
-│   ├── insurance/                      # Crop Insurance Portal
-│   ├── market/                         # Mandi Market Rates
-│   ├── notifications/                  # Alerts & Notification Center
-│   ├── officer-dashboard/              # Extension Officer Dashboard & Inspection
-│   ├── onboarding/                     # First-Time User Onboarding
-│   ├── recommended-actions/            # Actionable Advisory Steps
-│   ├── risk-details/                   # Climate & Pest Risk Breakdown
-│   ├── schemes/                        # Government Schemes Hub & Dynamic Details
-│   ├── unauthorized/                   # Security Access Control Warning View
-│   ├── api/                            # Backend REST Route Handlers
-│   ├── layout.tsx                      # Root Application Layout (Google Translate & Global Switcher)
-│   └── page.tsx                        # Home / Landing Page
-│
-├── Bank Portal/                        # Bank UI Components & Modular Views
-├── components/                         # Reusable UI & Domain Components
-│   ├── admin/                          # Admin Dashboard Components
-│   ├── bank-insurance/                 # Bank & Insurance Widgets
-│   ├── dashboard/                      # Farmer Widgets & Charts
-│   ├── farmer/                         # Farmer Management Components
-│   ├── government/                     # Government Hub Components
-│   ├── officer/                        # Officer Inspection Views
-│   ├── LanguageSelector.tsx            # Global Floating & Inlined Language Selector
-│   └── TopLanguageBar.tsx              # Top Language Bar Component
-├── farmer deshboard/                   # Core Farmer Dashboard Visuals & Navbar
-├── farmer profile/                     # Farmer Profile Views & Task Manager
-├── Crop Details/                       # Crop Calendar & Health Metrics
-├── lib/                                # Utilities & Database Connection
-│   ├── db.ts                           # AWS RDS MySQL Connection Pool (Singleton)
-│   ├── smartcrop-auth.ts               # Client Auth & Role Utilities
-│   ├── sarvam-ai.ts                    # Sarvam AI REST Client (Translation & TTS)
-│   └── language-context.tsx            # Multilingual Localization Engine & Route Sync
-├── scripts/                            # Verification & Diagnostic Test Scripts
-├── public/                             # Static Assets, Icons & Images
-├── proxy.ts                            # Next.js 16 Security & RBAC Middleware
-├── package.json                        # Dependencies & Project Scripts
-├── next.config.ts                      # Next.js Build Configuration
-└── README.md                           # Comprehensive Documentation
+├── app/                                 # Next.js 16 App Router pages & API routes
+│   ├── api/                             # Backend REST API routes
+│   │   ├── ai/                          # Gemini AI Chat & Alternative Crop endpoints
+│   │   ├── auth/                        # Login, Register, Logout endpoints
+│   │   ├── farmer/                      # Farmer dashboard & telemetry APIs
+│   │   ├── officer/                     # Officer dashboard & Analytics endpoints
+│   │   │   └── analytics/               # 9 dedicated distress analytics endpoints
+│   │   ├── equipment/                   # Machinery catalog & booking APIs
+│   │   ├── facilities/                  # Credit facility APIs
+│   │   ├── notifications/               # Alert feed & emit APIs
+│   │   └── sarvam/                      # Indic NLP & translation APIs
+│   ├── (portals)/                       # Route groups for Farmer, Officer, Bank, Gov
+│   ├── layout.tsx                       # Root layout with Google Translate & contexts
+│   └── globals.css                      # Global styles and Tailwind tokens
+├── Agriculture officer dashboard/       # Officer portal components & Analytics views
+├── Alternative crop/                    # Alternative crop recommendation views
+├── Bank Portal/                         # Bank credit facility management views
+├── Crop Details/                        # Crop calendar & agronomy views
+├── Crop Monitoring page/                # Real-time crop telemetry views
+├── Equipment page Dashboard/            # Custom Hiring Center rental views
+├── farmer deshboard/                    # Farmer command center views
+├── farmer profile/                      # Farmer dossier, land records & task manager
+├── Financial Support/                   # Kisan Credit Card & loan application views
+├── Full crop guide/                     # Full agronomic production guide
+├── Government equipment schemes/        # Government CHC hub & equipment views
+├── insurance/                           # PMFBY crop insurance views
+├── marketpage/                          # Mandi price feeds & logistics calculator
+├── notification page/                   # Notification center views
+├── components/                          # Reusable components (LanguageSelector, Maps, Nav)
+├── lib/                                 # Shared utilities
+│   ├── db.ts                            # AWS RDS MySQL connection pool & helpers
+│   ├── gemini.ts                        # Server-side Google Gemini AI service
+│   ├── sarvam-ai.ts                     # Sarvam AI Indic NLP client
+│   ├── auth-jwt.ts                      # Cryptographic JWT signing & verification
+│   ├── language-context.tsx             # Multilingual state & 22+ Indic dictionaries
+│   └── cropGuideData.ts                 # Agronomic knowledge base
+├── scripts/                             # Verification, migration & seeding scripts
+├── proxy.ts                             # Next.js security & RBAC proxy middleware
+├── next.config.ts                       # Next.js configuration with security headers
+└── docker-compose.yml                   # Container orchestration config
 ```
 
 ---
@@ -325,20 +312,45 @@ SIH/
 ## 🚀 Getting Started & Local Setup
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) version **20.x** or higher
-- [npm](https://www.npmjs.com/) version **10.x** or higher
+- **Node.js**: v18.18.0 or higher (v20+ recommended)
+- **npm** or **yarn** or **pnpm**
+- **Git**
 
-### 1. Clone & Install Dependencies
-```bash
-git clone <repository-url>
-cd SIH
-npm install
-```
+### Installation Steps
 
-### 2. Configure Environment Variables
-Create a `.env.local` file in the root directory and populate your credentials:
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Suguda-Thakur-Marndi/SIH.git
+   cd SIH
+   ```
 
-```env
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment Variables**:
+   Create `.env.local` in the root directory (refer to [Environment Variables](#-environment-variables-configuration) below).
+
+4. **Start the Development Server**:
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+5. **Build for Production**:
+   ```bash
+   npm run build
+   npm run start
+   ```
+
+---
+
+## 🔑 Environment Variables Configuration
+
+Create a `.env.local` file with the following variables:
+
+```ini
 # AWS RDS MySQL Database Configuration
 DB_HOST=sih-mysql.cley86o8g8vx.eu-north-1.rds.amazonaws.com
 DB_PORT=3306
@@ -346,41 +358,33 @@ DB_USER=admin
 DB_PASSWORD=your_rds_password
 DB_NAME=sih
 
-# Authentication & Secret Keys
-JWT_SECRET=your_jwt_secret_key_here
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+# JWT Authentication Secret
+JWT_SECRET=smartcrop_super_secure_jwt_secret_key_2026
 
-# Sarvam AI Indic NLP Gateway
+# Google Gemini AI API Key
+GEMINI_API_KEY=your_gemini_api_key
+
+# Sarvam AI Indic NLP API Key
 SARVAM_API_KEY=your_sarvam_api_key
 
-# Optional / External BaaS Gateway
-NEXT_PUBLIC_INSFORGE_PROJECT_URL=https://856k6wi6.us-east.insforge.app
-NEXT_PUBLIC_INSFORGE_ANON_KEY=your_anon_key
+# Application Base URL
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
-
-### 3. Run Development Server
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🧪 Verification & Quality Assurance
+## 🧪 Automated Verification & Test Suite
 
-Run the test and build verification suite:
+Run the full end-to-end automated verification script:
 
 ```bash
-# Verify TypeScript Types (0 errors)
-npx tsc --noEmit
-
-# Verify Production Build
-npm run build
+node scripts/test-full-project.mjs
 ```
+
+This tests **all 32 frontend pages**, **all 5 AI & translation engines**, and **all 19 backend REST APIs** with 100% automated assertion reporting.
 
 ---
 
 ## 👥 Contributors & Acknowledgements
 
-Developed with ❤️ for the **Smart India Hackathon (SIH)**.
+Built with ❤️ for **Smart India Hackathon (SIH)** by the **SmartCrop Development Team**. Dedicated to empowering Indian farmers with cutting-edge artificial intelligence, predictive climate telemetry, and seamless financial inclusion.

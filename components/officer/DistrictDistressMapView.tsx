@@ -55,7 +55,7 @@ export default function DistrictDistressMapView() {
       {/* 2. Main Page Layout */}
       <div className="relative z-10 flex flex-col md:flex-row min-h-screen p-3 md:p-5 gap-4">
         {/* Sidebar */}
-        <Sidebar isOpen={sidebarOpen} />
+        <Sidebar isOpen={sidebarOpen} activeKey="distress_map" />
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col space-y-4 overflow-hidden">

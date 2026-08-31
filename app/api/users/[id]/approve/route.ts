@@ -20,6 +20,13 @@ export async function POST(
     );
   }
 
+  try {
+    const { pool } = await import('@/lib/db');
+    await pool.query(`UPDATE users SET account_status = 'active' WHERE id = ?`, [id]);
+  } catch (err: any) {
+    console.warn('[User Approve DB Error]:', err?.message);
+  }
+
   return NextResponse.json({
     userId: id,
     status: "approved",
