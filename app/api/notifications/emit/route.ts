@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
-import { processSmsAlert } from '@/SMS/SMS/lib/notifications/service';
+import { processSmsAlert } from '@/lib/notifications/service';
 
 /**
  * POST /api/notifications/emit — Create a new notification (event-driven fan-in per PRD §1).

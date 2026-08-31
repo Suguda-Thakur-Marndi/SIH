@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendSmsToUser } from '@/SMS/SMS/lib/notifications/service';
+import { sendSmsToUser } from '@/lib/notifications/service';
 
 /**
  * POST /api/notifications/sms — Direct, protected SMS triggering endpoint

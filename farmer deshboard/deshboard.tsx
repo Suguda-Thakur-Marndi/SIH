@@ -32,8 +32,6 @@ export default function SmartCropDashboard() {
 
   // Navigation State
   const [activeNav, setActiveNav] = useState('home');
-  const [hoveredNav, setHoveredNav] = useState<string | null>(null);
-  const [hoveredAction, setHoveredAction] = useState<string | null>(null);
   const [showHeader, setShowHeader] = useState(true);
 
   useEffect(() => {
@@ -63,10 +61,10 @@ export default function SmartCropDashboard() {
 
   const navLinks = [
     { id: 'home', label: t('home', 'Home'), icon: Home, href: '/dashboard' },
-    { id: 'risk', label: t('risk_analysis', 'Risk'), icon: ShieldAlert, href: '/risk-details' },
-    { id: 'advisory', label: t('monitoring', 'Advisory'), icon: Sparkles, href: '/crop-monitoring' },
-    { id: 'market', label: t('market_prices', 'Market'), icon: TrendingUp, href: '/market' },
-    { id: 'schemes', label: t('schemes', 'Schemes'), icon: Landmark, href: '/schemes' },
+    { id: 'risk', label: t('risk_analysis', 'Risk Analysis'), icon: ShieldAlert, href: '/risk-details' },
+    { id: 'advisory', label: t('monitoring', 'Crop Advisory'), icon: Sparkles, href: '/crop-monitoring' },
+    { id: 'market', label: t('market_prices', 'Live Mandi'), icon: TrendingUp, href: '/market' },
+    { id: 'schemes', label: t('schemes', 'Govt Schemes'), icon: Landmark, href: '/schemes' },
   ];
 
   useEffect(() => {
@@ -185,195 +183,86 @@ export default function SmartCropDashboard() {
           }}
         >
           {/* Main Nav Content Row */}
-          <div className="relative z-10 max-w-7xl mx-auto flex items-center justify-between">
+          <div className="relative z-10 max-w-[1400px] mx-auto flex items-center justify-between gap-4">
             {/* Logo */}
-            <a href="#" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-full bg-[#1B1E19] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-300">
-                <Leaf size={16} color="#D6F24B" />
+            <a href="#" className="flex items-center gap-3 group shrink-0">
+              <div className="w-10 h-10 rounded-full bg-[#1B1E19] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-200">
+                <Leaf size={19} color="#D6F24B" />
               </div>
-              <span className="font-semibold text-lg tracking-tight text-[#1B1E19]">Smart Crop</span>
+              <span className="font-bold text-xl tracking-tight text-[#1B1E19]">Smart Crop</span>
             </a>
 
-          {/* Links (Symbols by default, expanding writings on hover / active) */}
-          <div className="flex items-center gap-6 md:gap-8 bg-white/70 p-2 px-5 md:px-7 rounded-full border border-black/6 shadow-sm backdrop-blur-md">
-            {navLinks.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeNav === item.id;
-              const isHovered = hoveredNav === item.id;
+            {/* Links (Spacious Pill with Icon + Label) */}
+            <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3 bg-white/85 p-1.5 px-3 sm:px-4 rounded-full border border-black/8 shadow-md backdrop-blur-xl">
+              {navLinks.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeNav === item.id;
 
-              return (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  onClick={() => setActiveNav(item.id)}
-                  onMouseEnter={() => setHoveredNav(item.id)}
-                  onMouseLeave={() => setHoveredNav(null)}
-                  className={`relative flex items-center justify-center h-11 rounded-full cursor-pointer select-none transition-all duration-300 ${
-                    isExpanded ? 'px-5' : 'w-11'
-                  } ${
-                    isActive
-                      ? 'bg-[#1B1E19] text-[#F7F8F4] shadow-md shadow-black/20'
-                      : 'text-[#6B6F63] hover:text-[#1B1E19] hover:bg-white/80'
-                  }`}
-                  style={{
-                    backdropFilter: 'blur(8px)',
-                  }}
-                >
-                  {/* Icon */}
-                  <Icon
-                    size={19}
-                    className={`transition-colors duration-300 ${
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    onClick={() => setActiveNav(item.id)}
+                    title={item.label}
+                    className={`flex items-center gap-2 h-11 px-3 sm:px-4 md:px-5 rounded-full cursor-pointer select-none text-sm font-semibold transition-colors duration-150 ${
                       isActive
-                        ? 'text-[#D6F24B] drop-shadow-[0_0_8px_rgba(214,242,75,0.6)]'
-                        : 'text-current'
+                        ? 'bg-[#1B1E19] text-[#F7F8F4] shadow-md shadow-black/25'
+                        : 'text-[#55594E] hover:text-[#1B1E19] hover:bg-black/5'
                     }`}
-                  />
+                  >
+                    <Icon size={19} className={isActive ? 'text-[#D6F24B]' : 'text-current'} />
+                    <span className="hidden md:inline whitespace-nowrap">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
 
-                  {/* Glowing Indicator bar for active item */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeNavGlow"
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-0.75 rounded-full bg-[#D6F24B]"
-                      style={{
-                        boxShadow: '0 0 8px #D6F24B, 0 0 14px rgba(214,242,75,0.8)',
-                      }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                </Link>
-              );
-            })}
+            {/* Right Action Icons */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {/* Language Selector Dropdown */}
+              <LanguageSelector variant="glass" />
+
+              {/* Search */}
+              <button
+                className="w-11 h-11 rounded-full flex items-center justify-center bg-white/85 hover:bg-white border border-black/8 shadow-sm cursor-pointer hover:border-black/20 transition-colors"
+                title="Search"
+              >
+                <Search size={19} className="text-[#1B1E19]" />
+              </button>
+
+              {/* Notification Bell */}
+              <button
+                onClick={() => router.push('/notifications')}
+                className="w-11 h-11 rounded-full flex items-center justify-center bg-white/85 hover:bg-white border border-black/8 shadow-sm relative cursor-pointer hover:border-black/20 transition-colors"
+                title={t('alerts', 'Alerts')}
+              >
+                <Bell size={19} className="text-[#1B1E19]" />
+                <div className="absolute top-2.5 right-2.5 w-2.5 h-2.5 rounded-full bg-[#E4572E] ring-2 ring-white"></div>
+              </button>
+
+              {/* Profile User */}
+              <button
+                onClick={() => router.push('/farmer-profile')}
+                className="w-11 h-11 rounded-full flex items-center justify-center bg-white/85 hover:bg-white border border-black/8 shadow-sm relative cursor-pointer hover:border-black/20 transition-colors"
+                title="Profile"
+              >
+                <User size={19} className="text-[#1B1E19]" />
+                <div className="absolute bottom-1 right-1 w-2.5 h-2.5 rounded-full bg-[#D6F24B] border-2 border-white"></div>
+              </button>
+
+              {/* Logout Button */}
+              <button
+                onClick={async () => {
+                  await smartCropAuth.signOut();
+                  router.push('/authentication');
+                }}
+                title="Sign Out to Authentication"
+                className="w-11 h-11 rounded-full flex items-center justify-center bg-red-50 hover:bg-red-100 border border-red-200 shadow-sm relative cursor-pointer transition-colors"
+              >
+                <LogOut size={18} className="text-red-700" />
+              </button>
+            </div>
           </div>
-
-          {/* Right Action Icons (Symbols with Expandable Hover Text) */}
-          <div className="flex items-center gap-3 md:gap-4">
-            {/* Language Selector Dropdown */}
-            <LanguageSelector variant="glass" />
-
-            {/* Search */}
-            <button
-              onMouseEnter={() => setHoveredAction('search')}
-              onMouseLeave={() => setHoveredAction(null)}
-              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm cursor-pointer group ${
-                hoveredAction === 'search' ? 'px-4' : 'w-11'
-              }`}
-            >
-              <motion.div
-                animate={{ y: hoveredAction === 'search' ? -2 : 0 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                className="flex items-center justify-center shrink-0"
-              >
-                <Search size={18} className="text-[#1B1E19] group-hover:scale-105 transition-transform" />
-              </motion.div>
-              <motion.span
-                initial={false}
-                animate={{
-                  width: hoveredAction === 'search' ? 'auto' : 0,
-                  opacity: hoveredAction === 'search' ? 1 : 0,
-                  marginLeft: hoveredAction === 'search' ? 6 : 0,
-                }}
-                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19]"
-              >
-                Search
-              </motion.span>
-            </button>
-
-            {/* Notification Bell */}
-            <button
-              onClick={() => router.push('/notifications')}
-              onMouseEnter={() => setHoveredAction('bell')}
-              onMouseLeave={() => setHoveredAction(null)}
-              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group ${
-                hoveredAction === 'bell' ? 'px-4' : 'w-11'
-              }`}
-            >
-              <motion.div
-                animate={{ y: hoveredAction === 'bell' ? -2 : 0 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                className="relative flex items-center justify-center shrink-0"
-              >
-                <Bell size={18} className="text-[#1B1E19] group-hover:scale-105 transition-transform" />
-                <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#E4572E] ring-2 ring-white animate-pulse"></div>
-              </motion.div>
-              <motion.span
-                initial={false}
-                animate={{
-                  width: hoveredAction === 'bell' ? 'auto' : 0,
-                  opacity: hoveredAction === 'bell' ? 1 : 0,
-                  marginLeft: hoveredAction === 'bell' ? 6 : 0,
-                }}
-                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19]"
-              >
-                {t('alerts', 'Alerts')}
-              </motion.span>
-            </button>
-
-            {/* Profile User */}
-            <button
-              onClick={() => router.push('/farmer-profile')}
-              onMouseEnter={() => setHoveredAction('user')}
-              onMouseLeave={() => setHoveredAction(null)}
-              className={`h-11 rounded-full flex items-center justify-center bg-white/80 hover:bg-white border border-black/6 hover:border-black/15 transition-all duration-300 shadow-sm relative cursor-pointer group ${
-                hoveredAction === 'user' ? 'px-4' : 'w-11'
-              }`}
-            >
-              <motion.div
-                animate={{ y: hoveredAction === 'user' ? -2 : 0 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                className="relative flex items-center justify-center shrink-0"
-              >
-                <User size={18} className="text-[#1B1E19] group-hover:scale-105 transition-transform" />
-                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#D6F24B] border-2 border-white"></div>
-              </motion.div>
-              <motion.span
-                initial={false}
-                animate={{
-                  width: hoveredAction === 'user' ? 'auto' : 0,
-                  opacity: hoveredAction === 'user' ? 1 : 0,
-                  marginLeft: hoveredAction === 'user' ? 6 : 0,
-                }}
-                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-[#1B1E19]"
-              >
-                Profile
-              </motion.span>
-            </button>
-
-            {/* Logout Button */}
-            <button
-              onClick={async () => {
-                await smartCropAuth.signOut();
-                router.push('/authentication');
-              }}
-              title="Sign Out to Authentication"
-              className={`h-11 rounded-full flex items-center justify-center bg-red-50/90 hover:bg-red-100 border border-red-200/80 transition-all duration-300 shadow-sm relative cursor-pointer group ${
-                hoveredAction === 'logout' ? 'px-4' : 'w-11'
-              }`}
-            >
-              <motion.div
-                animate={{ y: hoveredAction === 'logout' ? -2 : 0 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                className="relative flex items-center justify-center shrink-0"
-              >
-                <LogOut size={17} className="text-red-700 group-hover:scale-105 transition-transform" />
-              </motion.div>
-              <motion.span
-                initial={false}
-                animate={{
-                  width: hoveredAction === 'logout' ? 'auto' : 0,
-                  opacity: hoveredAction === 'logout' ? 1 : 0,
-                  marginLeft: hoveredAction === 'logout' ? 6 : 0,
-                }}
-                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className="overflow-hidden whitespace-nowrap text-xs font-semibold text-red-700"
-              >
-                Logout
-              </motion.span>
-            </button>
-          </div>
-        </div>
 
           {/* Bottom Curved Wave Accent Line */}
           <div className="absolute bottom-0 left-0 right-0 h-2.5 pointer-events-none opacity-30">

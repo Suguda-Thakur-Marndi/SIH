@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
-import { processSmsAlert } from '@/SMS/SMS/lib/notifications/service';
-import { getRiskPriority } from '@/SMS/SMS/lib/notifications/rules';
+import { processSmsAlert } from '@/lib/notifications/service';
+import { getRiskPriority } from '@/lib/notifications/rules';
 
 /**
  * POST /api/risk/check-all
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
              try {
                const expl = JSON.parse(scores[0].ai_explanation);
                if (expl && expl.factors) reasons = expl.factors;
-             } catch(e) {
+             } catch {
                reasons = [scores[0].ai_explanation.substring(0, 50)];
              }
           }
