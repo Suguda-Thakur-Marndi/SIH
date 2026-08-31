@@ -738,7 +738,7 @@ export default function FacilityDetailPage() {
                 </div>
 
                 <Link
-                  href={`/financial-support/acknowledgement?id=${encodeURIComponent(facility.id)}`}
+                  href={`/financial-support/acknowledgement?id=${encodeURIComponent(facility.id)}${bankId ? `&bankId=${encodeURIComponent(bankId)}` : ''}`}
                   className="apply-cta-btn"
                   style={{
                     display: 'block',

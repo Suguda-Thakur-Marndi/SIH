@@ -32,9 +32,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        {/* Google Translate Init Script */}
-        <script
+      <head />
+      <body className="min-h-full flex flex-col font-sans">
+        {/* Google Translate: inline init must run before the loader script */}
+        <Script
+          id="google-translate-init"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.googleTranslateElementInit = function() {
@@ -52,13 +55,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             `,
           }}
         />
-        <script
+        <Script
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-          async
-          defer
+          strategy="afterInteractive"
         />
-      </head>
-      <body className="min-h-full flex flex-col font-sans">
         {/* Hidden Google Translate container */}
         <div id="google_translate_element" style={{ display: 'none' }} aria-hidden="true" />
         <ClerkProvider publishableKey={publishableKey}>

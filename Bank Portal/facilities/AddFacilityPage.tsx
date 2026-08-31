@@ -86,7 +86,7 @@ export default function AddFacilityPage() {
     maxAmount: '',
     interestRate: '',
     tenure: '',
-    repayment: 'Monthly',
+    repayment: '',
     processingFee: '',
     otherCharges: '',
     farmerType: [] as string[],

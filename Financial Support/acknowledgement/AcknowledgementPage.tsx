@@ -13,6 +13,7 @@ interface FacilityAckInfo {
 export default function AcknowledgementPage() {
   const params = useSearchParams();
   const id = params?.get('id');
+  const bankId = params?.get('bankId');
 
   const [facility, setFacility] = useState<FacilityAckInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +47,8 @@ export default function AcknowledgementPage() {
     setLoading(true);
     setError(null);
 
-    fetch(`/api/facilities/${encodeURIComponent(id)}`)
+    const bankIdParam = (bankId && bankId.trim() !== '') ? `?bankId=${encodeURIComponent(bankId)}` : '';
+    fetch(`/api/facilities/${encodeURIComponent(id)}${bankIdParam}`)
       .then(async res => {
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
@@ -78,7 +80,7 @@ export default function AcknowledgementPage() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, bankId]);
 
   return (
     <section
