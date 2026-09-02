@@ -22,7 +22,7 @@ try {
   if (typeof __dirname !== 'undefined') {
     currentDir = __dirname;
   }
-} catch (e) {}
+} catch (_e) {}
 
 const envPaths = [
   path.resolve(process.cwd(), '.env.local'),
@@ -44,7 +44,7 @@ async function getGeminiApi() {
   try {
     const gemini = await import('../../lib/gemini').catch(() => null);
     callGeminiApiFn = gemini?.callGeminiApi;
-  } catch (e) {
+  } catch (_e) {
     // Standalone fallback
   }
   return callGeminiApiFn;
@@ -99,7 +99,7 @@ Market Risk: ${record.market_risk}
     });
     
     // Clean up response if needed
-    let cleaned = aiMessage.trim().replace(/^"|"$/g, '');
+    const cleaned = aiMessage.trim().replace(/^"|"$/g, '');
     if (!cleaned) throw new Error("Empty AI response");
     return cleaned;
   } catch (error) {
@@ -116,7 +116,7 @@ export async function runAiDistressAgent() {
   console.log('🤖 SMARTCROP — AI-DRIVEN DB FARMER DISTRESS SMS AGENT');
   console.log('====================================================\n');
 
-  let connection;
+  let _connection;
   let sentCount = 0;
   let checkedCount = 0;
 
@@ -217,7 +217,7 @@ export async function runAiDistressAgent() {
               ) VALUES (?, ?, ?, 'DISTRESS', 'ALERT', 'CRITICAL', 'AI Farm Distress Alert', ?, 'SMS', 'SENT', ?, 'FAST2SMS', ?, NOW(), NOW())`,
               [notificationId, farmer.farmer_id, farmer.farmer_id, smsMessage, score, result.messageId || null]
             );
-          } catch (dbErr: any) {}
+          } catch (_dbErr: any) {}
         } else {
           console.error(`   ❌ Failed to send SMS to Farmer: ${result.error}\n`);
         }

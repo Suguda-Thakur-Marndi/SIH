@@ -2,9 +2,9 @@ import dotenv from 'dotenv';
 import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
-import { buildMessage, buildMessageAsync } from './lib/notifications/templates';
+import { buildMessage } from './lib/notifications/templates';
 import { sendSms, normalizePhoneNumber, maskPhoneNumber } from './lib/notifications/sms';
-import { getRiskPriority, hasThresholdCrossed } from './lib/notifications/rules';
+import { hasThresholdCrossed } from './lib/notifications/rules';
 
 async function runComprehensiveSmsTests() {
   console.log('====================================================');

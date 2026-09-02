@@ -3,6 +3,7 @@
 import React from 'react';
 import { Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, ComposedChart, ReferenceLine } from 'recharts';
 import { useBandwidth } from '@/lib/bandwidth-context';
+import { useLanguage } from '@/lib/language-context';
 
 interface TrendData {
   date: string;
@@ -18,6 +19,8 @@ interface Props {
 
 export function DistressTrendChart({ data, loading, insight }: Props) {
   const { isLiteMode } = useBandwidth();
+  const { t } = useLanguage();
+
   if (loading || !data) {
     return (
       <div className="glass bg-white/80 backdrop-blur-2xl border border-white/80 rounded-3xl p-6 shadow-xl animate-pulse" role="status" aria-busy="true" aria-label="Loading distress trend chart">
@@ -52,8 +55,8 @@ export function DistressTrendChart({ data, loading, insight }: Props) {
     <div className="glass bg-white/85 backdrop-blur-2xl border border-white/80 rounded-3xl p-6 shadow-xl text-[#1A1A1A]">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-2">
         <div>
-          <h3 className="text-xl font-black text-slate-900 tracking-tight mb-0.5">Distress Trend Over Time</h3>
-          <p className="text-slate-600 text-xs font-medium">Average risk score tracking vs high-risk farmer volume</p>
+          <h3 className="text-xl font-black text-slate-900 tracking-tight mb-0.5">{t('distress_trend_title', 'Distress Trend Over Time')}</h3>
+          <p className="text-slate-600 text-xs font-medium">{t('distress_trend_subtitle', 'Average risk score tracking vs high-risk farmer volume')}</p>
         </div>
         {insight && (
           <div className="px-3.5 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full">
@@ -65,17 +68,17 @@ export function DistressTrendChart({ data, loading, insight }: Props) {
       {isLiteMode ? (
         <div className="w-full max-h-72 overflow-y-auto border border-slate-200 rounded-2xl bg-slate-50/80 p-3">
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
-            <span className="text-xs font-bold text-slate-700">Lite Data Table (Low Bandwidth)</span>
+            <span className="text-xs font-bold text-slate-700">{t('lite_data_table', 'Lite Data Table (Low Bandwidth)')}</span>
             <span className="text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-              Critical Threshold: &gt;70
+              {t('critical_threshold_badge', 'Critical Threshold: >70')}
             </span>
           </div>
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="text-slate-500 border-b border-slate-200">
-                <th className="py-1.5 font-semibold">Date</th>
-                <th className="py-1.5 font-semibold text-center">Avg Risk Score</th>
-                <th className="py-1.5 font-semibold text-right">High-Risk Farmers</th>
+                <th className="py-1.5 font-semibold">{t('date', 'Date')}</th>
+                <th className="py-1.5 font-semibold text-center">{t('avg_risk_score', 'Avg Risk Score')}</th>
+                <th className="py-1.5 font-semibold text-right">{t('high_risk_farmers', 'High-Risk Farmers')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 font-mono">
@@ -153,14 +156,14 @@ export function DistressTrendChart({ data, loading, insight }: Props) {
                 stroke="#ef4444" 
                 strokeDasharray="4 4" 
                 strokeWidth={1.5}
-                label={{ value: 'Critical Threshold (>70)', fill: '#dc2626', fontSize: 10, fontWeight: 700, position: 'insideTopLeft' }} 
+                label={{ value: t('critical_threshold_badge', 'Critical Threshold (>70)'), fill: '#dc2626', fontSize: 10, fontWeight: 700, position: 'insideTopLeft' }} 
               />
-              <Bar yAxisId="right" dataKey="highRiskCount" name="High Risk Count" fill="rgba(15,23,42,0.15)" radius={[6, 6, 0, 0]} barSize={18} />
+              <Bar yAxisId="right" dataKey="highRiskCount" name={t('high_risk_count', 'High Risk Count')} fill="rgba(15,23,42,0.15)" radius={[6, 6, 0, 0]} barSize={18} />
               <Area 
                 yAxisId="left"
                 type="monotone" 
                 dataKey="avgScore" 
-                name="Avg Risk Score"
+                name={t('avg_risk_score', 'Avg Risk Score')}
                 stroke="#dc2626" 
                 strokeWidth={3}
                 fillOpacity={1} 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '@/lib/language-context';
 import Image from 'next/image';
 import bgDesktop from '@/Government equipment schemes/img/1(1).png';
 import bgMobile from '@/Agriculture officer dashboard/img/3.png';
@@ -57,6 +58,7 @@ function useSectionFetch<T>(url: string, deps: any[]) {
 
 export function OfficerAnalytics() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { t } = useLanguage();
 
   /* ---- Global Filters ---- */
   const [timeRange, setTimeRange] = useState('7d');
@@ -175,17 +177,17 @@ export function OfficerAnalytics() {
             <div>
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="px-3 py-1 rounded-full text-xs font-black bg-[#1A1A1A] text-[#CFE362] uppercase tracking-wider shadow-sm">
-                  Distress Analytics
+                  {t('analytics', 'Distress Analytics')}
                 </span>
                 <span className="text-slate-600 text-xs font-bold bg-white/80 px-2.5 py-0.5 rounded-full border border-black/5">
-                  Mayurbhanj Jurisdiction
+                  {t('mayurbhanj_district', 'Mayurbhanj Jurisdiction')}
                 </span>
               </div>
               <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900">
-                Agricultural Distress Intelligence Engine
+                {t('distress_intelligence_engine', 'Agricultural Distress Intelligence Engine')}
               </h1>
               <p className="text-slate-700 text-sm font-medium mt-1">
-                Answering four critical signals: <em>Where is distress? How is it changing? Why is it happening? Who needs intervention?</em>
+                {t('analytics_subtitle', 'Answering four critical signals: Where is distress? How is it changing? Why is it happening? Who needs intervention?')}
               </p>
             </div>
 
@@ -195,7 +197,7 @@ export function OfficerAnalytics() {
               title="Reset all filters to defaults"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              <span>Reset Filters</span>
+              <span>{t('reset_filters', 'Reset Filters')}</span>
             </button>
           </div>
 
@@ -204,7 +206,7 @@ export function OfficerAnalytics() {
             {/* District (Locked) */}
             <div className="flex items-center gap-2 bg-white/90 border border-black/10 rounded-2xl px-3.5 py-2 min-w-[150px] shadow-2xs">
               <MapPin className="w-4 h-4 text-emerald-700" />
-              <span className="text-slate-900 text-sm font-bold">Mayurbhanj</span>
+              <span className="text-slate-900 text-sm font-bold">{t('mayurbhanj', 'Mayurbhanj')}</span>
               <span className="text-slate-400 text-xs ml-auto" title="Jurisdiction locked to authenticated officer">🔒</span>
             </div>
 
@@ -216,7 +218,7 @@ export function OfficerAnalytics() {
                 onChange={(e) => setBlock(e.target.value)}
                 className="bg-transparent border-none text-slate-900 text-sm font-bold outline-none w-full cursor-pointer appearance-none"
               >
-                <option value="ALL" className="bg-white text-slate-900">All Blocks</option>
+                <option value="ALL" className="bg-white text-slate-900">{t('all_blocks', 'All Blocks')}</option>
                 <option value="Baripada" className="bg-white text-slate-900">Baripada</option>
                 <option value="Betnoti" className="bg-white text-slate-900">Betnoti</option>
                 <option value="Badasahi" className="bg-white text-slate-900">Badasahi</option>
@@ -236,13 +238,13 @@ export function OfficerAnalytics() {
                 onChange={(e) => setCrop(e.target.value)}
                 className="bg-transparent border-none text-slate-900 text-sm font-bold outline-none w-full cursor-pointer appearance-none"
               >
-                <option value="ALL" className="bg-white text-slate-900">All Crops</option>
-                <option value="Paddy" className="bg-white text-slate-900">Paddy</option>
-                <option value="Groundnut" className="bg-white text-slate-900">Groundnut</option>
-                <option value="Mustard" className="bg-white text-slate-900">Mustard</option>
-                <option value="Maize" className="bg-white text-slate-900">Maize</option>
-                <option value="Vegetables" className="bg-white text-slate-900">Vegetables</option>
-                <option value="Wheat" className="bg-white text-slate-900">Wheat</option>
+                <option value="ALL" className="bg-white text-slate-900">{t('all_crops', 'All Crops')}</option>
+                <option value="Paddy" className="bg-white text-slate-900">{t('paddy', 'Paddy')}</option>
+                <option value="Groundnut" className="bg-white text-slate-900">{t('groundnut', 'Groundnut')}</option>
+                <option value="Mustard" className="bg-white text-slate-900">{t('mustard', 'Mustard')}</option>
+                <option value="Maize" className="bg-white text-slate-900">{t('maize', 'Maize')}</option>
+                <option value="Vegetables" className="bg-white text-slate-900">{t('vegetables', 'Vegetables')}</option>
+                <option value="Wheat" className="bg-white text-slate-900">{t('wheat', 'Wheat')}</option>
               </select>
             </div>
 
@@ -254,10 +256,10 @@ export function OfficerAnalytics() {
                 onChange={(e) => setRiskLevel(e.target.value)}
                 className="bg-transparent border-none text-slate-900 text-sm font-bold outline-none w-full cursor-pointer appearance-none"
               >
-                <option value="ALL" className="bg-white text-slate-900">All Risk Levels</option>
-                <option value="high" className="bg-white text-slate-900">High Risk (&gt;70)</option>
-                <option value="moderate" className="bg-white text-slate-900">Moderate (31–70)</option>
-                <option value="low" className="bg-white text-slate-900">Low Risk (≤30)</option>
+                <option value="ALL" className="bg-white text-slate-900">{t('all_risk_levels', 'All Risk Levels')}</option>
+                <option value="high" className="bg-white text-slate-900">{t('high_risk_farmers', 'High Risk (>70)')}</option>
+                <option value="moderate" className="bg-white text-slate-900">{t('medium_risk_farmers', 'Moderate (31–70)')}</option>
+                <option value="low" className="bg-white text-slate-900">{t('low_risk_farmers', 'Low Risk (≤30)')}</option>
               </select>
             </div>
 
@@ -269,10 +271,10 @@ export function OfficerAnalytics() {
                 onChange={(e) => setRiskFactor(e.target.value)}
                 className="bg-transparent border-none text-slate-900 text-sm font-bold outline-none w-full cursor-pointer appearance-none"
               >
-                <option value="ALL" className="bg-white text-slate-900">All Risk Factors</option>
-                <option value="weather" className="bg-white text-slate-900">Weather / Rainfall</option>
-                <option value="market" className="bg-white text-slate-900">Market Prices</option>
-                <option value="loan" className="bg-white text-slate-900">Loan Proximity</option>
+                <option value="ALL" className="bg-white text-slate-900">{t('all_risk_factors', 'All Risk Factors')}</option>
+                <option value="weather" className="bg-white text-slate-900">{t('weather_rainfall', 'Weather / Rainfall')}</option>
+                <option value="market" className="bg-white text-slate-900">{t('market_prices', 'Market Prices')}</option>
+                <option value="loan" className="bg-white text-slate-900">{t('loan_proximity', 'Loan Proximity')}</option>
               </select>
             </div>
 
@@ -284,9 +286,9 @@ export function OfficerAnalytics() {
                 onChange={(e) => setTimeRange(e.target.value)}
                 className="bg-transparent border-none text-slate-900 text-sm font-bold outline-none w-full cursor-pointer appearance-none"
               >
-                <option value="7d" className="bg-white text-slate-900">Last 7 Days</option>
-                <option value="15d" className="bg-white text-slate-900">Last 15 Days</option>
-                <option value="30d" className="bg-white text-slate-900">Last 30 Days</option>
+                <option value="7d" className="bg-white text-slate-900">{t('last_7_days', 'Last 7 Days')}</option>
+                <option value="15d" className="bg-white text-slate-900">{t('last_15_days', 'Last 15 Days')}</option>
+                <option value="30d" className="bg-white text-slate-900">{t('last_30_days', 'Last 30 Days')}</option>
               </select>
             </div>
           </div>

@@ -6,7 +6,7 @@ async function getDbPool() {
   try {
     const dbModule = await import('../../../../lib/db').catch(() => null);
     poolInstance = dbModule?.pool;
-  } catch (e) {
+  } catch (_e) {
     // Standalone mode
   }
   return poolInstance;

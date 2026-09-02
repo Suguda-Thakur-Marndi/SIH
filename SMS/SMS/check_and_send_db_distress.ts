@@ -80,7 +80,7 @@ export async function checkAndSendDbDistressAlerts() {
   console.log('🔍 SMARTCROP — AUTOMATED DB FARMER DISTRESS SMS CHECK');
   console.log('====================================================\n');
 
-  let connection;
+  let _connection;
   let sentCount = 0;
   let checkedCount = 0;
   let farmersToProcess: FarmerDistressRecord[] = [];

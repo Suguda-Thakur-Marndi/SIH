@@ -1,6 +1,6 @@
 import { NotificationEvent, SendSmsInput, SendSmsResult } from './types';
 import { buildMessageAsync } from './templates';
-import { sendSms, normalizePhoneNumber, maskPhoneNumber } from './sms';
+import { sendSms } from './sms';
 import { hasRecentEquivalentAlert } from './rules';
 import { pool } from '@/lib/db';
 

@@ -41,14 +41,14 @@ export default function Sidebar({ isOpen, activeKey = "command_center" }: { isOp
             <Link
               key={item.key}
               href={item.href ?? "#"}
-              className={`flex items-center gap-2 md:gap-3 py-2 px-3 md:py-2.5 md:px-4 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap ${
+              className={`flex items-center gap-2.5 md:gap-3 py-2 px-3 md:py-2.5 md:px-3.5 rounded-xl text-xs md:text-[13px] font-medium transition-all ${
                 isActive
                   ? "bg-[#CFE362] text-[#1A1A1A] font-semibold shadow-sm"
-                  : "text-[#4A4A4A] hover:bg-white/40 hover:text-[#1A1A1A]"
+                  : "text-[#4A4A4A] hover:bg-white/50 hover:text-[#1A1A1A]"
               }`}
             >
-              <Icon className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
-              <span>{translatedName}</span>
+              <Icon className="w-4 h-4 md:w-4.5 md:h-4.5 shrink-0" />
+              <span className="flex-1 min-w-0 break-words leading-tight">{translatedName}</span>
             </Link>
           );
         })}

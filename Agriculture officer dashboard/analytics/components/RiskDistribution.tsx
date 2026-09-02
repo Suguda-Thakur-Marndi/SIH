@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Users, AlertTriangle, Shield, ChevronRight } from 'lucide-react';
+import { useLanguage } from '@/lib/language-context';
 
 interface Props {
   data: { high: number; moderate: number; low: number } | null;
@@ -11,6 +12,7 @@ interface Props {
 
 export function RiskDistribution({ data, loading }: Props) {
   const router = useRouter();
+  const { t } = useLanguage();
 
   if (loading || !data) {
     return (
@@ -42,8 +44,8 @@ export function RiskDistribution({ data, loading }: Props) {
 
   const bands = [
     {
-      label: 'High Risk',
-      sublabel: 'Score > 70',
+      label: t('high_risk_label', 'High Risk'),
+      sublabel: t('high_risk_sublabel', 'Score > 70'),
       count: data.high,
       percent: total > 0 ? Math.round((data.high / total) * 100) : 0,
       color: 'bg-red-600',
@@ -55,8 +57,8 @@ export function RiskDistribution({ data, loading }: Props) {
       riskLevel: 'high',
     },
     {
-      label: 'Moderate Risk',
-      sublabel: 'Score 31–70',
+      label: t('moderate_risk_label', 'Moderate Risk'),
+      sublabel: t('moderate_risk_sublabel', 'Score 31–70'),
       count: data.moderate,
       percent: total > 0 ? Math.round((data.moderate / total) * 100) : 0,
       color: 'bg-amber-500',
@@ -68,8 +70,8 @@ export function RiskDistribution({ data, loading }: Props) {
       riskLevel: 'moderate',
     },
     {
-      label: 'Low Risk',
-      sublabel: 'Score ≤ 30',
+      label: t('low_risk_label', 'Low Risk'),
+      sublabel: t('low_risk_sublabel', 'Score ≤ 30'),
       count: data.low,
       percent: total > 0 ? Math.round((data.low / total) * 100) : 0,
       color: 'bg-emerald-600',
@@ -86,11 +88,11 @@ export function RiskDistribution({ data, loading }: Props) {
     <div className="glass bg-white/85 backdrop-blur-2xl border border-white/80 rounded-3xl p-6 shadow-xl text-[#1A1A1A]">
       <div className="flex justify-between items-center mb-5">
         <div>
-          <h3 className="text-xl font-black text-slate-900 tracking-tight mb-0.5">Risk Distribution</h3>
-          <p className="text-slate-600 text-xs font-medium">Click a risk tier to filter farmers</p>
+          <h3 className="text-xl font-black text-slate-900 tracking-tight mb-0.5">{t('risk_distribution_title', 'Risk Distribution')}</h3>
+          <p className="text-slate-600 text-xs font-medium">{t('risk_distribution_subtitle', 'Click a risk tier to filter farmers')}</p>
         </div>
         <div className="text-slate-500 text-xs font-bold bg-white/90 px-3 py-1 rounded-full border border-black/5">
-          {total.toLocaleString()} monitored farmers
+          {t('monitored_farmers_count', '{count} monitored farmers', { count: total.toLocaleString() })}
         </div>
       </div>
 
@@ -135,7 +137,7 @@ export function RiskDistribution({ data, loading }: Props) {
 
       {total === 0 && (
         <div className="flex items-center justify-center h-24">
-          <p className="text-slate-400 text-xs font-semibold">No risk data available for this period</p>
+          <p className="text-slate-400 text-xs font-semibold">{t('no_risk_data', 'No risk data available for this period')}</p>
         </div>
       )}
     </div>

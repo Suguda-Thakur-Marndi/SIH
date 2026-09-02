@@ -86,38 +86,44 @@ export const AiAgronomistDrawer: React.FC<AiAgronomistDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white dark:bg-zinc-900 shadow-2xl border-l border-zinc-200 dark:border-zinc-800 flex flex-col">
+    <div
+      className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-emerald-950/85 backdrop-blur-2xl backdrop-saturate-180 shadow-2xl border-l border-emerald-500/30 flex flex-col text-emerald-50"
+      style={{
+        backdropFilter: 'blur(28px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(28px) saturate(180%)',
+      }}
+    >
       {/* Drawer Header */}
-      <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-emerald-900 text-white">
+      <div className="p-4 border-b border-emerald-500/25 flex items-center justify-between bg-gradient-to-r from-emerald-950/95 via-teal-950/90 to-emerald-900/95 backdrop-blur-xl text-white">
         <div className="flex items-center gap-3">
-          <span className="text-2xl p-1.5 rounded-xl bg-white/10">🤖</span>
+          <span className="text-2xl p-1.5 rounded-xl bg-emerald-500/20 border border-emerald-400/30">🤖</span>
           <div>
-            <h3 className="font-bold text-sm">{t('ai_agronomist_specialist', 'AI Agronomist Specialist')}</h3>
-            <p className="text-[11px] text-emerald-200">{t('realtime_advisory_for', 'Real-time advisory for')} {getCropName(currentCrop, t)}</p>
+            <h3 className="font-bold text-sm text-white drop-shadow-xs">{t('ai_agronomist_specialist', 'AI Agronomist Specialist')}</h3>
+            <p className="text-[11px] text-emerald-300/80">{t('realtime_advisory_for', 'Real-time advisory for')} {getCropName(currentCrop, t)}</p>
           </div>
         </div>
-        <button onClick={onClose} className="text-zinc-300 hover:text-white p-1">
+        <button onClick={onClose} className="text-emerald-300/70 hover:text-white hover:bg-emerald-800/40 p-1.5 rounded-lg transition">
           ✕
         </button>
       </div>
 
       {/* Quick Prompt Suggestions */}
-      <div className="p-3 bg-zinc-50 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-700/80 flex flex-wrap gap-1.5">
+      <div className="p-3 bg-emerald-950/50 backdrop-blur-md border-b border-emerald-500/20 flex flex-wrap gap-1.5">
         <button
           onClick={() => handleSend("What is the optimal nitrogen dosage for current vegetative stage?")}
-          className="text-[11px] font-medium bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-600 hover:border-emerald-500 cursor-pointer"
+          className="text-[11px] font-medium bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-100 hover:text-white px-2.5 py-1 rounded-full border border-emerald-500/30 hover:border-emerald-400 cursor-pointer backdrop-blur-md transition-all shadow-xs"
         >
           🧪 {t('prompt_nitrogen', 'Nitrogen Dosage')}
         </button>
         <button
           onClick={() => handleSend("How should I prepare for tomorrow's rain forecast?")}
-          className="text-[11px] font-medium bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-600 hover:border-emerald-500 cursor-pointer"
+          className="text-[11px] font-medium bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-100 hover:text-white px-2.5 py-1 rounded-full border border-emerald-500/30 hover:border-emerald-400 cursor-pointer backdrop-blur-md transition-all shadow-xs"
         >
           🌧️ {t('prompt_rain', 'Rain Prep')}
         </button>
         <button
           onClick={() => handleSend("How to identify leaf folder & stem borer symptoms?")}
-          className="text-[11px] font-medium bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-600 hover:border-emerald-500 cursor-pointer"
+          className="text-[11px] font-medium bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-100 hover:text-white px-2.5 py-1 rounded-full border border-emerald-500/30 hover:border-emerald-400 cursor-pointer backdrop-blur-md transition-all shadow-xs"
         >
           🛡️ {t('prompt_pest', 'Pest Scouting')}
         </button>
@@ -133,13 +139,13 @@ export const AiAgronomistDrawer: React.FC<AiAgronomistDrawerProps> = ({
             <div
               className={`max-w-[88%] p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
                 item.sender === "user"
-                  ? "bg-emerald-600 text-white rounded-br-xs"
-                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 rounded-bl-xs"
+                  ? "bg-gradient-to-r from-emerald-600/90 to-teal-600/90 backdrop-blur-xl text-white border border-emerald-400/40 rounded-br-xs shadow-md"
+                  : "bg-emerald-900/35 backdrop-blur-xl text-emerald-50 border border-emerald-500/25 rounded-bl-xs shadow-sm"
               }`}
             >
               <p className="whitespace-pre-line">{item.message}</p>
             </div>
-            <span className="text-[10px] text-zinc-400 mt-1 px-1">{item.timestamp}</span>
+            <span className="text-[10px] text-emerald-300/60 mt-1 px-1">{item.timestamp}</span>
           </div>
         ))}
       </div>
@@ -150,18 +156,18 @@ export const AiAgronomistDrawer: React.FC<AiAgronomistDrawerProps> = ({
           e.preventDefault();
           handleSend();
         }}
-        className="p-3.5 border-t border-zinc-100 dark:border-zinc-800 flex gap-2"
+        className="p-3.5 border-t border-emerald-500/25 bg-emerald-950/80 backdrop-blur-xl flex gap-2"
       >
         <input
           type="text"
           placeholder={t('ask_crop_placeholder', 'Ask anything about this crop...')}
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          className="flex-1 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="flex-1 bg-emerald-900/35 border border-emerald-500/40 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-emerald-50 placeholder:text-emerald-300/40 focus:outline-none focus:ring-2 focus:ring-emerald-400/70 backdrop-blur-md"
         />
         <button
           type="submit"
-          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer"
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-emerald-950 font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 cursor-pointer transition"
         >
           {t('send_btn', 'Send')}
         </button>

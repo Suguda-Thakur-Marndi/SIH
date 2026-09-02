@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { CloudRain, TrendingDown, CreditCard, ChevronDown, ChevronUp, Loader2, Users, MapPin, Wheat } from 'lucide-react';
+import { useLanguage } from '@/lib/language-context';
 
 interface FactorData {
   name: string;
@@ -34,6 +35,7 @@ export function DistressFactorsExpanded({ data, loading, timeRange, block }: Pro
   const [expandedFactor, setExpandedFactor] = useState<string | null>(null);
   const [detailData, setDetailData] = useState<Record<string, FactorDetail>>({});
   const [detailLoading, setDetailLoading] = useState<Record<string, boolean>>({});
+  const { t } = useLanguage();
 
   const fetchDetail = useCallback(async (factorName: string) => {
     const factorKey = FACTOR_MAP[factorName];
@@ -118,9 +120,9 @@ export function DistressFactorsExpanded({ data, loading, timeRange, block }: Pro
   };
 
   return (
-    <div className="glass bg-white/85 backdrop-blur-2xl border border-white/80 rounded-3xl p-6 shadow-xl h-full text-[#1A1A1A]">
-      <h3 className="text-xl font-black text-slate-900 tracking-tight mb-0.5">Distress Factor Breakdown</h3>
-      <p className="text-slate-600 text-xs font-medium mb-6">Click any factor card to expand affected farmers and agronomic telemetry</p>
+    <div className="glass bg-white/85 backdrop-blur-2xl border border-white/80 rounded-3xl p-6 shadow-xl text-[#1A1A1A]">
+      <h3 className="text-xl font-black text-slate-900 tracking-tight mb-0.5">{t('distress_factor_breakdown_title', 'Distress Factor Breakdown')}</h3>
+      <p className="text-slate-600 text-xs font-medium mb-6">{t('distress_factor_breakdown_desc', 'Click any factor card to expand affected farmers and agronomic telemetry')}</p>
 
       <div className="space-y-4">
         {data.map((factor, idx) => {
@@ -142,7 +144,9 @@ export function DistressFactorsExpanded({ data, loading, timeRange, block }: Pro
                     <div className="p-1.5 rounded-lg bg-white border border-black/5 shadow-2xs">
                       {getIcon(factor.name)}
                     </div>
-                    <span className="text-sm font-extrabold">{factor.name}</span>
+                    <span className="text-sm font-extrabold">
+                      {factor.name.includes('Weather') ? t('weather_rainfall', factor.name) : factor.name.includes('Market') ? t('market_prices', factor.name) : factor.name.includes('Loan') ? t('loan_proximity', factor.name) : factor.name}
+                    </span>
                     {isExpanded
                       ? <ChevronUp className="w-4 h-4 text-slate-500" />
                       : <ChevronDown className="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors" />
@@ -150,7 +154,7 @@ export function DistressFactorsExpanded({ data, loading, timeRange, block }: Pro
                   </div>
                   <div className="text-right">
                     <span className="text-slate-900 font-black text-base block">{factor.percent}%</span>
-                    <span className="text-slate-500 text-xs font-semibold">{factor.value.toLocaleString()} farmers affected</span>
+                    <span className="text-slate-500 text-xs font-semibold">{t('farmers_affected_count', '{value} farmers affected', { value: factor.value.toLocaleString() })}</span>
                   </div>
                 </div>
                 <div className="h-2.5 w-full bg-slate-200/80 rounded-full overflow-hidden p-0.5">
@@ -167,7 +171,7 @@ export function DistressFactorsExpanded({ data, loading, timeRange, block }: Pro
                   {isDetailLoading ? (
                     <div className="flex items-center justify-center py-6 gap-2 text-slate-600">
                       <Loader2 className="w-4 h-4 animate-spin text-emerald-700" />
-                      <span className="text-xs font-bold">Loading factor details...</span>
+                      <span className="text-xs font-bold">{t('loading_factor_details', 'Loading factor details...')}</span>
                     </div>
                   ) : detail ? (
                     <div className="space-y-4">
@@ -175,25 +179,25 @@ export function DistressFactorsExpanded({ data, loading, timeRange, block }: Pro
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div className="text-center bg-white/80 p-2.5 rounded-xl border border-black/5">
                           <div className="flex items-center justify-center gap-1 text-slate-500 text-[11px] font-bold mb-0.5">
-                            <Users className="w-3.5 h-3.5" /> Total Affected
+                            <Users className="w-3.5 h-3.5" /> {t('total_affected', 'Total Affected')}
                           </div>
                           <p className="text-slate-900 font-black text-lg">{detail.farmersAffected}</p>
                         </div>
                         <div className="text-center bg-white/80 p-2.5 rounded-xl border border-black/5">
                           <div className="flex items-center justify-center gap-1 text-slate-500 text-[11px] font-bold mb-0.5">
-                            <TrendingDown className="w-3.5 h-3.5" /> Avg Stress
+                            <TrendingDown className="w-3.5 h-3.5" /> {t('avg_stress', 'Avg Stress')}
                           </div>
                           <p className="text-slate-900 font-black text-lg">{detail.avgDeviation}</p>
                         </div>
                         <div className="text-center bg-white/80 p-2.5 rounded-xl border border-black/5">
                           <div className="flex items-center justify-center gap-1 text-slate-500 text-[11px] font-bold mb-0.5">
-                            <Wheat className="w-3.5 h-3.5" /> Vulnerable Crop
+                            <Wheat className="w-3.5 h-3.5" /> {t('vulnerable_crop', 'Vulnerable Crop')}
                           </div>
                           <p className="text-emerald-900 font-extrabold text-xs mt-1">{detail.mostAffectedCrop}</p>
                         </div>
                         <div className="text-center bg-white/80 p-2.5 rounded-xl border border-black/5">
                           <div className="flex items-center justify-center gap-1 text-slate-500 text-[11px] font-bold mb-0.5">
-                            <MapPin className="w-3.5 h-3.5" /> Priority Block
+                            <MapPin className="w-3.5 h-3.5" /> {t('priority_block', 'Priority Block')}
                           </div>
                           <p className="text-slate-900 font-extrabold text-xs mt-1">{detail.mostAffectedBlock}</p>
                         </div>
@@ -202,7 +206,7 @@ export function DistressFactorsExpanded({ data, loading, timeRange, block }: Pro
                       {/* Farmer List */}
                       {detail.farmers.length > 0 && (
                         <div className="space-y-2 pt-2 border-t border-black/10">
-                          <p className="text-slate-600 text-xs font-bold uppercase tracking-wider">High-Priority Farmers Under This Factor</p>
+                          <p className="text-slate-600 text-xs font-bold uppercase tracking-wider">{t('high_priority_farmers_factor', 'High-Priority Farmers Under This Factor')}</p>
                           {detail.farmers.map((f, i) => (
                             <div key={i} className="flex items-center justify-between py-2 px-3 bg-white/80 rounded-xl border border-black/5">
                               <div className="flex items-center gap-2.5">
@@ -215,7 +219,7 @@ export function DistressFactorsExpanded({ data, loading, timeRange, block }: Pro
                                 </div>
                               </div>
                               <div className="flex items-center gap-2.5">
-                                <span className="text-slate-600 text-xs font-semibold">Factor: {f.factorScore}%</span>
+                                <span className="text-slate-600 text-xs font-semibold">{t('factor_score', 'Factor: {score}%', { score: f.factorScore })}</span>
                                 <span className="text-red-700 font-black text-xs bg-red-100 px-2 py-0.5 rounded-md">{f.score}/100</span>
                               </div>
                             </div>
@@ -224,7 +228,7 @@ export function DistressFactorsExpanded({ data, loading, timeRange, block }: Pro
                       )}
                     </div>
                   ) : (
-                    <p className="text-slate-500 text-xs text-center py-4">No detail telemetry available</p>
+                    <p className="text-slate-500 text-xs text-center py-4">{t('no_detail_telemetry', 'No detail telemetry available')}</p>
                   )}
                 </div>
               )}
@@ -235,7 +239,7 @@ export function DistressFactorsExpanded({ data, loading, timeRange, block }: Pro
 
       {data.length === 0 && (
         <div className="flex items-center justify-center h-40">
-          <p className="text-slate-400 text-xs font-semibold">No distress factors recorded</p>
+          <p className="text-slate-400 text-xs font-semibold">{t('no_distress_factors', 'No distress factors recorded')}</p>
         </div>
       )}
     </div>
