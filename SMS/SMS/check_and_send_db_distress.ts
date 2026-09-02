@@ -18,7 +18,7 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 import { pool } from '../../lib/db';
-import { sendSms } from './lib/notifications/sms';
+import { sendSms } from '../../lib/notifications/sms';
 
 export interface FarmerDistressRecord {
   farmer_id: string;
@@ -88,29 +88,31 @@ export async function checkAndSendDbDistressAlerts() {
   try {
     console.log('📡 Connecting to MySQL database to fetch registered farmers...');
 
-    // Attempt DB query with 4-second timeout
+    // Attempt DB query against `farmers` anchor table (with fallback to `farmer_profiles`)
     const fetchDbPromise = (async () => {
       const conn = await pool.getConnection();
       try {
         const [rows]: any = await conn.query(`
           SELECT 
-            fp.id AS farmer_id,
-            fp.name AS farmer_name,
-            fp.phone AS phone,
-            fp.village AS village,
-            COALESCE(rs.overall_score, 88) AS overall_score,
-            COALESCE(rs.weather_risk, 85) AS weather_risk,
-            COALESCE(rs.pest_risk, 80) AS pest_risk,
-            COALESCE(rs.soil_risk, 75) AS soil_risk,
+            COALESCE(f.id, fp.id) AS farmer_id,
+            COALESCE(f.name, fp.name) AS farmer_name,
+            COALESCE(f.phone, fp.phone) AS phone,
+            COALESCE(f.village, fp.village, 'Baripada') AS village,
+            COALESCE(rs.score, 88) AS overall_score,
+            COALESCE(rs.rainfall_risk, 85) AS weather_risk,
+            80 AS pest_risk,
+            75 AS soil_risk,
             COALESCE(rs.market_risk, 60) AS market_risk,
-            c.name AS crop_name
-          FROM farmer_profiles fp
+            COALESCE(c.name, 'Rice / Paddy') AS crop_name
+          FROM farmers f
+          LEFT JOIN farmer_profiles fp ON f.id = fp.id OR f.id = fp.user_id
           LEFT JOIN (
-            SELECT farmer_id, overall_score, weather_risk, pest_risk, soil_risk, market_risk,
-                   ROW_NUMBER() OVER (PARTITION BY farmer_id ORDER BY calculated_at DESC) as rn
+            SELECT farmer_id, score, rainfall_risk, market_risk, loan_risk,
+                   ROW_NUMBER() OVER (PARTITION BY farmer_id ORDER BY created_at DESC) as rn
             FROM risk_scores
-          ) rs ON fp.id = rs.farmer_id AND rs.rn = 1
-          LEFT JOIN crops c ON fp.id = c.farmer_id AND c.status = 'ACTIVE'
+          ) rs ON f.id = rs.farmer_id AND rs.rn = 1
+          LEFT JOIN crops c ON f.id = c.farmer_id
+          WHERE COALESCE(f.sms_alerts_enabled, 1) = 1
         `);
         return rows;
       } finally {
@@ -118,7 +120,7 @@ export async function checkAndSendDbDistressAlerts() {
       }
     })();
 
-    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 4000));
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000));
 
     const dbRows: any = await Promise.race([fetchDbPromise, timeoutPromise]);
 

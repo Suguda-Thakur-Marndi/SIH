@@ -302,9 +302,24 @@ Frontend Application Routes (59 Next.js App Router Routes):
 
 ## ⚡ Backend REST API Reference
 
-### 1. Distress Scoring & Officer Analytics
-- `GET /api/farmer/risk`: Returns 3-signal computed distress score, breakdown %, primary driver, and 7-day velocity.
+### 1. Farmer Management, Registration & Verification
+- `POST /api/farmer/register`: Secure farmer onboarding, creates linked entries in `farmers`, `users`, `farmer_profiles`, `farms`, `crops`, and initial welcome notification with JWT session token.
+- `POST /api/farmer/login`: Mobile/password credential validation returning signed JWT.
+- `GET /api/farmer/dashboard`: Full multi-telemetry dashboard state (crops, weather, soil, distress score, advisories).
+- `GET /api/farmer/risk`: 3-signal computed distress score, breakdown %, primary driver, and 7-day velocity.
 - `GET /api/farmer/recommendations`: Dynamic irrigation advisory + farm mitigation directives.
+- `GET /api/farmer/check-name`: Search and verify registered farmer by name in AWS RDS with automatic high-priority alert generation.
+- `GET /api/farmer/check-number`: Fast database lookup to verify whether a mobile number exists in AWS RDS MySQL.
+- `GET /api/farmer/all-numbers`: Retrieve all registered farmer contact numbers for bulk communication.
+- `GET /api/farmer/me`: Active session dossier for the authenticated farmer.
+- `GET /api/farmer/[id]`: Individual farmer profile and farm metadata lookup.
+
+### 2. Officer Distress Analytics & Command Center
+- `GET /api/officer/dashboard`: Overview metrics, high-risk triage count, and recent alerts.
+- `GET /api/officer/farmers`: Paginated list of registered farmers with risk scores and filter support.
+- `GET /api/officer/interventions`: History of officer field visits, advisory calls, and SMS dispatches.
+- `POST /api/officer/interventions`: Record a new scheduled field visit or action item.
+- `GET /api/officer/settings`: Officer threshold configuration and notification preferences.
 - `GET /api/officer/analytics/overview`: High-level district distress metrics and totals.
 - `GET /api/officer/analytics/distress-trend`: Historical distress score trajectories over 30 days.
 - `GET /api/officer/analytics/risk-distribution`: Distribution across Low, Medium, High, and Critical bands.
@@ -315,7 +330,7 @@ Frontend Application Routes (59 Next.js App Router Routes):
 - `GET /api/officer/analytics/combined-risk`: Cross-tabulation of compound hazard scenarios.
 - `GET /api/officer/analytics/priority-interventions`: Prioritized queue of farmers needing field visits.
 
-### 2. Module 1 AI Advisory & NLP
+### 3. Module 1 AI Advisory, NLP & Speech
 - `POST /api/ai/chat`: Conversational agronomist answering farmer queries (NVIDIA NIM Llama 3.1 70B).
 - `GET /api/agentic`: Autonomous multi-source advisory synthesis pipeline.
 - `POST /api/ai/alternative-crop`: Climate-resilient crop substitution evaluation.
@@ -324,10 +339,20 @@ Frontend Application Routes (59 Next.js App Router Routes):
 - `POST /api/translate`: Regional text translation engine (Sarvam AI with NVIDIA NIM fallback).
 - `POST /api/sarvam`: Sarvam AI speech-to-text and text-to-speech bridge.
 
-### 3. Notifications & Alert Routing
-- `POST /api/notifications/emit`: Broadcast multi-channel alert.
-- `POST /api/notifications/sms`: Dispatch SMS advisory to farmer mobile.
+### 4. Notifications, SMS & Disaster Alerts
+- `GET /api/notifications`: Retrieve in-app notifications for authenticated user.
+- `POST /api/notifications/emit`: Broadcast multi-channel alert (In-App, SMS).
+- `POST /api/notifications/read-all`: Mark all notifications as read.
+- `POST /api/notifications/sms`: Dispatch SMS advisory to farmer mobile (Fast2SMS / MSG91).
+- `GET /api/disaster/check`: Real-time weather and natural calamity alert check.
 - `POST /api/risk/check-all`: Scheduled cron job to detect distress threshold escalation.
+
+### 5. Authentication, Governance & System Utilities
+- `POST /api/auth/login`: Unified authentication for farmers and officers.
+- `POST /api/auth/register`: Unified registration handler.
+- `POST /api/auth/logout`: Session clearance and cookie revocation.
+- `GET /api/government/dashboard`: Macro agricultural statistics and subsidy metrics.
+- `GET /api/db-check`: Health check and connectivity verification for AWS RDS MySQL.
 
 ---
 
