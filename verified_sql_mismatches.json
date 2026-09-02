@@ -1,26 +1,18 @@
 [
   {
     "file": "app\\api\\ai\\chat\\route.ts",
-    "line": 15,
+    "line": 18,
     "table": "crops",
     "invalidColumn": "area_acres",
-    "sql": ", { limit: 40, windowMs: 60000 }); if (!rateCheck.allowed) { return NextResponse.json( { success: false, error: 'Rate limit exceeded. Please wait a moment before sending another query.' }, { status: 429 } ); } const body = await req.json().catch(() => ({})); const { action, message, imageBase64, mimeType } = body; const context = body.context || {}; // If farmerId is passed, try to fetch real DB farm context if available if (context.farmerId && !context.cropName) { try { const cropRes: any = await query( 'SELECT name, variety, stage, area_acres FROM crops WHERE farmer_id = ? AND status = \"ACTIVE\" LIMIT 1', [context.farmerId] ); if (cropRes && cropRes.length > 0) { context.cropName =",
+    "sql": "}, { status: 429 } ); } const body = await req.json().catch(() => ({})); const { action, message, imageBase64, mimeType } = body; const context = body.context || {}; // If farmerId is passed, try to fetch real DB farm context if available if (context.farmerId && !context.cropName) { try { const cropRes: any = await query( `SELECT c.name, c.stage, fm.area as area_acres FROM crops c LEFT JOIN farms fm ON c.farmer_id = fm.farmer_id WHERE c.farmer_id = ? ORDER BY c.sowing_date DESC LIMIT 1`, [context.farmerId] ); if (cropRes && cropRes.length > 0) { context.cropName = cropRes[0].name; context.stage = cropRes[0].stage; context.areaAcres = cropRes[0].area_acres; } } catch { // Fallback to client-provided context } } // 1. Proactive Check-in Greeting if (action ===",
     "fix": "Column 'area_acres' does not exist on 'crops' table (valid columns: id, farmer_id, name, stage, sowing_date)"
   },
   {
     "file": "app\\api\\ai\\chat\\route.ts",
-    "line": 15,
-    "table": "crops",
-    "invalidColumn": "variety",
-    "sql": ", { limit: 40, windowMs: 60000 }); if (!rateCheck.allowed) { return NextResponse.json( { success: false, error: 'Rate limit exceeded. Please wait a moment before sending another query.' }, { status: 429 } ); } const body = await req.json().catch(() => ({})); const { action, message, imageBase64, mimeType } = body; const context = body.context || {}; // If farmerId is passed, try to fetch real DB farm context if available if (context.farmerId && !context.cropName) { try { const cropRes: any = await query( 'SELECT name, variety, stage, area_acres FROM crops WHERE farmer_id = ? AND status = \"ACTIVE\" LIMIT 1', [context.farmerId] ); if (cropRes && cropRes.length > 0) { context.cropName =",
-    "fix": "Column 'variety' does not exist on 'crops' table (valid columns: id, farmer_id, name, stage, sowing_date)"
-  },
-  {
-    "file": "app\\api\\ai\\chat\\route.ts",
-    "line": 15,
+    "line": 18,
     "table": "crops",
     "invalidColumn": "status",
-    "sql": ", { limit: 40, windowMs: 60000 }); if (!rateCheck.allowed) { return NextResponse.json( { success: false, error: 'Rate limit exceeded. Please wait a moment before sending another query.' }, { status: 429 } ); } const body = await req.json().catch(() => ({})); const { action, message, imageBase64, mimeType } = body; const context = body.context || {}; // If farmerId is passed, try to fetch real DB farm context if available if (context.farmerId && !context.cropName) { try { const cropRes: any = await query( 'SELECT name, variety, stage, area_acres FROM crops WHERE farmer_id = ? AND status = \"ACTIVE\" LIMIT 1', [context.farmerId] ); if (cropRes && cropRes.length > 0) { context.cropName =",
+    "sql": "}, { status: 429 } ); } const body = await req.json().catch(() => ({})); const { action, message, imageBase64, mimeType } = body; const context = body.context || {}; // If farmerId is passed, try to fetch real DB farm context if available if (context.farmerId && !context.cropName) { try { const cropRes: any = await query( `SELECT c.name, c.stage, fm.area as area_acres FROM crops c LEFT JOIN farms fm ON c.farmer_id = fm.farmer_id WHERE c.farmer_id = ? ORDER BY c.sowing_date DESC LIMIT 1`, [context.farmerId] ); if (cropRes && cropRes.length > 0) { context.cropName = cropRes[0].name; context.stage = cropRes[0].stage; context.areaAcres = cropRes[0].area_acres; } } catch { // Fallback to client-provided context } } // 1. Proactive Check-in Greeting if (action ===",
     "fix": "Column 'status' does not exist on 'crops' table (valid columns: id, farmer_id, name, stage, sowing_date)"
   },
   {
@@ -44,7 +36,7 @@
     "line": 55,
     "table": "users",
     "invalidColumn": "phone",
-    "sql": "} }, { status: 400 } ); } const saltRounds = 12; const hashedPassword = await bcrypt.hash(password, saltRounds); const timestamp = Date.now(); const prefix = normalizedRole === 'farmer' ? 'FRM' : normalizedRole === 'bank' ? 'BNK' : 'ADM'; const userId = `${prefix}_${timestamp.toString().slice(-8)}_${Math.floor(100 + Math.random() * 900)}`; const cropId = `CRP_${timestamp.toString().slice(-8)}`; const connection = await pool.getConnection(); try { // 1. Check duplicate user in `users` const [existingUsers]: any = await connection.query( 'SELECT id FROM users WHERE (phone = ? AND ? !=",
+    "sql": "} }, { status: 400 } ); } const saltRounds = 12; const hashedPassword = await bcrypt.hash(password, saltRounds); const timestamp = Date.now(); const prefix = normalizedRole === 'farmer' ? 'FRM' : normalizedRole === 'bank' ? 'BNK' : 'ADM'; const userId = `${prefix}_${timestamp.toString().slice(-8)}_${Math.floor(100 + Math.random() * 900)}`; const cropId = `CRP_${timestamp.toString().slice(-8)}`; const connection = await pool.getConnection(); try { // 1. Check duplicate user in users (email) and farmers (phone) let isDuplicate = false; if (finalEmail) { const [dupEmail]: any = await connection.query( 'SELECT id FROM users WHERE email = ? LIMIT 1;', [finalEmail] ); if (dupEmail && dupEmail.length > 0) isDuplicate = true; } if (!isDuplicate && finalPhone) { const [dupPhone]: any = await connection.query( 'SELECT id FROM farmers WHERE phone = ? LIMIT 1;', [finalPhone] ); if (dupPhone && dupPhone.length > 0) isDuplicate = true; } if (isDuplicate) { return NextResponse.json( { error: { code:",
     "fix": "Column 'phone' does not exist on 'users' table (valid columns: id, email, name, role, profile_id, created_at)"
   },
   {
@@ -52,55 +44,63 @@
     "line": 55,
     "table": "users",
     "invalidColumn": "password",
-    "sql": "} }, { status: 400 } ); } const saltRounds = 12; const hashedPassword = await bcrypt.hash(password, saltRounds); const timestamp = Date.now(); const prefix = normalizedRole === 'farmer' ? 'FRM' : normalizedRole === 'bank' ? 'BNK' : 'ADM'; const userId = `${prefix}_${timestamp.toString().slice(-8)}_${Math.floor(100 + Math.random() * 900)}`; const cropId = `CRP_${timestamp.toString().slice(-8)}`; const connection = await pool.getConnection(); try { // 1. Check duplicate user in `users` const [existingUsers]: any = await connection.query( 'SELECT id FROM users WHERE (phone = ? AND ? !=",
+    "sql": "} }, { status: 400 } ); } const saltRounds = 12; const hashedPassword = await bcrypt.hash(password, saltRounds); const timestamp = Date.now(); const prefix = normalizedRole === 'farmer' ? 'FRM' : normalizedRole === 'bank' ? 'BNK' : 'ADM'; const userId = `${prefix}_${timestamp.toString().slice(-8)}_${Math.floor(100 + Math.random() * 900)}`; const cropId = `CRP_${timestamp.toString().slice(-8)}`; const connection = await pool.getConnection(); try { // 1. Check duplicate user in users (email) and farmers (phone) let isDuplicate = false; if (finalEmail) { const [dupEmail]: any = await connection.query( 'SELECT id FROM users WHERE email = ? LIMIT 1;', [finalEmail] ); if (dupEmail && dupEmail.length > 0) isDuplicate = true; } if (!isDuplicate && finalPhone) { const [dupPhone]: any = await connection.query( 'SELECT id FROM farmers WHERE phone = ? LIMIT 1;', [finalPhone] ); if (dupPhone && dupPhone.length > 0) isDuplicate = true; } if (isDuplicate) { return NextResponse.json( { error: { code:",
     "fix": "Column 'password' does not exist on 'users' table (valid columns: id, email, name, role, profile_id, created_at)"
   },
   {
     "file": "app\\api\\auth\\register\\route.ts",
-    "line": 73,
+    "line": 90,
     "table": "users",
-    "invalidColumn": "username",
-    "sql": ", [finalPhone, finalPhone, finalEmail, finalEmail, finalUsername, finalUsername] ); if (existingUsers && existingUsers.length > 0) { return NextResponse.json( { error: { code: \"duplicate_user\", message: \"An account with this mobile number, email, or username already exists.\" } }, { status: 409 } ); } await connection.beginTransaction(); // 2. Insert into `users` table await connection.query( `INSERT INTO users (id, email, name, role, profile_id) VALUES (?, ?, ?, ?, ?);`, [ userId, finalEmail, finalName, normalizedRole, userId, ] ); // 3. If farmer, insert into `farmers`, `farms`, `crops` if (normalizedRole ===",
-    "fix": "Column 'username' does not exist on 'users' table (valid columns: id, email, name, role, profile_id, created_at)"
+    "invalidColumn": "phone",
+    "sql": "} }, { status: 409 } ); } await connection.beginTransaction(); // 2. Insert into `users` table await connection.query( `INSERT INTO users (id, email, name, role, profile_id) VALUES (?, ?, ?, ?, ?);`, [ userId, finalEmail, finalName, normalizedRole, userId, ] ); // 3. If farmer, insert into `farmers`, `farms`, `crops` if (normalizedRole === 'farmer') { const farmId = `FRM_LAND_${timestamp.toString().slice(-8)}`; await connection.query( `INSERT INTO farmers (id, name, phone, email, password_hash, district, village, language, land_area, state) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`, [ userId, finalName, finalPhone || `943${timestamp.toString().slice(-7)}`, finalEmail, hashedPassword, district || 'Mayurbhanj', village || 'Baripada', preferredLanguage || language || 'or', parsedArea, state || 'Odisha', ] ); await connection.query( `INSERT INTO farms (id, farmer_id, name, latitude, longitude, area, soil_type, village, district) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`, [ farmId, userId, `${finalName}'s Farm`, 21.9324, 86.7351, parsedArea, soilType || 'Red Loamy', village || 'Baripada', district || 'Mayurbhanj', ] ); await connection.query( `INSERT INTO crops (id, farmer_id, name, stage, sowing_date) VALUES (?, ?, ?, ?, ?);`, [ cropId, userId, currentCrop || 'Rice / Paddy', 'Vegetative', sowingDate && /^\\d{4}-\\d{2}-\\d{2}$/.test(sowingDate) ? sowingDate : new Date().toISOString().split('T')[0], ] ); } await connection.commit(); // 4. Issue signed JWT token const accessToken = signJwt({ id: userId, name: finalName, role: normalizedRole as any, email: finalEmail || undefined, mobileNumber: finalPhone || undefined, }); const registeredUser = { id: userId, fullName: finalName, email: finalEmail, mobileNumber: finalPhone, role: normalizedRole, district, village, state, landArea: parsedArea, currentCrop }; const response = NextResponse.json({ success: true, message:",
+    "fix": "Column 'phone' does not exist on 'users' table (valid columns: id, email, name, role, profile_id, created_at)"
+  },
+  {
+    "file": "app\\api\\auth\\register\\route.ts",
+    "line": 90,
+    "table": "farmers",
+    "invalidColumn": "farmer_id",
+    "sql": "} }, { status: 409 } ); } await connection.beginTransaction(); // 2. Insert into `users` table await connection.query( `INSERT INTO users (id, email, name, role, profile_id) VALUES (?, ?, ?, ?, ?);`, [ userId, finalEmail, finalName, normalizedRole, userId, ] ); // 3. If farmer, insert into `farmers`, `farms`, `crops` if (normalizedRole === 'farmer') { const farmId = `FRM_LAND_${timestamp.toString().slice(-8)}`; await connection.query( `INSERT INTO farmers (id, name, phone, email, password_hash, district, village, language, land_area, state) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`, [ userId, finalName, finalPhone || `943${timestamp.toString().slice(-7)}`, finalEmail, hashedPassword, district || 'Mayurbhanj', village || 'Baripada', preferredLanguage || language || 'or', parsedArea, state || 'Odisha', ] ); await connection.query( `INSERT INTO farms (id, farmer_id, name, latitude, longitude, area, soil_type, village, district) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`, [ farmId, userId, `${finalName}'s Farm`, 21.9324, 86.7351, parsedArea, soilType || 'Red Loamy', village || 'Baripada', district || 'Mayurbhanj', ] ); await connection.query( `INSERT INTO crops (id, farmer_id, name, stage, sowing_date) VALUES (?, ?, ?, ?, ?);`, [ cropId, userId, currentCrop || 'Rice / Paddy', 'Vegetative', sowingDate && /^\\d{4}-\\d{2}-\\d{2}$/.test(sowingDate) ? sowingDate : new Date().toISOString().split('T')[0], ] ); } await connection.commit(); // 4. Issue signed JWT token const accessToken = signJwt({ id: userId, name: finalName, role: normalizedRole as any, email: finalEmail || undefined, mobileNumber: finalPhone || undefined, }); const registeredUser = { id: userId, fullName: finalName, email: finalEmail, mobileNumber: finalPhone, role: normalizedRole, district, village, state, landArea: parsedArea, currentCrop }; const response = NextResponse.json({ success: true, message:",
+    "fix": "Column 'farmer_id' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
+  },
+  {
+    "file": "app\\api\\auth\\register\\route.ts",
+    "line": 90,
+    "table": "crops",
+    "invalidColumn": "status",
+    "sql": "} }, { status: 409 } ); } await connection.beginTransaction(); // 2. Insert into `users` table await connection.query( `INSERT INTO users (id, email, name, role, profile_id) VALUES (?, ?, ?, ?, ?);`, [ userId, finalEmail, finalName, normalizedRole, userId, ] ); // 3. If farmer, insert into `farmers`, `farms`, `crops` if (normalizedRole === 'farmer') { const farmId = `FRM_LAND_${timestamp.toString().slice(-8)}`; await connection.query( `INSERT INTO farmers (id, name, phone, email, password_hash, district, village, language, land_area, state) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`, [ userId, finalName, finalPhone || `943${timestamp.toString().slice(-7)}`, finalEmail, hashedPassword, district || 'Mayurbhanj', village || 'Baripada', preferredLanguage || language || 'or', parsedArea, state || 'Odisha', ] ); await connection.query( `INSERT INTO farms (id, farmer_id, name, latitude, longitude, area, soil_type, village, district) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`, [ farmId, userId, `${finalName}'s Farm`, 21.9324, 86.7351, parsedArea, soilType || 'Red Loamy', village || 'Baripada', district || 'Mayurbhanj', ] ); await connection.query( `INSERT INTO crops (id, farmer_id, name, stage, sowing_date) VALUES (?, ?, ?, ?, ?);`, [ cropId, userId, currentCrop || 'Rice / Paddy', 'Vegetative', sowingDate && /^\\d{4}-\\d{2}-\\d{2}$/.test(sowingDate) ? sowingDate : new Date().toISOString().split('T')[0], ] ); } await connection.commit(); // 4. Issue signed JWT token const accessToken = signJwt({ id: userId, name: finalName, role: normalizedRole as any, email: finalEmail || undefined, mobileNumber: finalPhone || undefined, }); const registeredUser = { id: userId, fullName: finalName, email: finalEmail, mobileNumber: finalPhone, role: normalizedRole, district, village, state, landArea: parsedArea, currentCrop }; const response = NextResponse.json({ success: true, message:",
+    "fix": "Column 'status' does not exist on 'crops' table (valid columns: id, farmer_id, name, stage, sowing_date)"
+  },
+  {
+    "file": "app\\api\\farmer\\check-name\\route.ts",
+    "line": 18,
+    "table": "farmers",
+    "invalidColumn": "user_id",
+    "sql": "is required.' } }, { status: 400 } ); } const connection = await pool.getConnection(); try { // Search for exact name (case‑insensitive) in the farmers table const [rows]: any = await connection.query( `SELECT id, name FROM farmers WHERE LOWER(name) = LOWER(?) LIMIT 1;`, [name] ); if (!rows || rows.length === 0) { return NextResponse.json({ found: false }, { status: 200 }); } const farmer = rows[0]; // Insert an alert notification for the found farmer const notifId = `NTF_${Date.now().toString().slice(-8)}`; await connection.query( `INSERT INTO notifications (id, user_id, farmer_id, type, priority, title, message, action_label, action_url) VALUES (?, ?, ?, 'alert', 'high', 'Farmer Found', CONCAT('Farmer ', ?, ' is registered in the system.'), 'View Profile', '/farmer/', ?);`, [notifId, farmer.id, farmer.id, farmer.name, farmer.id] ); return NextResponse.json({ found: true, farmerId: farmer.id, notificationId: notifId }, { status: 200 }); } catch (err: any) { console.error('[Check Name Route Error]:', err); return NextResponse.json( { error: { code: 'server_error', message: err.message || 'Internal server error.' } }, { status: 500 } ); } finally { connection.release(); } } // Allow POST with JSON body as an alternative entry point export async function POST(req: NextRequest) { try { const body = await req.json(); const name = (body?.name || '').trim(); if (!name) { return NextResponse.json( { error: { code: 'validation_error', message: '",
+    "fix": "Column 'user_id' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
+  },
+  {
+    "file": "app\\api\\farmer\\check-name\\route.ts",
+    "line": 18,
+    "table": "farmers",
+    "invalidColumn": "farmer_id",
+    "sql": "is required.' } }, { status: 400 } ); } const connection = await pool.getConnection(); try { // Search for exact name (case‑insensitive) in the farmers table const [rows]: any = await connection.query( `SELECT id, name FROM farmers WHERE LOWER(name) = LOWER(?) LIMIT 1;`, [name] ); if (!rows || rows.length === 0) { return NextResponse.json({ found: false }, { status: 200 }); } const farmer = rows[0]; // Insert an alert notification for the found farmer const notifId = `NTF_${Date.now().toString().slice(-8)}`; await connection.query( `INSERT INTO notifications (id, user_id, farmer_id, type, priority, title, message, action_label, action_url) VALUES (?, ?, ?, 'alert', 'high', 'Farmer Found', CONCAT('Farmer ', ?, ' is registered in the system.'), 'View Profile', '/farmer/', ?);`, [notifId, farmer.id, farmer.id, farmer.name, farmer.id] ); return NextResponse.json({ found: true, farmerId: farmer.id, notificationId: notifId }, { status: 200 }); } catch (err: any) { console.error('[Check Name Route Error]:', err); return NextResponse.json( { error: { code: 'server_error', message: err.message || 'Internal server error.' } }, { status: 500 } ); } finally { connection.release(); } } // Allow POST with JSON body as an alternative entry point export async function POST(req: NextRequest) { try { const body = await req.json(); const name = (body?.name || '').trim(); if (!name) { return NextResponse.json( { error: { code: 'validation_error', message: '",
+    "fix": "Column 'farmer_id' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
   },
   {
     "file": "app\\api\\farmer\\login\\route.ts",
-    "line": 71,
+    "line": 55,
     "table": "users",
     "invalidColumn": "phone",
-    "sql": "if (!authenticatedFarmer) { const [users]: any = await connection.query( `SELECT id, name, email, phone, username, password as password_hash, role, account_status, metadata FROM users WHERE (phone = ? OR (? IS NOT NULL AND email = ?) OR username = ?) AND role IN (",
+    "sql": ", district: f.district, village: f.village, state: f.state, landArea: f.land_area, metadata: { district: f.district, village: f.village, state: f.state, landArea: f.land_area, language: f.language, }, }; } } // 2. If not found in farmers table, check users linked to farmers table if (!authenticatedFarmer) { const [users]: any = await connection.query( `SELECT u.id, u.name, u.email, u.role, f.phone, f.password_hash, f.district, f.village, f.state, f.land_area, f.language FROM users u JOIN farmers f ON (u.profile_id = f.id OR u.id = f.id OR u.email = f.email) WHERE (? IS NOT NULL AND u.email = ?) OR f.phone = ? OR u.id = ? LIMIT 1;`, [cleanEmail, cleanEmail, cleanPhone || identifier, identifier] ); if (users && users.length > 0) { const u = users[0]; let passwordValid = false; if (u.password_hash) { if (u.password_hash.startsWith(",
     "fix": "Column 'phone' does not exist on 'users' table (valid columns: id, email, name, role, profile_id, created_at)"
   },
   {
     "file": "app\\api\\farmer\\login\\route.ts",
-    "line": 71,
-    "table": "users",
-    "invalidColumn": "username",
-    "sql": "if (!authenticatedFarmer) { const [users]: any = await connection.query( `SELECT id, name, email, phone, username, password as password_hash, role, account_status, metadata FROM users WHERE (phone = ? OR (? IS NOT NULL AND email = ?) OR username = ?) AND role IN (",
-    "fix": "Column 'username' does not exist on 'users' table (valid columns: id, email, name, role, profile_id, created_at)"
-  },
-  {
-    "file": "app\\api\\farmer\\login\\route.ts",
-    "line": 71,
-    "table": "users",
-    "invalidColumn": "password",
-    "sql": "if (!authenticatedFarmer) { const [users]: any = await connection.query( `SELECT id, name, email, phone, username, password as password_hash, role, account_status, metadata FROM users WHERE (phone = ? OR (? IS NOT NULL AND email = ?) OR username = ?) AND role IN (",
-    "fix": "Column 'password' does not exist on 'users' table (valid columns: id, email, name, role, profile_id, created_at)"
-  },
-  {
-    "file": "app\\api\\farmer\\login\\route.ts",
-    "line": 71,
-    "table": "users",
-    "invalidColumn": "account_status",
-    "sql": "if (!authenticatedFarmer) { const [users]: any = await connection.query( `SELECT id, name, email, phone, username, password as password_hash, role, account_status, metadata FROM users WHERE (phone = ? OR (? IS NOT NULL AND email = ?) OR username = ?) AND role IN (",
-    "fix": "Column 'account_status' does not exist on 'users' table (valid columns: id, email, name, role, profile_id, created_at)"
-  },
-  {
-    "file": "app\\api\\farmer\\login\\route.ts",
-    "line": 71,
+    "line": 55,
     "table": "users",
     "invalidColumn": "metadata",
-    "sql": "if (!authenticatedFarmer) { const [users]: any = await connection.query( `SELECT id, name, email, phone, username, password as password_hash, role, account_status, metadata FROM users WHERE (phone = ? OR (? IS NOT NULL AND email = ?) OR username = ?) AND role IN (",
+    "sql": ", district: f.district, village: f.village, state: f.state, landArea: f.land_area, metadata: { district: f.district, village: f.village, state: f.state, landArea: f.land_area, language: f.language, }, }; } } // 2. If not found in farmers table, check users linked to farmers table if (!authenticatedFarmer) { const [users]: any = await connection.query( `SELECT u.id, u.name, u.email, u.role, f.phone, f.password_hash, f.district, f.village, f.state, f.land_area, f.language FROM users u JOIN farmers f ON (u.profile_id = f.id OR u.id = f.id OR u.email = f.email) WHERE (? IS NOT NULL AND u.email = ?) OR f.phone = ? OR u.id = ? LIMIT 1;`, [cleanEmail, cleanEmail, cleanPhone || identifier, identifier] ); if (users && users.length > 0) { const u = users[0]; let passwordValid = false; if (u.password_hash) { if (u.password_hash.startsWith(",
     "fix": "Column 'metadata' does not exist on 'users' table (valid columns: id, email, name, role, profile_id, created_at)"
   },
   {
@@ -108,23 +108,15 @@
     "line": 6,
     "table": "users",
     "invalidColumn": "phone",
-    "sql": "]); if (errorResponse) return errorResponse; try { const connection = await pool.getConnection(); try { // 1. Fetch from farmers table const [farmers]: any = await connection.query( `SELECT id, name, phone, email, district, village, language, land_area, state, created_at FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [user.id, user.mobileNumber || user.id] ); let farmerData = farmers && farmers.length > 0 ? farmers[0] : null; // 2. If not found in farmers, check users/farmer_profiles if (!farmerData) { const [users]: any = await connection.query( `SELECT u.id, u.name, u.email, u.phone, u.role, u.account_status, fp.district, fp.village, fp.state, fp.language, fp.land_area FROM users u LEFT JOIN farmer_profiles fp ON u.id = fp.user_id WHERE u.id = ? LIMIT 1;`, [user.id] ); if (users && users.length > 0) { farmerData = users[0]; } } if (!farmerData) { return NextResponse.json({ success: true, authenticated: true, farmer: { id: user.id, name: user.name, fullName: user.name, email: user.email, mobileNumber: user.mobileNumber, role: user.role, }, }); } // Fetch crops & farms const [farms]: any = await connection.query( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [farmerData.id || user.id] ); const [crops]: any = await connection.query( `SELECT id, name, stage, sowing_date, area_acres FROM crops WHERE farmer_id = ?;`, [farmerData.id || user.id] ); return NextResponse.json({ success: true, authenticated: true, farmer: { id: farmerData.id || user.id, name: farmerData.name, fullName: farmerData.name, phone: farmerData.phone, mobileNumber: farmerData.phone, email: farmerData.email, district: farmerData.district ||",
+    "sql": "]); if (errorResponse) return errorResponse; try { const connection = await pool.getConnection(); try { // 1. Fetch from farmers table const [farmers]: any = await connection.query( `SELECT id, name, phone, email, district, village, language, land_area, state, created_at FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [user.id, user.mobileNumber || user.id] ); let farmerData = farmers && farmers.length > 0 ? farmers[0] : null; // 2. If not found in farmers, check users/farmer_profiles if (!farmerData) { const [users]: any = await connection.query( `SELECT u.id, u.name, u.email, u.role, fp.phone, fp.district, fp.village, fp.state, fp.language, fp.land_area FROM users u LEFT JOIN farmer_profiles fp ON u.id = fp.user_id WHERE u.id = ? LIMIT 1;`, [user.id] ); if (users && users.length > 0) { farmerData = users[0]; } } if (!farmerData) { return NextResponse.json({ success: true, authenticated: true, farmer: { id: user.id, name: user.name, fullName: user.name, email: user.email, mobileNumber: user.mobileNumber, role: user.role, }, }); } // Fetch crops & farms const [farms]: any = await connection.query( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [farmerData.id || user.id] ); const [crops]: any = await connection.query( `SELECT id, name, stage, sowing_date FROM crops WHERE farmer_id = ?;`, [farmerData.id || user.id] ); return NextResponse.json({ success: true, authenticated: true, farmer: { id: farmerData.id || user.id, name: farmerData.name, fullName: farmerData.name, phone: farmerData.phone, mobileNumber: farmerData.phone, email: farmerData.email, district: farmerData.district ||",
     "fix": "Column 'phone' does not exist on 'users' table (valid columns: id, email, name, role, profile_id, created_at)"
-  },
-  {
-    "file": "app\\api\\farmer\\me\\route.ts",
-    "line": 6,
-    "table": "users",
-    "invalidColumn": "account_status",
-    "sql": "]); if (errorResponse) return errorResponse; try { const connection = await pool.getConnection(); try { // 1. Fetch from farmers table const [farmers]: any = await connection.query( `SELECT id, name, phone, email, district, village, language, land_area, state, created_at FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [user.id, user.mobileNumber || user.id] ); let farmerData = farmers && farmers.length > 0 ? farmers[0] : null; // 2. If not found in farmers, check users/farmer_profiles if (!farmerData) { const [users]: any = await connection.query( `SELECT u.id, u.name, u.email, u.phone, u.role, u.account_status, fp.district, fp.village, fp.state, fp.language, fp.land_area FROM users u LEFT JOIN farmer_profiles fp ON u.id = fp.user_id WHERE u.id = ? LIMIT 1;`, [user.id] ); if (users && users.length > 0) { farmerData = users[0]; } } if (!farmerData) { return NextResponse.json({ success: true, authenticated: true, farmer: { id: user.id, name: user.name, fullName: user.name, email: user.email, mobileNumber: user.mobileNumber, role: user.role, }, }); } // Fetch crops & farms const [farms]: any = await connection.query( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [farmerData.id || user.id] ); const [crops]: any = await connection.query( `SELECT id, name, stage, sowing_date, area_acres FROM crops WHERE farmer_id = ?;`, [farmerData.id || user.id] ); return NextResponse.json({ success: true, authenticated: true, farmer: { id: farmerData.id || user.id, name: farmerData.name, fullName: farmerData.name, phone: farmerData.phone, mobileNumber: farmerData.phone, email: farmerData.email, district: farmerData.district ||",
-    "fix": "Column 'account_status' does not exist on 'users' table (valid columns: id, email, name, role, profile_id, created_at)"
   },
   {
     "file": "app\\api\\farmer\\me\\route.ts",
     "line": 6,
     "table": "farmers",
     "invalidColumn": "user_id",
-    "sql": "]); if (errorResponse) return errorResponse; try { const connection = await pool.getConnection(); try { // 1. Fetch from farmers table const [farmers]: any = await connection.query( `SELECT id, name, phone, email, district, village, language, land_area, state, created_at FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [user.id, user.mobileNumber || user.id] ); let farmerData = farmers && farmers.length > 0 ? farmers[0] : null; // 2. If not found in farmers, check users/farmer_profiles if (!farmerData) { const [users]: any = await connection.query( `SELECT u.id, u.name, u.email, u.phone, u.role, u.account_status, fp.district, fp.village, fp.state, fp.language, fp.land_area FROM users u LEFT JOIN farmer_profiles fp ON u.id = fp.user_id WHERE u.id = ? LIMIT 1;`, [user.id] ); if (users && users.length > 0) { farmerData = users[0]; } } if (!farmerData) { return NextResponse.json({ success: true, authenticated: true, farmer: { id: user.id, name: user.name, fullName: user.name, email: user.email, mobileNumber: user.mobileNumber, role: user.role, }, }); } // Fetch crops & farms const [farms]: any = await connection.query( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [farmerData.id || user.id] ); const [crops]: any = await connection.query( `SELECT id, name, stage, sowing_date, area_acres FROM crops WHERE farmer_id = ?;`, [farmerData.id || user.id] ); return NextResponse.json({ success: true, authenticated: true, farmer: { id: farmerData.id || user.id, name: farmerData.name, fullName: farmerData.name, phone: farmerData.phone, mobileNumber: farmerData.phone, email: farmerData.email, district: farmerData.district ||",
+    "sql": "]); if (errorResponse) return errorResponse; try { const connection = await pool.getConnection(); try { // 1. Fetch from farmers table const [farmers]: any = await connection.query( `SELECT id, name, phone, email, district, village, language, land_area, state, created_at FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [user.id, user.mobileNumber || user.id] ); let farmerData = farmers && farmers.length > 0 ? farmers[0] : null; // 2. If not found in farmers, check users/farmer_profiles if (!farmerData) { const [users]: any = await connection.query( `SELECT u.id, u.name, u.email, u.role, fp.phone, fp.district, fp.village, fp.state, fp.language, fp.land_area FROM users u LEFT JOIN farmer_profiles fp ON u.id = fp.user_id WHERE u.id = ? LIMIT 1;`, [user.id] ); if (users && users.length > 0) { farmerData = users[0]; } } if (!farmerData) { return NextResponse.json({ success: true, authenticated: true, farmer: { id: user.id, name: user.name, fullName: user.name, email: user.email, mobileNumber: user.mobileNumber, role: user.role, }, }); } // Fetch crops & farms const [farms]: any = await connection.query( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [farmerData.id || user.id] ); const [crops]: any = await connection.query( `SELECT id, name, stage, sowing_date FROM crops WHERE farmer_id = ?;`, [farmerData.id || user.id] ); return NextResponse.json({ success: true, authenticated: true, farmer: { id: farmerData.id || user.id, name: farmerData.name, fullName: farmerData.name, phone: farmerData.phone, mobileNumber: farmerData.phone, email: farmerData.email, district: farmerData.district ||",
     "fix": "Column 'user_id' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
   },
   {
@@ -132,28 +124,12 @@
     "line": 6,
     "table": "farmers",
     "invalidColumn": "farmer_id",
-    "sql": "]); if (errorResponse) return errorResponse; try { const connection = await pool.getConnection(); try { // 1. Fetch from farmers table const [farmers]: any = await connection.query( `SELECT id, name, phone, email, district, village, language, land_area, state, created_at FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [user.id, user.mobileNumber || user.id] ); let farmerData = farmers && farmers.length > 0 ? farmers[0] : null; // 2. If not found in farmers, check users/farmer_profiles if (!farmerData) { const [users]: any = await connection.query( `SELECT u.id, u.name, u.email, u.phone, u.role, u.account_status, fp.district, fp.village, fp.state, fp.language, fp.land_area FROM users u LEFT JOIN farmer_profiles fp ON u.id = fp.user_id WHERE u.id = ? LIMIT 1;`, [user.id] ); if (users && users.length > 0) { farmerData = users[0]; } } if (!farmerData) { return NextResponse.json({ success: true, authenticated: true, farmer: { id: user.id, name: user.name, fullName: user.name, email: user.email, mobileNumber: user.mobileNumber, role: user.role, }, }); } // Fetch crops & farms const [farms]: any = await connection.query( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [farmerData.id || user.id] ); const [crops]: any = await connection.query( `SELECT id, name, stage, sowing_date, area_acres FROM crops WHERE farmer_id = ?;`, [farmerData.id || user.id] ); return NextResponse.json({ success: true, authenticated: true, farmer: { id: farmerData.id || user.id, name: farmerData.name, fullName: farmerData.name, phone: farmerData.phone, mobileNumber: farmerData.phone, email: farmerData.email, district: farmerData.district ||",
+    "sql": "]); if (errorResponse) return errorResponse; try { const connection = await pool.getConnection(); try { // 1. Fetch from farmers table const [farmers]: any = await connection.query( `SELECT id, name, phone, email, district, village, language, land_area, state, created_at FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [user.id, user.mobileNumber || user.id] ); let farmerData = farmers && farmers.length > 0 ? farmers[0] : null; // 2. If not found in farmers, check users/farmer_profiles if (!farmerData) { const [users]: any = await connection.query( `SELECT u.id, u.name, u.email, u.role, fp.phone, fp.district, fp.village, fp.state, fp.language, fp.land_area FROM users u LEFT JOIN farmer_profiles fp ON u.id = fp.user_id WHERE u.id = ? LIMIT 1;`, [user.id] ); if (users && users.length > 0) { farmerData = users[0]; } } if (!farmerData) { return NextResponse.json({ success: true, authenticated: true, farmer: { id: user.id, name: user.name, fullName: user.name, email: user.email, mobileNumber: user.mobileNumber, role: user.role, }, }); } // Fetch crops & farms const [farms]: any = await connection.query( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [farmerData.id || user.id] ); const [crops]: any = await connection.query( `SELECT id, name, stage, sowing_date FROM crops WHERE farmer_id = ?;`, [farmerData.id || user.id] ); return NextResponse.json({ success: true, authenticated: true, farmer: { id: farmerData.id || user.id, name: farmerData.name, fullName: farmerData.name, phone: farmerData.phone, mobileNumber: farmerData.phone, email: farmerData.email, district: farmerData.district ||",
     "fix": "Column 'farmer_id' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
   },
   {
-    "file": "app\\api\\farmer\\me\\route.ts",
-    "line": 6,
-    "table": "farmers",
-    "invalidColumn": "area_acres",
-    "sql": "]); if (errorResponse) return errorResponse; try { const connection = await pool.getConnection(); try { // 1. Fetch from farmers table const [farmers]: any = await connection.query( `SELECT id, name, phone, email, district, village, language, land_area, state, created_at FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [user.id, user.mobileNumber || user.id] ); let farmerData = farmers && farmers.length > 0 ? farmers[0] : null; // 2. If not found in farmers, check users/farmer_profiles if (!farmerData) { const [users]: any = await connection.query( `SELECT u.id, u.name, u.email, u.phone, u.role, u.account_status, fp.district, fp.village, fp.state, fp.language, fp.land_area FROM users u LEFT JOIN farmer_profiles fp ON u.id = fp.user_id WHERE u.id = ? LIMIT 1;`, [user.id] ); if (users && users.length > 0) { farmerData = users[0]; } } if (!farmerData) { return NextResponse.json({ success: true, authenticated: true, farmer: { id: user.id, name: user.name, fullName: user.name, email: user.email, mobileNumber: user.mobileNumber, role: user.role, }, }); } // Fetch crops & farms const [farms]: any = await connection.query( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [farmerData.id || user.id] ); const [crops]: any = await connection.query( `SELECT id, name, stage, sowing_date, area_acres FROM crops WHERE farmer_id = ?;`, [farmerData.id || user.id] ); return NextResponse.json({ success: true, authenticated: true, farmer: { id: farmerData.id || user.id, name: farmerData.name, fullName: farmerData.name, phone: farmerData.phone, mobileNumber: farmerData.phone, email: farmerData.email, district: farmerData.district ||",
-    "fix": "Column 'area_acres' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
-  },
-  {
-    "file": "app\\api\\farmer\\me\\route.ts",
-    "line": 6,
-    "table": "crops",
-    "invalidColumn": "area_acres",
-    "sql": "]); if (errorResponse) return errorResponse; try { const connection = await pool.getConnection(); try { // 1. Fetch from farmers table const [farmers]: any = await connection.query( `SELECT id, name, phone, email, district, village, language, land_area, state, created_at FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [user.id, user.mobileNumber || user.id] ); let farmerData = farmers && farmers.length > 0 ? farmers[0] : null; // 2. If not found in farmers, check users/farmer_profiles if (!farmerData) { const [users]: any = await connection.query( `SELECT u.id, u.name, u.email, u.phone, u.role, u.account_status, fp.district, fp.village, fp.state, fp.language, fp.land_area FROM users u LEFT JOIN farmer_profiles fp ON u.id = fp.user_id WHERE u.id = ? LIMIT 1;`, [user.id] ); if (users && users.length > 0) { farmerData = users[0]; } } if (!farmerData) { return NextResponse.json({ success: true, authenticated: true, farmer: { id: user.id, name: user.name, fullName: user.name, email: user.email, mobileNumber: user.mobileNumber, role: user.role, }, }); } // Fetch crops & farms const [farms]: any = await connection.query( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [farmerData.id || user.id] ); const [crops]: any = await connection.query( `SELECT id, name, stage, sowing_date, area_acres FROM crops WHERE farmer_id = ?;`, [farmerData.id || user.id] ); return NextResponse.json({ success: true, authenticated: true, farmer: { id: farmerData.id || user.id, name: farmerData.name, fullName: farmerData.name, phone: farmerData.phone, mobileNumber: farmerData.phone, email: farmerData.email, district: farmerData.district ||",
-    "fix": "Column 'area_acres' does not exist on 'crops' table (valid columns: id, farmer_id, name, stage, sowing_date)"
-  },
-  {
     "file": "app\\api\\farmer\\register\\route.ts",
-    "line": 68,
+    "line": 69,
     "table": "users",
     "invalidColumn": "phone",
     "sql": "const [existingFarmers]: any = await connection.query( 'SELECT id FROM farmers WHERE phone = ? LIMIT 1;', [cleanPhone] ); const [existingUsers]: any = await connection.query( 'SELECT id FROM users WHERE (email = ? AND ? IS NOT NULL) LIMIT 1;', [farmerEmail, farmerEmail] ); if ((existingFarmers && existingFarmers.length > 0) || (existingUsers && existingUsers.length > 0)) { return NextResponse.json( { error: { code: 'duplicate_phone', message: 'A farmer with this mobile number or email is already registered. Please log in.' } }, { status: 409 } ); } // 3. Hash Password securely with bcrypt const saltRounds = 10; const hashedPassword = await bcrypt.hash(password, saltRounds); // 4. Generate Unique Identifiers const timestamp = Date.now(); const farmerId =",
@@ -161,7 +137,7 @@
   },
   {
     "file": "app\\api\\farmer\\register\\route.ts",
-    "line": 68,
+    "line": 69,
     "table": "users",
     "invalidColumn": "password",
     "sql": "const [existingFarmers]: any = await connection.query( 'SELECT id FROM farmers WHERE phone = ? LIMIT 1;', [cleanPhone] ); const [existingUsers]: any = await connection.query( 'SELECT id FROM users WHERE (email = ? AND ? IS NOT NULL) LIMIT 1;', [farmerEmail, farmerEmail] ); if ((existingFarmers && existingFarmers.length > 0) || (existingUsers && existingUsers.length > 0)) { return NextResponse.json( { error: { code: 'duplicate_phone', message: 'A farmer with this mobile number or email is already registered. Please log in.' } }, { status: 409 } ); } // 3. Hash Password securely with bcrypt const saltRounds = 10; const hashedPassword = await bcrypt.hash(password, saltRounds); // 4. Generate Unique Identifiers const timestamp = Date.now(); const farmerId =",
@@ -172,31 +148,15 @@
     "line": 10,
     "table": "farmers",
     "invalidColumn": "farmer_id",
-    "sql": "}, { status: 400 }); } try { // Direct Query against AWS RDS MySQL with 10s connection timeout const rows = await query<any[]>( `SELECT id, name, phone, email, district, village, language, land_area, loan_amount, loan_due_date, state FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [id, id], 10000 ); if (rows && rows.length > 0) { const f = rows[0]; const farms = await query<any[]>( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [f.id], 10000 ).catch(() => []); const crops = await query<any[]>( `SELECT id, name, stage, sowing_date, area_acres FROM crops WHERE farmer_id = ?;`, [f.id], 10000 ).catch(() => []); return NextResponse.json({ id: f.id, name: f.name, phone: f.phone, email: f.email, district: f.district ||",
+    "sql": "}, { status: 400 }); } try { // Direct Query against AWS RDS MySQL with 10s connection timeout const rows = await query<any[]>( `SELECT id, name, phone, email, district, village, language, land_area, loan_amount, loan_due_date, state FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [id, id], 10000 ); if (rows && rows.length > 0) { const f = rows[0]; const farms = await query<any[]>( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [f.id], 10000 ).catch(() => []); const crops = await query<any[]>( `SELECT id, name, stage, sowing_date FROM crops WHERE farmer_id = ?;`, [f.id], 10000 ).catch(() => []); return NextResponse.json({ id: f.id, name: f.name, phone: f.phone, email: f.email, district: f.district ||",
     "fix": "Column 'farmer_id' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
-  },
-  {
-    "file": "app\\api\\farmer\\[id]\\route.ts",
-    "line": 10,
-    "table": "farmers",
-    "invalidColumn": "area_acres",
-    "sql": "}, { status: 400 }); } try { // Direct Query against AWS RDS MySQL with 10s connection timeout const rows = await query<any[]>( `SELECT id, name, phone, email, district, village, language, land_area, loan_amount, loan_due_date, state FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [id, id], 10000 ); if (rows && rows.length > 0) { const f = rows[0]; const farms = await query<any[]>( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [f.id], 10000 ).catch(() => []); const crops = await query<any[]>( `SELECT id, name, stage, sowing_date, area_acres FROM crops WHERE farmer_id = ?;`, [f.id], 10000 ).catch(() => []); return NextResponse.json({ id: f.id, name: f.name, phone: f.phone, email: f.email, district: f.district ||",
-    "fix": "Column 'area_acres' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
-  },
-  {
-    "file": "app\\api\\farmer\\[id]\\route.ts",
-    "line": 10,
-    "table": "crops",
-    "invalidColumn": "area_acres",
-    "sql": "}, { status: 400 }); } try { // Direct Query against AWS RDS MySQL with 10s connection timeout const rows = await query<any[]>( `SELECT id, name, phone, email, district, village, language, land_area, loan_amount, loan_due_date, state FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [id, id], 10000 ); if (rows && rows.length > 0) { const f = rows[0]; const farms = await query<any[]>( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [f.id], 10000 ).catch(() => []); const crops = await query<any[]>( `SELECT id, name, stage, sowing_date, area_acres FROM crops WHERE farmer_id = ?;`, [f.id], 10000 ).catch(() => []); return NextResponse.json({ id: f.id, name: f.name, phone: f.phone, email: f.email, district: f.district ||",
-    "fix": "Column 'area_acres' does not exist on 'crops' table (valid columns: id, farmer_id, name, stage, sowing_date)"
   },
   {
     "file": "app\\api\\farmer\\[id]\\route.ts",
     "line": 10,
     "table": "crops",
     "invalidColumn": "status",
-    "sql": "}, { status: 400 }); } try { // Direct Query against AWS RDS MySQL with 10s connection timeout const rows = await query<any[]>( `SELECT id, name, phone, email, district, village, language, land_area, loan_amount, loan_due_date, state FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [id, id], 10000 ); if (rows && rows.length > 0) { const f = rows[0]; const farms = await query<any[]>( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [f.id], 10000 ).catch(() => []); const crops = await query<any[]>( `SELECT id, name, stage, sowing_date, area_acres FROM crops WHERE farmer_id = ?;`, [f.id], 10000 ).catch(() => []); return NextResponse.json({ id: f.id, name: f.name, phone: f.phone, email: f.email, district: f.district ||",
+    "sql": "}, { status: 400 }); } try { // Direct Query against AWS RDS MySQL with 10s connection timeout const rows = await query<any[]>( `SELECT id, name, phone, email, district, village, language, land_area, loan_amount, loan_due_date, state FROM farmers WHERE id = ? OR phone = ? LIMIT 1;`, [id, id], 10000 ); if (rows && rows.length > 0) { const f = rows[0]; const farms = await query<any[]>( `SELECT id, name, area, soil_type, village, district, latitude, longitude FROM farms WHERE farmer_id = ?;`, [f.id], 10000 ).catch(() => []); const crops = await query<any[]>( `SELECT id, name, stage, sowing_date FROM crops WHERE farmer_id = ?;`, [f.id], 10000 ).catch(() => []); return NextResponse.json({ id: f.id, name: f.name, phone: f.phone, email: f.email, district: f.district ||",
     "fix": "Column 'status' does not exist on 'crops' table (valid columns: id, farmer_id, name, stage, sowing_date)"
   },
   {
@@ -254,5 +214,53 @@
     "invalidColumn": "phone",
     "sql": "} }, { status: 403 } ); } targetUserId = requestedUserId; } try { const rows = await query<any[]>( `SELECT u.id, u.email, u.name, u.role, u.profile_id, u.created_at, f.phone, f.district, f.village, f.language, f.land_area, f.loan_amount, f.loan_due_date FROM users u LEFT JOIN farmers f ON (u.profile_id = f.id OR u.id = f.id) WHERE u.id = ? OR u.profile_id = ? LIMIT 1`, [targetUserId, targetUserId] ); if (rows && rows.length > 0) { return NextResponse.json({ success: true, data: rows[0], source:",
     "fix": "Column 'phone' does not exist on 'users' table (valid columns: id, email, name, role, profile_id, created_at)"
+  },
+  {
+    "file": "app\\api\\risk\\check-all\\route.ts",
+    "line": 23,
+    "table": "farmers",
+    "invalidColumn": "user_id",
+    "sql": "}, { status: 401 }); } let connection; try { connection = await pool.getConnection(); // Fetch farmers who need risk checking const [farmers]: any = await connection.query(` SELECT id as farmer_id FROM farmers WHERE COALESCE(sms_alerts_enabled, 1) = 1 `).catch(async () => { return pool.query(`SELECT COALESCE(user_id, id) as farmer_id FROM farmer_profiles`); }); const results = []; let alertsSent = 0; for (const farmer of farmers || []) { const fid = farmer.farmer_id || farmer.id; try { const pipeResult = await runFarmerPipeline(fid); results.push(pipeResult); if (pipeResult.smsQueued) alertsSent++; } catch (pipeErr: any) { console.error(`[check-all] Pipeline error for farmer ${fid}:`, pipeErr.message); results.push({ farmerId: fid, error: pipeErr.message }); } } return NextResponse.json({ success: true, totalChecked: results.length, alertsSent, results, }); } catch (error: any) { console.error(",
+    "fix": "Column 'user_id' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
+  },
+  {
+    "file": "app\\api\\risk\\check-all\\route.ts",
+    "line": 23,
+    "table": "farmers",
+    "invalidColumn": "farmer_id",
+    "sql": "}, { status: 401 }); } let connection; try { connection = await pool.getConnection(); // Fetch farmers who need risk checking const [farmers]: any = await connection.query(` SELECT id as farmer_id FROM farmers WHERE COALESCE(sms_alerts_enabled, 1) = 1 `).catch(async () => { return pool.query(`SELECT COALESCE(user_id, id) as farmer_id FROM farmer_profiles`); }); const results = []; let alertsSent = 0; for (const farmer of farmers || []) { const fid = farmer.farmer_id || farmer.id; try { const pipeResult = await runFarmerPipeline(fid); results.push(pipeResult); if (pipeResult.smsQueued) alertsSent++; } catch (pipeErr: any) { console.error(`[check-all] Pipeline error for farmer ${fid}:`, pipeErr.message); results.push({ farmerId: fid, error: pipeErr.message }); } } return NextResponse.json({ success: true, totalChecked: results.length, alertsSent, results, }); } catch (error: any) { console.error(",
+    "fix": "Column 'farmer_id' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
+  },
+  {
+    "file": "lib\\automation\\orchestrator.ts",
+    "line": 75,
+    "table": "farmers",
+    "invalidColumn": "user_id",
+    "sql": "; score?: number; trend?: string; primaryDriver?: string; actionSummary?: string; aiExplanation?: string; notificationId?: string; smsQueued?: boolean; error?: string; } // Main Pipeline Orchestrator export async function runFarmerPipeline(farmerId: string): Promise<PipelineResult> { console.log(`[Orchestrator] Starting 7-step pipeline for farmer: ${farmerId}`); // Step 0: Load farmer profile const farmers = await query<FarmerRow[]>( `SELECT f.id, f.name, f.phone, f.district, f.village, f.state, f.language, fm.latitude, fm.longitude, COALESCE(f.sms_alerts_enabled, 1) as sms_alerts_enabled FROM farmers f LEFT JOIN farms fm ON f.id = fm.farmer_id WHERE f.id = ? OR f.phone = ? LIMIT 1`, [farmerId, farmerId] ).catch(async () => { // Fallback: check farmer_profiles table return query<FarmerRow[]>( `SELECT id, name, phone, district, village, state, language, NULL as latitude, NULL as longitude, 1 as sms_alerts_enabled FROM farmer_profiles WHERE user_id = ? OR id = ? LIMIT 1`, [farmerId, farmerId] ); }); const farmer = farmers[0]; if (!farmer) { throw new Error(`Farmer ${farmerId} not found in database`); } // Hard opt-out kill switch check if (farmer.sms_alerts_enabled === 0) { console.log(`[Orchestrator] Farmer ${farmer.name} has sms_alerts_enabled=0. Pipeline skipped.`); return { farmerId: farmer.id, farmerName: farmer.name, skipped: true, reason:",
+    "fix": "Column 'user_id' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
+  },
+  {
+    "file": "lib\\automation\\orchestrator.ts",
+    "line": 75,
+    "table": "farmers",
+    "invalidColumn": "farmer_id",
+    "sql": "; score?: number; trend?: string; primaryDriver?: string; actionSummary?: string; aiExplanation?: string; notificationId?: string; smsQueued?: boolean; error?: string; } // Main Pipeline Orchestrator export async function runFarmerPipeline(farmerId: string): Promise<PipelineResult> { console.log(`[Orchestrator] Starting 7-step pipeline for farmer: ${farmerId}`); // Step 0: Load farmer profile const farmers = await query<FarmerRow[]>( `SELECT f.id, f.name, f.phone, f.district, f.village, f.state, f.language, fm.latitude, fm.longitude, COALESCE(f.sms_alerts_enabled, 1) as sms_alerts_enabled FROM farmers f LEFT JOIN farms fm ON f.id = fm.farmer_id WHERE f.id = ? OR f.phone = ? LIMIT 1`, [farmerId, farmerId] ).catch(async () => { // Fallback: check farmer_profiles table return query<FarmerRow[]>( `SELECT id, name, phone, district, village, state, language, NULL as latitude, NULL as longitude, 1 as sms_alerts_enabled FROM farmer_profiles WHERE user_id = ? OR id = ? LIMIT 1`, [farmerId, farmerId] ); }); const farmer = farmers[0]; if (!farmer) { throw new Error(`Farmer ${farmerId} not found in database`); } // Hard opt-out kill switch check if (farmer.sms_alerts_enabled === 0) { console.log(`[Orchestrator] Farmer ${farmer.name} has sms_alerts_enabled=0. Pipeline skipped.`); return { farmerId: farmer.id, farmerName: farmer.name, skipped: true, reason:",
+    "fix": "Column 'farmer_id' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
+  },
+  {
+    "file": "lib\\notifications\\service.ts",
+    "line": 49,
+    "table": "farmers",
+    "invalidColumn": "user_id",
+    "sql": "; let smsAlertsEnabled = 1; try { connection = await pool.getConnection(); // 1. First look up directly in `farmers` table (anchor record per DB spec) const [farmers]: any = await connection.query( `SELECT id, phone, language, sms_alerts_enabled FROM farmers WHERE id = ? OR phone = ? LIMIT 1`, [opts.farmerId, opts.farmerId] ); if (farmers && farmers.length > 0) { phone = farmers[0].phone; if (farmers[0].language) preferredLanguage = farmers[0].language; if (farmers[0].sms_alerts_enabled !== undefined && farmers[0].sms_alerts_enabled !== null) { smsAlertsEnabled = Number(farmers[0].sms_alerts_enabled); } } else { // Fallback to farmer_profiles or users const [profiles]: any = await connection.query( `SELECT phone, language FROM farmer_profiles WHERE user_id = ? OR id = ? LIMIT 1`, [opts.farmerId, opts.farmerId] ); if (profiles && profiles.length > 0) { phone = profiles[0].phone; if (profiles[0].language) preferredLanguage = profiles[0].language; } } } catch (dbErr) { console.warn(",
+    "fix": "Column 'user_id' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
+  },
+  {
+    "file": "lib\\notifications\\service.ts",
+    "line": 197,
+    "table": "farmers",
+    "invalidColumn": "user_id",
+    "sql": "; let smsAlertsEnabled = 1; try { connection = await pool.getConnection(); const [farmers]: any = await connection.query( `SELECT id, phone, language, sms_alerts_enabled FROM farmers WHERE id = ? OR phone = ? LIMIT 1`, [opts.userId, opts.userId] ); if (farmers && farmers.length > 0) { phone = farmers[0].phone; if (farmers[0].language) language = farmers[0].language; if (farmers[0].sms_alerts_enabled !== undefined && farmers[0].sms_alerts_enabled !== null) { smsAlertsEnabled = Number(farmers[0].sms_alerts_enabled); } } else { const [profiles]: any = await connection.query( `SELECT phone, language FROM farmer_profiles WHERE user_id = ? OR id = ? LIMIT 1`, [opts.userId, opts.userId] ); if (profiles && profiles.length > 0) { phone = profiles[0].phone; if (profiles[0].language) language = profiles[0].language; } } } catch (dbErr) { console.warn(",
+    "fix": "Column 'user_id' does not exist on 'farmers' table (valid columns: id, name, phone, email, password_hash, district, village, language, land_area, loan_amount, loan_due_date, created_at, state, sms_alerts_enabled)"
   }
 ]

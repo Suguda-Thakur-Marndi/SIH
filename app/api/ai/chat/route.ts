@@ -28,11 +28,16 @@ export async function POST(req: NextRequest) {
     if (context.farmerId && !context.cropName) {
       try {
         const cropRes: any = await query(
-          'SELECT name, variety, stage, area_acres FROM crops WHERE farmer_id = ? AND status = "ACTIVE" LIMIT 1',
+          `SELECT c.name, c.stage, fm.area as area_acres 
+           FROM crops c 
+           LEFT JOIN farms fm ON c.farmer_id = fm.farmer_id 
+           WHERE c.farmer_id = ? 
+           ORDER BY c.sowing_date DESC 
+           LIMIT 1`,
           [context.farmerId]
         );
         if (cropRes && cropRes.length > 0) {
-          context.cropName = `${cropRes[0].name} (${cropRes[0].variety || 'Local'})`;
+          context.cropName = cropRes[0].name;
           context.stage = cropRes[0].stage;
           context.areaAcres = cropRes[0].area_acres;
         }

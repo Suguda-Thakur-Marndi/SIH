@@ -22,7 +22,7 @@ try {
   if (typeof __dirname !== 'undefined') {
     currentDir = __dirname;
   }
-} catch (_e) {}
+} catch {}
 
 const envPaths = [
   path.resolve(process.cwd(), '.env.local'),
@@ -44,7 +44,7 @@ async function getGeminiApi() {
   try {
     const gemini = await import('../../lib/gemini').catch(() => null);
     callGeminiApiFn = gemini?.callGeminiApi;
-  } catch (_e) {
+  } catch {
     // Standalone fallback
   }
   return callGeminiApiFn;
@@ -217,7 +217,7 @@ export async function runAiDistressAgent() {
               ) VALUES (?, ?, ?, 'DISTRESS', 'ALERT', 'CRITICAL', 'AI Farm Distress Alert', ?, 'SMS', 'SENT', ?, 'FAST2SMS', ?, NOW(), NOW())`,
               [notificationId, farmer.farmer_id, farmer.farmer_id, smsMessage, score, result.messageId || null]
             );
-          } catch (_dbErr: any) {}
+          } catch {}
         } else {
           console.error(`   ❌ Failed to send SMS to Farmer: ${result.error}\n`);
         }

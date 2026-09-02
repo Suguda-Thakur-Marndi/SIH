@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { pool } from '@/lib/db';
 import { signJwt } from '@/lib/auth-jwt';
+import { runFarmerPipeline } from '@/lib/automation/orchestrator';
 
 export async function POST(req: NextRequest) {
   try {
@@ -204,6 +205,11 @@ export async function POST(req: NextRequest) {
 
       // Commit transaction
       await connection.commit();
+
+      // Trigger automated location -> live data -> AI prediction -> SMS pipeline in background
+      runFarmerPipeline(farmerId).catch((err: any) => {
+        console.error('[Registration Automation Pipeline Error]:', err.message);
+      });
 
       // Generate signed JWT token
       const accessToken = signJwt({

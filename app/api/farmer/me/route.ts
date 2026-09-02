@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       // 2. If not found in farmers, check users/farmer_profiles
       if (!farmerData) {
         const [users]: any = await connection.query(
-          `SELECT u.id, u.name, u.email, u.phone, u.role, u.account_status,
+          `SELECT u.id, u.name, u.email, u.role, fp.phone,
                   fp.district, fp.village, fp.state, fp.language, fp.land_area
            FROM users u
            LEFT JOIN farmer_profiles fp ON u.id = fp.user_id
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
       );
 
       const [crops]: any = await connection.query(
-        `SELECT id, name, stage, sowing_date, area_acres 
+        `SELECT id, name, stage, sowing_date 
          FROM crops WHERE farmer_id = ?;`,
         [farmerData.id || user.id]
       );

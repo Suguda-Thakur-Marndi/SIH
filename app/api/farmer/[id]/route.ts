@@ -32,7 +32,7 @@ export async function GET(
       ).catch(() => []);
 
       const crops = await query<any[]>(
-        `SELECT id, name, stage, sowing_date, area_acres 
+        `SELECT id, name, stage, sowing_date 
          FROM crops 
          WHERE farmer_id = ?;`,
         [f.id],

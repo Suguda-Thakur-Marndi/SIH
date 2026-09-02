@@ -18,8 +18,9 @@ async function checkAndSendToOfficer() {
 
       // Search by name for Shubham Prakash in users table
       const [rows]: any = await conn.query(`
-        SELECT u.id, u.name, u.phone, u.email, u.role, u.account_status
+        SELECT u.id, u.name, u.email, u.role, f.phone
         FROM users u
+        LEFT JOIN farmers f ON (u.profile_id = f.id OR u.id = f.id)
         WHERE u.name LIKE '%Shubham%' OR u.name LIKE '%Prakash%'
         LIMIT 5
       `);

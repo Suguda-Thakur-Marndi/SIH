@@ -68,14 +68,16 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // 2. If not found in farmers table, check users table for role 'farmer'
+      // 2. If not found in farmers table, check users linked to farmers table
       if (!authenticatedFarmer) {
         const [users]: any = await connection.query(
-          `SELECT id, name, email, phone, username, password as password_hash, role, account_status, metadata
-           FROM users 
-           WHERE (phone = ? OR (? IS NOT NULL AND email = ?) OR username = ?) AND role IN ('farmer')
+          `SELECT u.id, u.name, u.email, u.role,
+                  f.phone, f.password_hash, f.district, f.village, f.state, f.land_area, f.language
+           FROM users u
+           JOIN farmers f ON (u.profile_id = f.id OR u.id = f.id OR u.email = f.email)
+           WHERE (? IS NOT NULL AND u.email = ?) OR f.phone = ? OR u.id = ?
            LIMIT 1;`,
-          [cleanPhone || identifier, cleanEmail, cleanEmail, identifier]
+          [cleanEmail, cleanEmail, cleanPhone || identifier, identifier]
         );
 
         if (users && users.length > 0) {
@@ -91,20 +93,25 @@ export async function POST(req: NextRequest) {
           }
 
           if (passwordValid) {
-            const meta = typeof u.metadata === 'string' ? JSON.parse(u.metadata) : (u.metadata || {});
             authenticatedFarmer = {
               id: u.id,
-              fullName: u.name || u.username || 'Farmer',
-              name: u.name || u.username || 'Farmer',
+              fullName: u.name || 'Farmer',
+              name: u.name || 'Farmer',
               email: u.email || undefined,
               mobileNumber: u.phone || undefined,
               role: 'farmer',
-              accountStatus: u.account_status || 'active',
-              district: meta.district || 'Mayurbhanj',
-              village: meta.village || 'Baripada',
-              state: meta.state || 'Odisha',
-              landArea: meta.landArea || 3.5,
-              metadata: meta,
+              accountStatus: 'active',
+              district: u.district || 'Mayurbhanj',
+              village: u.village || 'Baripada',
+              state: u.state || 'Odisha',
+              landArea: u.land_area || 3.5,
+              metadata: {
+                district: u.district || 'Mayurbhanj',
+                village: u.village || 'Baripada',
+                state: u.state || 'Odisha',
+                landArea: u.land_area || 3.5,
+                language: u.language || 'en',
+              },
             };
           }
         }

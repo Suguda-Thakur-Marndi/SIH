@@ -68,15 +68,26 @@ export async function POST(req: NextRequest) {
     const connection = await pool.getConnection();
 
     try {
-      // 1. Check duplicate user in `users`
-      const [existingUsers]: any = await connection.query(
-        'SELECT id FROM users WHERE (phone = ? AND ? != "") OR (email = ? AND ? IS NOT NULL) OR (username = ? AND ? != "") LIMIT 1;',
-        [finalPhone, finalPhone, finalEmail, finalEmail, finalUsername, finalUsername]
-      );
+      // 1. Check duplicate user in users (email) and farmers (phone)
+      let isDuplicate = false;
+      if (finalEmail) {
+        const [dupEmail]: any = await connection.query(
+          'SELECT id FROM users WHERE email = ? LIMIT 1;',
+          [finalEmail]
+        );
+        if (dupEmail && dupEmail.length > 0) isDuplicate = true;
+      }
+      if (!isDuplicate && finalPhone) {
+        const [dupPhone]: any = await connection.query(
+          'SELECT id FROM farmers WHERE phone = ? LIMIT 1;',
+          [finalPhone]
+        );
+        if (dupPhone && dupPhone.length > 0) isDuplicate = true;
+      }
 
-      if (existingUsers && existingUsers.length > 0) {
+      if (isDuplicate) {
         return NextResponse.json(
-          { error: { code: "duplicate_user", message: "An account with this mobile number, email, or username already exists." } },
+          { error: { code: "duplicate_user", message: "An account with this mobile number or email already exists." } },
           { status: 409 }
         );
       }

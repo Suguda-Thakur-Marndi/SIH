@@ -4,7 +4,7 @@ async function getSarvamTranslator() {
   try {
     const sarvam = await import('../../../../lib/sarvam-ai').catch(() => null);
     translateWithSarvamFn = sarvam?.translateWithSarvam;
-  } catch (_e) {
+  } catch {
     // Standalone fallback
   }
   return translateWithSarvamFn;

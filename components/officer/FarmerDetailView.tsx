@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
-  ArrowLeft, MapPin, ShieldAlert, Sparkles, Send, Droplets, CheckCircle2
+  ArrowLeft, MapPin, ShieldAlert, Sparkles, Send, Droplets, CheckCircle2, RefreshCw
 } from 'lucide-react';
 
 export default function FarmerDetailView({ farmerId }: { farmerId: string }) {
@@ -12,6 +12,8 @@ export default function FarmerDetailView({ farmerId }: { farmerId: string }) {
   const [interventionType, setInterventionType] = useState('FIELD_VISIT');
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [runningPipeline, setRunningPipeline] = useState(false);
+  const [pipelineResult, setPipelineResult] = useState<any>(null);
 
   useEffect(() => {
     fetch(`/api/officer/farmers/${farmerId}`)
@@ -40,6 +42,36 @@ export default function FarmerDetailView({ farmerId }: { farmerId: string }) {
       console.error(err);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleRunPipeline = async () => {
+    setRunningPipeline(true);
+    setPipelineResult(null);
+    try {
+      const res = await fetch('/api/automation/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ farmerId }),
+      });
+      const resJson = await res.json();
+      if (resJson.success && resJson.result) {
+        setPipelineResult(resJson.result);
+        // Refresh local data view
+        setData((prev: any) => ({
+          ...prev,
+          riskProfile: {
+            ...prev.riskProfile,
+            overallScore: resJson.result.score ?? prev.riskProfile.overallScore,
+          },
+        }));
+      } else {
+        setPipelineResult({ error: resJson.error || 'Pipeline run failed' });
+      }
+    } catch (err: any) {
+      setPipelineResult({ error: err.message });
+    } finally {
+      setRunningPipeline(false);
     }
   };
 
@@ -84,6 +116,35 @@ export default function FarmerDetailView({ farmerId }: { farmerId: string }) {
                 <span>{data.phone}</span>
                 <span>&bull;</span>
                 <span>Landholding: {data.landArea}</span>
+              </div>
+
+              <div className="pt-2 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleRunPipeline}
+                  disabled={runningPipeline}
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-[#CFE362] text-xs font-semibold border border-white/10 transition disabled:opacity-50"
+                  title="Pull live location, weather, soil, mandi price and run AI SMS pipeline"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${runningPipeline ? 'animate-spin' : ''}`} />
+                  <span>{runningPipeline ? 'Running 7-Step Pipeline...' : 'Re-run Live Telemetry Pipeline'}</span>
+                </button>
+
+                {pipelineResult && (
+                  <span
+                    className={`text-[11px] font-medium px-2.5 py-1 rounded-lg ${
+                      pipelineResult.error
+                        ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    }`}
+                  >
+                    {pipelineResult.error
+                      ? `Error: ${pipelineResult.error}`
+                      : `Updated: Score ${pipelineResult.score}/100 (${pipelineResult.band})${
+                          pipelineResult.smsQueued ? ' • SMS Dispatched' : ''
+                        }`}
+                  </span>
+                )}
               </div>
             </div>
 

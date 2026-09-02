@@ -47,17 +47,17 @@ export async function processSmsAlert(event: NotificationEvent): Promise<SendSms
     let language = event.language || farmerRows[0]?.language || 'en';
     const smsEnabled = farmerRows[0]?.sms_enabled;
 
-    // Fallback to users table if needed
+    // Fallback to farmers table if needed
     if (!phone) {
-      const [userRows]: any = await connection.query(
-        `SELECT phone, language, sms_enabled, name 
-         FROM users 
-         WHERE id = ? 
+      const [farmerTableRows]: any = await connection.query(
+        `SELECT phone, language, sms_alerts_enabled, name 
+         FROM farmers 
+         WHERE id = ? OR phone = ?
          LIMIT 1`,
-        [event.farmerId]
+        [event.farmerId, event.farmerId]
       );
-      phone = userRows[0]?.phone;
-      if (!language && userRows[0]?.language) language = userRows[0].language;
+      phone = farmerTableRows[0]?.phone;
+      if (!language && farmerTableRows[0]?.language) language = farmerTableRows[0].language;
     }
 
     if (!phone) {

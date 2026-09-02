@@ -1,5 +1,5 @@
 import { pool } from '@/lib/db';
-import { sendSms, normalizePhoneNumber, maskPhoneNumber } from './sms';
+import { sendSms } from './sms';
 import { buildMessage } from './templates';
 import { isEligibleForSms } from './rules';
 import { Priority, NotificationStatus, NotificationType } from './types';
