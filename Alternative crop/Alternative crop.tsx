@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -17,13 +17,48 @@ import {
 import { CROPS_GUIDE_DATA, CropFullGuide } from '@/lib/cropGuideData';
 import CropAudioPlayer from '@/components/CropAudioPlayer';
 import CropAiChatbot from '@/components/CropAiChatbot';
+import { useLanguage } from '@/lib/language-context';
 
 import bgLaptop from './Image/Bg Laptop.png';
 import bgPhone from './Image/Bg phone.png';
 
 export default function AlternativeCrop() {
+  const { t, language, languageCode } = useLanguage();
   const alternativeCropKeys = ['groundnut', 'mustard', 'blackgram'];
   const [selectedCropId, setSelectedCropId] = useState<string>('groundnut');
+  const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [isAiLoading, setIsAiLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function fetchAiRecommendations() {
+      setIsAiLoading(true);
+      try {
+        const res = await fetch('/api/ai/alternative-crop', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            currentCrop: 'Paddy (Swarna MTU 7029)',
+            soilType: 'Red Loamy Soil',
+            waterAvailability: 'Low-Medium (Canal Deficit)',
+            district: 'Mayurbhanj, Odisha',
+            language: language,
+            languageCode: languageCode,
+          }),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data?.recommendations?.[0]?.reasoning) {
+            setAiInsight(json.data.recommendations[0].reasoning);
+          }
+        }
+      } catch (err) {
+        console.warn('[Alternative Crop AI fetch failed]:', err);
+      } finally {
+        setIsAiLoading(false);
+      }
+    }
+    fetchAiRecommendations();
+  }, [language, languageCode]);
 
   const selectedCrop: CropFullGuide =
     CROPS_GUIDE_DATA[selectedCropId] || CROPS_GUIDE_DATA.groundnut;
@@ -74,14 +109,14 @@ export default function AlternativeCrop() {
               className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 bg-white/80 hover:bg-white/95 backdrop-blur-xl px-4 py-2.5 rounded-2xl shadow-sm hover:shadow-md border border-white/80 transition-all duration-200"
             >
               <ArrowLeft className="w-4 h-4 text-emerald-600" />
-              Dashboard
+              {t('back', 'Dashboard')}
             </Link>
             <Link
               href="/full-crop-guide"
               className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-teal-900 bg-teal-50/85 hover:bg-teal-100/95 backdrop-blur-xl px-4 py-2.5 rounded-2xl border border-teal-200/80 shadow-sm transition-all duration-200"
             >
               <BookOpen className="w-4 h-4 text-teal-600" />
-              Paddy &amp; Crop Master Guide
+              {t('agronomic_guide', 'Paddy & Crop Master Guide')}
             </Link>
           </div>
 
@@ -99,14 +134,29 @@ export default function AlternativeCrop() {
           <div className="relative">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100/80 text-emerald-800 rounded-lg text-xs font-black uppercase tracking-wider mb-3 border border-emerald-200/60">
               <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-              AI Climate-Resilience &amp; Net Margin Advisory
+              {t('alternative_crop_advisory', 'AI Climate-Resilience & Net Margin Advisory')}
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
-              Climate-Smart Alternative Crop Recommendations
+              {t('alternative_crops', 'Climate-Smart Alternative Crop Recommendations')}
             </h1>
             <p className="text-slate-700 text-xs sm:text-sm md:text-base mt-2.5 max-w-3xl leading-relaxed font-medium">
               Mitigate rainfall deficit, enrich soil nitrogen, and boost your household profits by transitioning to resilient alternative crops with verified agronomic workflows.
             </p>
+
+            {isAiLoading ? (
+              <div className="mt-4 p-3 bg-white/50 border border-white/80 rounded-2xl flex items-center gap-2 text-xs text-slate-600 font-bold backdrop-blur-sm">
+                <div className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                <span>Synthesizing live NVIDIA NIM crop recommendations...</span>
+              </div>
+            ) : aiInsight ? (
+              <div className="mt-4 p-3.5 bg-emerald-500/15 border border-emerald-500/30 rounded-2xl flex items-start gap-2.5 text-xs text-emerald-950 font-bold backdrop-blur-sm animate-in fade-in duration-300">
+                <Sparkles className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-extrabold text-emerald-900 block mb-0.5">🤖 NVIDIA NIM Agronomic Rationale:</span>
+                  <span>{aiInsight}</span>
+                </div>
+              </div>
+            ) : null}
 
             {/* Workflow Pipeline Graphic */}
             <div className="mt-6 p-3 bg-white/70 backdrop-blur-md rounded-2xl border border-white/90 shadow-inner flex items-center justify-between overflow-x-auto gap-2 text-xs font-extrabold text-slate-700 no-scrollbar">

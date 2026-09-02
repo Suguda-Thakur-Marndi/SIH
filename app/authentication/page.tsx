@@ -5,14 +5,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, Sprout } from 'lucide-react';
-import { useUser } from '@clerk/nextjs';
 import LanguageSelector from '@/components/LanguageSelector';
 import Logo from './components/Logo';
 import LoginForm from './components/LoginForm';
 import RoleSelector from './components/RoleSelector';
 import FarmerRegisterForm from './components/FarmerRegisterForm';
 import AdminRegisterForm from './components/AdminRegisterForm';
-import BankRegisterForm from './components/BankRegisterForm';
 import ForgotPasswordModal from './components/ForgotPasswordModal';
 import { smartCropAuth, UserRole, UserSession } from '@/lib/smartcrop-auth';
 
@@ -21,7 +19,6 @@ type AuthView =
   | 'role-select'
   | 'register-farmer'
   | 'register-admin'
-  | 'register-bank'
   | 'success';
 
 export default function AuthenticationPage() {
@@ -51,53 +48,12 @@ export default function AuthenticationPage() {
     }, 1200);
   }, [router]);
 
-  // Clerk Google Auth hook
-  const { user: clerkUser, isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn } = useUser();
-
-  // Listen for Clerk Google Sign-In
-  useEffect(() => {
-    if (isClerkLoaded && isClerkSignedIn && clerkUser) {
-      const email =
-        clerkUser.primaryEmailAddress?.emailAddress ||
-        clerkUser.emailAddresses?.[0]?.emailAddress;
-      const fullName =
-        clerkUser.fullName ||
-        clerkUser.firstName ||
-        email?.split('@')[0] ||
-        'Google User';
-      const intendedRole =
-        (localStorage.getItem('smartcrop_oauth_intended_role') as UserRole) ||
-        'farmer';
-
-      const session: UserSession = {
-        id: clerkUser.id,
-        role: intendedRole,
-        fullName,
-        email,
-        accountStatus: 'active',
-        metadata: {
-          imageUrl: clerkUser.imageUrl,
-          provider: 'google',
-        },
-      };
-
-      smartCropAuth.saveSession(session);
-      handleLoginSuccess(session);
-    }
-  }, [isClerkLoaded, isClerkSignedIn, clerkUser, handleLoginSuccess]);
-
-  // Check if already authenticated on initial load or returning from InsForge OAuth
+  // Check if already authenticated on initial load
   useEffect(() => {
     const checkAuth = async () => {
       const existing = await smartCropAuth.getCurrentSession();
       if (existing) {
-        if (
-          typeof window !== 'undefined' &&
-          (window.location.search.includes('insforge_code') ||
-            window.location.search.includes('code'))
-        ) {
-          handleLoginSuccess(existing);
-        }
+        handleLoginSuccess(existing);
       }
     };
     checkAuth();
@@ -130,8 +86,6 @@ export default function AuthenticationPage() {
       setCurrentView('register-farmer');
     } else if (selectedRole === 'administrator') {
       setCurrentView('register-admin');
-    } else if (selectedRole === 'bank') {
-      setCurrentView('register-bank');
     }
   };
 
@@ -221,23 +175,6 @@ export default function AuthenticationPage() {
                 transition={{ duration: 0.15 }}
               >
                 <AdminRegisterForm
-                  onSuccess={handleRegisterSuccess}
-                  onBackToRoles={() => setCurrentView('role-select')}
-                  onBackToLogin={() => setCurrentView('login')}
-                />
-              </motion.div>
-            )}
-
-            {/* VIEW: REGISTER BANK / INSURANCE */}
-            {currentView === 'register-bank' && (
-              <motion.div
-                key="register-bank"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.15 }}
-              >
-                <BankRegisterForm
                   onSuccess={handleRegisterSuccess}
                   onBackToRoles={() => setCurrentView('role-select')}
                   onBackToLogin={() => setCurrentView('login')}

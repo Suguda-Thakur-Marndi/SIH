@@ -15,6 +15,10 @@ import {
 } from 'lucide-react';
 import { CROPS_GUIDE_DATA } from '@/lib/cropGuideData';
 import AIChatSkeleton from '@/components/skeletons/AIChatSkeleton';
+import { useBandwidth } from '@/lib/bandwidth-context';
+import { DataSaverToggle } from '@/components/DataSaverToggle';
+
+import { useLanguage } from '@/lib/language-context';
 
 interface ChatMessage {
   id: string;
@@ -26,6 +30,8 @@ interface ChatMessage {
 function AiChatPageContent() {
   const searchParams = useSearchParams();
   const cropParam = searchParams.get('crop')?.toLowerCase() || 'paddy';
+  const { isLiteMode } = useBandwidth();
+  const { language } = useLanguage();
 
   const [selectedCropKey, setSelectedCropKey] = useState<string>(
     CROPS_GUIDE_DATA[cropParam] ? cropParam : 'paddy'
@@ -33,12 +39,19 @@ function AiChatPageContent() {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [autoSpeak, setAutoSpeak] = useState(true);
+  const [autoSpeak, setAutoSpeak] = useState(!isLiteMode);
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isLiteMode) {
+      setAutoSpeak(false);
+    }
+  }, [isLiteMode]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
 
   const activeCrop = CROPS_GUIDE_DATA[selectedCropKey] || CROPS_GUIDE_DATA.paddy;
 
@@ -46,41 +59,100 @@ function AiChatPageContent() {
     {
       id: 'msg-init',
       sender: 'ai',
-      text: `🌾 **Namaste! I am your Smart Crop AI Voice Agronomist.**\n\nI am connected with **Google Gemini AI** and configured for **${activeCrop.name}** in **Mayurbhanj, Odisha**.\n\n🎤 **Voice is Live!**\n- Tap the **Microphone** below to speak your question.\n- All answers are automatically read aloud (Voice ON 🔊).\n- Ask about DAP/Gypsum dosage, stem borer defense, or water savings!\n\nHow can I assist your farm today?`,
+      text: `🌾 **Namaste! I am your Smart Crop AI Voice Agronomist.**\n\nI am powered by **NVIDIA NIM AI (Llama 3.1 70B)** and configured for **${activeCrop.name}** in **Mayurbhanj, Odisha**.\n\n🎤 **Voice is Live!**\n- Tap the **Microphone** below to speak your question.\n- All answers are automatically read aloud via **Sarvam AI Voice Synthesis**.\n- Ask about DAP/Gypsum dosage, stem borer defense, or water savings!\n\nHow can I assist your farm today?`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
 
-  const handleSpeak = useCallback((id: string, text: string) => {
-    if (!synthRef.current) return;
+  const handleSpeak = useCallback(async (id: string, text: string) => {
+    // 1. If currently speaking this message, stop it
     if (speakingMessageId === id) {
-      synthRef.current.cancel();
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.pause();
+        audioPlayerRef.current = null;
+      }
+      if (synthRef.current) {
+        synthRef.current.cancel();
+      }
       setSpeakingMessageId(null);
       return;
     }
-    synthRef.current.cancel();
+
+    // Stop any ongoing audio
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+      audioPlayerRef.current = null;
+    }
+    if (synthRef.current) {
+      synthRef.current.cancel();
+    }
+
+    setSpeakingMessageId(id);
+
     const cleanText = text
       .replace(/[*#_`]/g, '')
       .replace(/👉/g, '')
-      .replace(/🥜|🌾|🌱|💧|🧪|🛡️|💰/g, '');
+      .replace(/🥜|🌾|🌱|💧|🧪|🛡️|💰|🤖|⚠️/g, '')
+      .slice(0, 450); // Keep TTS payload compact and fast
 
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    const voices = synthRef.current.getVoices();
-    const indianVoice = voices.find(
-      (v) =>
-        v.lang.toLowerCase().includes('en-in') ||
-        v.lang.toLowerCase().includes('hi-in') ||
-        v.name.toLowerCase().includes('india')
-    );
-    if (indianVoice) utterance.voice = indianVoice;
-    utterance.lang = indianVoice?.lang || 'en-IN';
-    utterance.rate = 1.0;
+    // 2. Primary: Try Sarvam AI Neural Indic TTS via /api/sarvam
+    if (!isLiteMode) {
+      try {
+        const ttsRes = await fetch('/api/sarvam', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mode: 'tts',
+            text: cleanText,
+            targetLanguage: language || 'od-IN',
+          }),
+        });
 
-    utterance.onstart = () => setSpeakingMessageId(id);
-    utterance.onend = () => setSpeakingMessageId(null);
-    utterance.onerror = () => setSpeakingMessageId(null);
-    synthRef.current.speak(utterance);
-  }, [speakingMessageId]);
+        if (ttsRes.ok) {
+          const ttsData = await ttsRes.json();
+          const base64Audio = ttsData.audioBase64 || ttsData.audios?.[0];
+          if (base64Audio) {
+            const audio = new Audio(`data:audio/wav;base64,${base64Audio}`);
+            audioPlayerRef.current = audio;
+            audio.onended = () => {
+              setSpeakingMessageId(null);
+              audioPlayerRef.current = null;
+            };
+            audio.onerror = () => {
+              setSpeakingMessageId(null);
+              audioPlayerRef.current = null;
+            };
+            await audio.play();
+            return;
+          }
+        }
+      } catch (sarvamErr) {
+        console.warn('[Sarvam AI TTS playback failed, falling back to Web Speech]:', sarvamErr);
+      }
+    }
+
+    // 3. Fallback: Browser Web SpeechSynthesis
+    if (synthRef.current) {
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      const voices = synthRef.current.getVoices();
+      const indianVoice = voices.find(
+        (v) =>
+          v.lang.toLowerCase().includes('en-in') ||
+          v.lang.toLowerCase().includes('hi-in') ||
+          v.name.toLowerCase().includes('india')
+      );
+      if (indianVoice) utterance.voice = indianVoice;
+      utterance.lang = indianVoice?.lang || 'en-IN';
+      utterance.rate = 1.0;
+
+      utterance.onstart = () => setSpeakingMessageId(id);
+      utterance.onend = () => setSpeakingMessageId(null);
+      utterance.onerror = () => setSpeakingMessageId(null);
+      synthRef.current.speak(utterance);
+    } else {
+      setSpeakingMessageId(null);
+    }
+  }, [speakingMessageId, language, isLiteMode]);
 
   const handleSend = useCallback(async (queryOverride?: string) => {
     const query = (queryOverride || inputText).trim();
@@ -107,6 +179,8 @@ function AiChatPageContent() {
             cropName: activeCrop.name,
             cropId: activeCrop.id,
             district: 'Mayurbhanj, Odisha',
+            language: language,
+            languageCode: language,
           },
         }),
       }).catch(() => null);
@@ -154,7 +228,7 @@ function AiChatPageContent() {
     } finally {
       setIsLoading(false);
     }
-  }, [inputText, isLoading, activeCrop.name, activeCrop.id, autoSpeak, handleSpeak]);
+  }, [inputText, isLoading, activeCrop.name, activeCrop.id, autoSpeak, handleSpeak, language]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -245,6 +319,9 @@ function AiChatPageContent() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* 2G Data Saver Mode Toggle */}
+            <DataSaverToggle />
+
             <button
               onClick={() => {
                 setAutoSpeak(!autoSpeak);
@@ -263,7 +340,7 @@ function AiChatPageContent() {
             </button>
 
             <span className="text-xs font-extrabold px-3 py-1 bg-emerald-100 text-emerald-900 rounded-full border border-emerald-300">
-              🤖 Gemini AI
+              🤖 NVIDIA AI
             </span>
           </div>
         </div>
@@ -280,7 +357,7 @@ function AiChatPageContent() {
                   Smart Crop AI Voice Agronomist
                 </h1>
                 <p className="text-xs text-slate-600">
-                  Speak directly or ask farming questions in English &amp; Odia with Gemini AI.
+                  Speak directly or ask farming questions in English &amp; Odia with NVIDIA AI.
                 </p>
               </div>
             </div>

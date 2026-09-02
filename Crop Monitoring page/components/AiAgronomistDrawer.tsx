@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { RegisteredCrop } from "../types";
-import { formatDateString, getDaysDifference } from "../mockData";
+import { formatDateString, getDaysDifference, getCropName } from "../mockData";
+import { useLanguage } from '@/lib/language-context';
 
 interface AiAgronomistDrawerProps {
   currentCrop: RegisteredCrop;
@@ -23,6 +24,7 @@ export const AiAgronomistDrawer: React.FC<AiAgronomistDrawerProps> = ({
   onClose,
   prefilledPrompt
 }) => {
+  const { t } = useLanguage();
   const [question, setQuestion] = useState(prefilledPrompt || "");
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([
     {
@@ -90,8 +92,8 @@ export const AiAgronomistDrawer: React.FC<AiAgronomistDrawerProps> = ({
         <div className="flex items-center gap-3">
           <span className="text-2xl p-1.5 rounded-xl bg-white/10">🤖</span>
           <div>
-            <h3 className="font-bold text-sm">AI Agronomist Specialist</h3>
-            <p className="text-[11px] text-emerald-200">Real-time advisory for {currentCrop.name}</p>
+            <h3 className="font-bold text-sm">{t('ai_agronomist_specialist', 'AI Agronomist Specialist')}</h3>
+            <p className="text-[11px] text-emerald-200">{t('realtime_advisory_for', 'Real-time advisory for')} {getCropName(currentCrop, t)}</p>
           </div>
         </div>
         <button onClick={onClose} className="text-zinc-300 hover:text-white p-1">
@@ -103,21 +105,21 @@ export const AiAgronomistDrawer: React.FC<AiAgronomistDrawerProps> = ({
       <div className="p-3 bg-zinc-50 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-700/80 flex flex-wrap gap-1.5">
         <button
           onClick={() => handleSend("What is the optimal nitrogen dosage for current vegetative stage?")}
-          className="text-[11px] font-medium bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-600 hover:border-emerald-500"
+          className="text-[11px] font-medium bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-600 hover:border-emerald-500 cursor-pointer"
         >
-          🧪 Nitrogen Dosage
+          🧪 {t('prompt_nitrogen', 'Nitrogen Dosage')}
         </button>
         <button
           onClick={() => handleSend("How should I prepare for tomorrow's rain forecast?")}
-          className="text-[11px] font-medium bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-600 hover:border-emerald-500"
+          className="text-[11px] font-medium bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-600 hover:border-emerald-500 cursor-pointer"
         >
-          🌧️ Rain Prep
+          🌧️ {t('prompt_rain', 'Rain Prep')}
         </button>
         <button
           onClick={() => handleSend("How to identify leaf folder & stem borer symptoms?")}
-          className="text-[11px] font-medium bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-600 hover:border-emerald-500"
+          className="text-[11px] font-medium bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-600 hover:border-emerald-500 cursor-pointer"
         >
-          🛡️ Pest Scouting
+          🛡️ {t('prompt_pest', 'Pest Scouting')}
         </button>
       </div>
 
@@ -152,16 +154,16 @@ export const AiAgronomistDrawer: React.FC<AiAgronomistDrawerProps> = ({
       >
         <input
           type="text"
-          placeholder="Ask anything about this crop..."
+          placeholder={t('ask_crop_placeholder', 'Ask anything about this crop...')}
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           className="flex-1 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
         <button
           type="submit"
-          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold shadow-xs"
+          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold shadow-xs cursor-pointer"
         >
-          Send
+          {t('send_btn', 'Send')}
         </button>
       </form>
     </div>

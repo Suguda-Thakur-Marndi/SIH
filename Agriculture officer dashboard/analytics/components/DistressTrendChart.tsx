@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, ComposedChart, ReferenceLine } from 'recharts';
+import { useBandwidth } from '@/lib/bandwidth-context';
 
 interface TrendData {
   date: string;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function DistressTrendChart({ data, loading, insight }: Props) {
+  const { isLiteMode } = useBandwidth();
   if (loading || !data) {
     return (
       <div className="glass bg-white/80 backdrop-blur-2xl border border-white/80 rounded-3xl p-6 shadow-xl animate-pulse" role="status" aria-busy="true" aria-label="Loading distress trend chart">
@@ -60,76 +62,114 @@ export function DistressTrendChart({ data, loading, insight }: Props) {
         )}
       </div>
       
-      <div className="w-full h-72">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.35}/>
-                <stop offset="95%" stopColor="#ef4444" stopOpacity={0.02}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" vertical={false} />
-            <XAxis 
-              dataKey="date" 
-              stroke="#64748b" 
-              fontSize={11}
-              fontWeight={600}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis 
-              yAxisId="left"
-              stroke="#64748b" 
-              fontSize={11}
-              fontWeight={600}
-              tickLine={false}
-              axisLine={false}
-              domain={[0, 100]}
-            />
-            <YAxis 
-              yAxisId="right"
-              orientation="right"
-              stroke="#64748b" 
-              fontSize={11}
-              fontWeight={600}
-              tickLine={false}
-              axisLine={false}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'rgba(255,255,255,0.95)', 
-                backdropFilter: 'blur(12px)',
-                borderColor: 'rgba(0,0,0,0.1)', 
-                borderRadius: '16px', 
-                color: '#0f172a',
-                fontWeight: 'bold',
-                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)'
-              }}
-              itemStyle={{ color: '#0f172a' }}
-            />
-            <ReferenceLine 
-              yAxisId="left" 
-              y={70} 
-              stroke="#ef4444" 
-              strokeDasharray="4 4" 
-              strokeWidth={1.5}
-              label={{ value: 'Critical Threshold (>70)', fill: '#dc2626', fontSize: 10, fontWeight: 700, position: 'insideTopLeft' }} 
-            />
-            <Bar yAxisId="right" dataKey="highRiskCount" name="High Risk Count" fill="rgba(15,23,42,0.15)" radius={[6, 6, 0, 0]} barSize={18} />
-            <Area 
-              yAxisId="left"
-              type="monotone" 
-              dataKey="avgScore" 
-              name="Avg Risk Score"
-              stroke="#dc2626" 
-              strokeWidth={3}
-              fillOpacity={1} 
-              fill="url(#colorScore)" 
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+      {isLiteMode ? (
+        <div className="w-full max-h-72 overflow-y-auto border border-slate-200 rounded-2xl bg-slate-50/80 p-3">
+          <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
+            <span className="text-xs font-bold text-slate-700">Lite Data Table (Low Bandwidth)</span>
+            <span className="text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+              Critical Threshold: &gt;70
+            </span>
+          </div>
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="text-slate-500 border-b border-slate-200">
+                <th className="py-1.5 font-semibold">Date</th>
+                <th className="py-1.5 font-semibold text-center">Avg Risk Score</th>
+                <th className="py-1.5 font-semibold text-right">High-Risk Farmers</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 font-mono">
+              {data.map((row, idx) => {
+                const isCritical = row.avgScore >= 70;
+                return (
+                  <tr key={idx} className="hover:bg-slate-100/80">
+                    <td className="py-1.5 text-slate-800 font-sans font-medium">{row.date}</td>
+                    <td className="py-1.5 text-center">
+                      <span className={`px-2 py-0.5 rounded font-bold ${
+                        isCritical ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'
+                      }`}>
+                        {row.avgScore}
+                      </span>
+                    </td>
+                    <td className="py-1.5 text-right text-slate-700 font-bold">{row.highRiskCount}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="w-full h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.35}/>
+                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0.02}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" vertical={false} />
+              <XAxis 
+                dataKey="date" 
+                stroke="#64748b" 
+                fontSize={11}
+                fontWeight={600}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis 
+                yAxisId="left"
+                stroke="#64748b" 
+                fontSize={11}
+                fontWeight={600}
+                tickLine={false}
+                axisLine={false}
+                domain={[0, 100]}
+              />
+              <YAxis 
+                yAxisId="right"
+                orientation="right"
+                stroke="#64748b" 
+                fontSize={11}
+                fontWeight={600}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'rgba(255,255,255,0.95)', 
+                  backdropFilter: 'blur(12px)',
+                  borderColor: 'rgba(0,0,0,0.1)', 
+                  borderRadius: '16px', 
+                  color: '#0f172a',
+                  fontWeight: 'bold',
+                  boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)'
+                }}
+                itemStyle={{ color: '#0f172a' }}
+              />
+              <ReferenceLine 
+                yAxisId="left" 
+                y={70} 
+                stroke="#ef4444" 
+                strokeDasharray="4 4" 
+                strokeWidth={1.5}
+                label={{ value: 'Critical Threshold (>70)', fill: '#dc2626', fontSize: 10, fontWeight: 700, position: 'insideTopLeft' }} 
+              />
+              <Bar yAxisId="right" dataKey="highRiskCount" name="High Risk Count" fill="rgba(15,23,42,0.15)" radius={[6, 6, 0, 0]} barSize={18} />
+              <Area 
+                yAxisId="left"
+                type="monotone" 
+                dataKey="avgScore" 
+                name="Avg Risk Score"
+                stroke="#dc2626" 
+                strokeWidth={3}
+                fillOpacity={1} 
+                fill="url(#colorScore)" 
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,8 @@
 
 import React, { useMemo } from "react";
 import { RegisteredCrop, WeatherDay, Activity } from "../types";
-import { getActivityTypeBadge } from "../mockData";
+import { getActivityTypeBadge, getActivityTitle } from "../mockData";
+import { useLanguage } from "@/lib/language-context";
 
 interface InteractiveCalendarProps {
   currentCrop: RegisteredCrop;
@@ -25,15 +26,20 @@ export const InteractiveCalendar: React.FC<InteractiveCalendarProps> = ({
   onFilterChange,
   weatherForecast,
 }) => {
+  const { t } = useLanguage();
   const todayIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
   const todayStr = `${todayIST.getFullYear()}-${String(todayIST.getMonth() + 1).padStart(2, "0")}-${String(todayIST.getDate()).padStart(2, "0")}`;
 
   const year = currentMonthDate.getFullYear();
   const month = currentMonthDate.getMonth();
 
-  const monthNames = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December",
+  const monthKeys = [
+    "month_january", "month_february", "month_march", "month_april", "month_may", "month_june",
+    "month_july", "month_august", "month_september", "month_october", "month_november", "month_december"
+  ];
+  const defaultMonthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
   ];
 
   const firstDayIndex = new Date(year, month, 1).getDay();
@@ -67,13 +73,13 @@ export const InteractiveCalendar: React.FC<InteractiveCalendarProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/50">
         <div className="flex items-center gap-3">
           <h3 className="text-xl font-bold text-zinc-800">
-            {monthNames[month]} {year}
+            {t(monthKeys[month], defaultMonthNames[month])} {year}
           </h3>
           <button
             onClick={handleTodayMonth}
             className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-100/80 text-emerald-700 border border-emerald-200/60 hover:bg-emerald-200/80 transition-colors"
           >
-            Today
+            {t('today', 'Today')}
           </button>
         </div>
 
@@ -81,14 +87,14 @@ export const InteractiveCalendar: React.FC<InteractiveCalendarProps> = ({
           <select
             value={filterType}
             onChange={(e) => onFilterChange(e.target.value)}
-            className="text-xs font-medium bg-white/70 text-zinc-700 rounded-lg px-2.5 py-1.5 border border-white/60 focus:outline-none focus:ring-1 focus:ring-emerald-400 backdrop-blur-sm"
+            className="text-xs font-medium bg-white/70 text-zinc-700 rounded-lg px-2.5 py-1.5 border border-white/60 focus:outline-none focus:ring-1 focus:ring-emerald-400 backdrop-blur-sm cursor-pointer"
           >
-            <option value="all">All Events</option>
-            <option value="irrigation">💧 Irrigation</option>
-            <option value="fertilizer">🧪 Fertilizers</option>
-            <option value="inspection">🔍 Field Scouting</option>
-            <option value="pest_control">🛡️ Pest Protection</option>
-            <option value="stage_change">🌱 Stage Changes</option>
+            <option value="all">{t('all_events', 'All Events')}</option>
+            <option value="irrigation">{t('event_irrigation', '💧 Irrigation')}</option>
+            <option value="fertilizer">{t('event_fertilizer', '🧪 Fertilizers')}</option>
+            <option value="inspection">{t('event_inspection', '🔍 Field Scouting')}</option>
+            <option value="pest_control">{t('event_pest_control', '🛡️ Pest Protection')}</option>
+            <option value="stage_change">{t('event_stage_change', '🌱 Stage Changes')}</option>
           </select>
 
           <div className="flex items-center gap-1 bg-white/60 rounded-lg p-0.5 border border-white/60 backdrop-blur-sm">
@@ -114,8 +120,13 @@ export const InteractiveCalendar: React.FC<InteractiveCalendarProps> = ({
 
       {/* Day-of-week header */}
       <div className="grid grid-cols-7 text-center text-xs font-bold text-zinc-400 py-3 border-b border-white/40">
-        <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span>
-        <span>THU</span><span>FRI</span><span>SAT</span>
+        <span>{t('day_sun', 'SUN')}</span>
+        <span>{t('day_mon', 'MON')}</span>
+        <span>{t('day_tue', 'TUE')}</span>
+        <span>{t('day_wed', 'WED')}</span>
+        <span>{t('day_thu', 'THU')}</span>
+        <span>{t('day_fri', 'FRI')}</span>
+        <span>{t('day_sat', 'SAT')}</span>
       </div>
 
       {/* Calendar grid */}
@@ -166,15 +177,15 @@ export const InteractiveCalendar: React.FC<InteractiveCalendarProps> = ({
                   {dayNum}
                 </span>
                 <div className="flex items-center gap-0.5">
-                  {hasRain && <span className="text-[10px]" title="Rain forecast">🌧️</span>}
-                  {isSowingDay && <span className="text-[10px]" title="Sowing Date">🌱</span>}
-                  {isHarvestDay && <span className="text-[10px]" title="Expected Harvest">🚜</span>}
+                  {hasRain && <span className="text-[10px]" title={t('rain_forecast', 'Rain forecast')}>🌧️</span>}
+                  {isSowingDay && <span className="text-[10px]" title={t('sowing_date', 'Sowing Date')}>🌱</span>}
+                  {isHarvestDay && <span className="text-[10px]" title={t('expected_harvest', 'Expected Harvest')}>🚜</span>}
                 </div>
               </div>
 
               <div className="space-y-1 my-1 overflow-hidden">
                 {dayActivities.slice(0, 2).map((act) => {
-                  const badge = getActivityTypeBadge(act.type);
+                  const badge = getActivityTypeBadge(act.type, t);
                   return (
                     <div
                       key={act.id}
@@ -183,13 +194,13 @@ export const InteractiveCalendar: React.FC<InteractiveCalendarProps> = ({
                       }`}
                     >
                       <span className="mr-0.5">{badge.icon}</span>
-                      <span>{act.title}</span>
+                      <span>{getActivityTitle(act, t)}</span>
                     </div>
                   );
                 })}
                 {dayActivities.length > 2 && (
                   <div className="text-[9px] font-bold text-zinc-500 px-1">
-                    +{dayActivities.length - 2} more
+                    +{dayActivities.length - 2} {t('more', 'more')}
                   </div>
                 )}
               </div>
@@ -197,7 +208,7 @@ export const InteractiveCalendar: React.FC<InteractiveCalendarProps> = ({
               {dayActivities.length > 0 && (
                 <div className="flex items-center gap-1 mt-auto">
                   {dayActivities.slice(0, 3).map((act, idx) => (
-                    <span key={idx} className={`w-1.5 h-1.5 rounded-full ${getActivityTypeBadge(act.type).dot}`} />
+                    <span key={idx} className={`w-1.5 h-1.5 rounded-full ${getActivityTypeBadge(act.type, t).dot}`} />
                   ))}
                 </div>
               )}
@@ -209,12 +220,12 @@ export const InteractiveCalendar: React.FC<InteractiveCalendarProps> = ({
       {/* Legend */}
       <div className="mt-5 pt-4 border-t border-white/40 flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-500">
         <div className="flex flex-wrap items-center gap-3">
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-blue-400" /> Irrigation</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-400" /> Fertilizer</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-purple-400" /> Inspection</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-400" /> Pest Control</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-blue-400" /> {t('irrigation', 'Irrigation')}</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-400" /> {t('fertilizer', 'Fertilizer')}</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-purple-400" /> {t('inspection', 'Inspection')}</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-400" /> {t('pest_control', 'Pest Control')}</span>
         </div>
-        <span className="text-[11px] text-zinc-400">Click any date to view tasks</span>
+        <span className="text-[11px] text-zinc-400">{t('click_date_view_tasks', 'Click any date to view tasks')}</span>
       </div>
     </div>
   );

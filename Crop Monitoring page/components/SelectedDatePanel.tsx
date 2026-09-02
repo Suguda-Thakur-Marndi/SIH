@@ -2,7 +2,8 @@
 
 import React from "react";
 import { RegisteredCrop, WeatherDay } from "../types";
-import { formatDateString, getActivityTypeBadge } from "../mockData";
+import { formatDateString, getActivityTypeBadge, getActivityTitle, translateWeatherAlert } from "../mockData";
+import { useLanguage } from "@/lib/language-context";
 
 function conditionEmoji(condition: WeatherDay["condition"]): string {
   switch (condition) {
@@ -32,6 +33,7 @@ export const SelectedDatePanel: React.FC<SelectedDatePanelProps> = ({
   onOpenAddModalForDate,
   onOpenAiWithPrompt,
 }) => {
+  const { t } = useLanguage();
   const selectedDateActivities = currentCrop.activities.filter((act) => act.date === selectedDate);
   const selectedDateWeather: WeatherDay | undefined =
     weatherForecast.find((w) => w.date === selectedDate) || weatherForecast[0];
@@ -42,17 +44,17 @@ export const SelectedDatePanel: React.FC<SelectedDatePanelProps> = ({
       <div className="flex items-center justify-between pb-3 border-b border-white/50">
         <div>
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-            Selected Calendar Day
+            {t('selected_calendar_day', 'Selected Calendar Day')}
           </span>
           <h3 className="text-lg sm:text-xl font-extrabold text-zinc-800">
-            📅 {formatDateString(selectedDate)}
+            📅 {formatDateString(selectedDate, t)}
           </h3>
         </div>
         <button
           onClick={() => onOpenAddModalForDate(selectedDate)}
           className="px-2.5 py-1.5 rounded-lg bg-emerald-100/80 text-emerald-700 hover:bg-emerald-200/80 text-xs font-semibold border border-emerald-200/60 transition-colors"
         >
-          + Add Task
+          + {t('add_task', 'Add Task')}
         </button>
       </div>
 
@@ -63,47 +65,57 @@ export const SelectedDatePanel: React.FC<SelectedDatePanelProps> = ({
             <span className="text-3xl">{conditionEmoji(selectedDateWeather.condition)}</span>
             <div>
               <p className="text-xs font-bold text-zinc-700 capitalize">
-                {selectedDateWeather.condition.replace("_", " ")} &nbsp;{selectedDateWeather.tempHigh}°C / {selectedDateWeather.tempLow}°C
+                {selectedDateWeather.condition === "rainy"
+                  ? t("weather_rainy", "Rainy")
+                  : selectedDateWeather.condition === "sunny"
+                  ? t("weather_sunny", "Sunny")
+                  : selectedDateWeather.condition === "storm"
+                  ? t("weather_storm", "Thunderstorm")
+                  : selectedDateWeather.condition === "partly_cloudy"
+                  ? t("weather_partly_cloudy", "Partly Cloudy")
+                  : t("weather_cloudy", "Cloudy")} &nbsp;{selectedDateWeather.tempHigh}°C / {selectedDateWeather.tempLow}°C
               </p>
               <p className="text-[11px] text-zinc-500">
-                💧 {selectedDateWeather.rainChance}% rain · 💦 {selectedDateWeather.humidity}% humidity · 💨 {selectedDateWeather.windSpeed} km/h
+                💧 {selectedDateWeather.rainChance}% {t('rain', 'rain')} · 💦 {selectedDateWeather.humidity}% {t('humidity', 'humidity')} · 💨 {selectedDateWeather.windSpeed} km/h
               </p>
               {selectedDateWeather.alert && (
-                <p className="text-[10px] text-amber-700 font-medium mt-0.5">{selectedDateWeather.alert}</p>
+                <p className="text-[10px] text-amber-700 font-medium mt-0.5">
+                  {translateWeatherAlert(selectedDateWeather.alert, t, selectedDateWeather)}
+                </p>
               )}
             </div>
           </div>
           <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-white/70 text-zinc-700 border border-white/60">
-            🌿 {currentCrop.currentStage}
+            🌿 {t(currentCrop.currentStage.toLowerCase(), currentCrop.currentStage)}
           </span>
         </div>
       ) : (
         <div className="rounded-xl bg-white/30 p-3 border border-white/40 text-center text-xs text-zinc-400">
-          Weather data loading…
+          {t('weather_loading', 'Weather data loading…')}
         </div>
       )}
 
       {/* Activities */}
       <div className="space-y-3">
         <h4 className="text-sm font-bold text-zinc-700 flex items-center gap-1.5">
-          <span>📋</span> Scheduled Activities ({selectedDateActivities.length})
+          <span>📋</span> {t('scheduled_activities', 'Scheduled Activities')} ({selectedDateActivities.length})
         </h4>
 
         {selectedDateActivities.length === 0 ? (
           <div className="p-6 rounded-xl border border-dashed border-white/60 bg-white/30 text-center space-y-2">
             <span className="text-2xl">🌱</span>
-            <p className="text-xs text-zinc-500">No tasks scheduled for this day.</p>
+            <p className="text-xs text-zinc-500">{t('no_tasks_scheduled', 'No tasks scheduled for this day.')}</p>
             <button
               onClick={() => onOpenAddModalForDate(selectedDate)}
               className="text-xs font-semibold text-emerald-600 hover:underline"
             >
-              + Schedule custom field task
+              + {t('schedule_custom_task', 'Schedule custom field task')}
             </button>
           </div>
         ) : (
           <div className="space-y-2.5">
             {selectedDateActivities.map((act) => {
-              const badge = getActivityTypeBadge(act.type);
+              const badge = getActivityTypeBadge(act.type, t);
               const isDone = act.status === "completed";
               return (
                 <div
@@ -122,7 +134,7 @@ export const SelectedDatePanel: React.FC<SelectedDatePanelProps> = ({
                           ? "bg-emerald-500 border-emerald-500 text-white font-bold"
                           : "border-zinc-300 hover:border-emerald-400 bg-white/70"
                       }`}
-                      title={isDone ? "Mark Incomplete" : "Mark Complete"}
+                      title={isDone ? t('mark_incomplete', 'Mark Incomplete') : t('mark_complete', 'Mark Complete')}
                     >
                       {isDone && "✓"}
                     </button>
@@ -130,7 +142,7 @@ export const SelectedDatePanel: React.FC<SelectedDatePanelProps> = ({
                     <div className="space-y-1 flex-1">
                       <div className="flex items-center justify-between flex-wrap gap-1">
                         <h5 className={`text-sm font-bold ${isDone ? "line-through text-zinc-400" : "text-zinc-800"}`}>
-                          {act.title}
+                          {getActivityTitle(act, t)}
                         </h5>
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border bg-white/70 ${badge.bg}`}>
                           {badge.label}
@@ -139,14 +151,14 @@ export const SelectedDatePanel: React.FC<SelectedDatePanelProps> = ({
                       <p className="text-xs text-zinc-600">{act.description}</p>
                       {act.dosage && (
                         <p className="text-[11px] text-emerald-700 font-medium">
-                          Dosage: {act.dosage}
+                          {t('dosage', 'Dosage')}: {act.dosage}
                         </p>
                       )}
                       <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-1">
                         <span>{act.time}</span>
                         {isDone && (
                           <span className="text-emerald-600 font-semibold">
-                            ✓ Completed {act.completedAt}
+                            ✓ {t('completed', 'Completed')} {act.completedAt}
                           </span>
                         )}
                       </div>
@@ -165,7 +177,7 @@ export const SelectedDatePanel: React.FC<SelectedDatePanelProps> = ({
           <div className="flex items-center gap-2">
             <span className="text-lg">🤖</span>
             <h5 className="text-xs font-bold uppercase tracking-wider text-emerald-300">
-              Agronomist Guidance
+              {t('agronomist_guidance', 'Agronomist Guidance')}
             </h5>
           </div>
           <button
@@ -176,12 +188,11 @@ export const SelectedDatePanel: React.FC<SelectedDatePanelProps> = ({
             }
             className="text-[11px] font-semibold text-emerald-300 underline hover:text-white"
           >
-            Ask Assistant →
+            {t('ask_assistant', 'Ask Assistant')} →
           </button>
         </div>
         <p className="text-xs text-zinc-200 leading-relaxed">
-          During tillering, maintain 3cm water depth. If rain exceeds 20mm, drain surplus standing water
-          immediately to avoid root asphyxiation.
+          {t('tillering_water_advice', 'During tillering, maintain 3cm water depth. If rain exceeds 20mm, drain surplus standing water immediately to avoid root asphyxiation.')}
         </p>
       </div>
     </div>

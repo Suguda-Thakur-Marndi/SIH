@@ -3,11 +3,13 @@
 import React from 'react';
 import { Scheme } from '../types';
 
+import { useLanguage } from '@/lib/language-context';
 interface ApplicationTimelineProps {
   scheme: Scheme;
 }
 
 export const ApplicationTimeline: React.FC<ApplicationTimelineProps> = ({ scheme }) => {
+  const { t } = useLanguage();
   const currentStage = scheme.applicationStage || 'submitted';
 
   const stages = [
@@ -54,7 +56,7 @@ export const ApplicationTimeline: React.FC<ApplicationTimelineProps> = ({ scheme
       <div className="flex items-center justify-between mb-4">
         <h4 className="font-bold text-[#1A1A1A] text-sm flex items-center gap-2">
           <span>📍</span>
-          <span>Application Progress</span>
+          <span>{t('application_progress', 'Application Progress')}{' '}</span>
         </h4>
         <span className="text-xs text-emerald-800 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
           Est: {scheme.estimatedDays || '7–10 days'}
@@ -100,7 +102,7 @@ export const ApplicationTimeline: React.FC<ApplicationTimelineProps> = ({ scheme
 
       {scheme.applicationStage === 'rejected' && scheme.rejectionReason && (
         <div className="mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-          <span className="font-bold block mb-1">Reason for Action Required:</span>
+          <span className="font-bold block mb-1">{t('reason_for_action_required', 'Reason for Action Required:')}{' '}</span>
           <p>{scheme.rejectionReason}</p>
         </div>
       )}

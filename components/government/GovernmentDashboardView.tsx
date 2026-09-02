@@ -97,10 +97,10 @@ export default function GovernmentDashboardView() {
               <p className="text-xs text-neutral-500">Live inventory across 28 block hiring hubs</p>
             </div>
             <Link
-              href="/equipment"
+              href="/schemes"
               className="text-xs font-semibold px-3.5 py-1.5 rounded-xl bg-neutral-900 text-white hover:bg-black transition flex items-center gap-1"
             >
-              <span>Farmer Rental View</span>
+              <span>View Schemes & Subsidies</span>
               <ExternalLink className="w-3 h-3 text-[#CFE362]" />
             </Link>
           </div>

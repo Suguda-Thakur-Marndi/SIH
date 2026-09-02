@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Sprout, Droplets, Layers, BookOpen } from 'lucide-react';
 import bgImage from '../farmer profile/image/BG_2.png';
 import CropDetailsCalendar from './CropDetailsCalendar';
+import { useLanguage } from '@/lib/language-context';
 
 interface CalendarTask {
   task: string;
@@ -58,56 +59,96 @@ const CROPS_CATALOG: CropInfo[] = [
       zinc: '10 kg ZnSO4 / acre',
     },
     criticalIrrigationStages: [
-      'Transplanting stage',
-      'Tillering stage (20-25 DAT)',
-      'Panicle initiation (45-50 DAT)',
-      'Grain filling stage',
+      'Transplanting & seedling establishment (0-10 DAT)',
+      'Active tillering stage (20-35 DAT)',
+      'Panicle initiation & booting stage (50-65 DAT)',
+      'Flowering & grain filling stage (70-90 DAT)',
     ],
-    keyPests: ['Yellow Stem Borer', 'Brown Plant Hopper (BPH)', 'Bacterial Leaf Blight', 'Blast disease'],
+    keyPests: ['Yellow Stem Borer', 'Brown Plant Hopper (BPH)', 'Bacterial Leaf Blight (BLB)'],
     calendar: {
-      completed: ['Land preparation', 'Sowing'],
+      completed: ['Nursery sowing', 'Transplanting', 'Initial weed management'],
       today: {
-        task: 'Soil moisture inspection',
-        description: 'Check root-zone moisture levels across all plots — ensure adequate field capacity.',
+        task: 'AWD (Alternate Wetting & Drying) water depth check',
+        description: 'Maintain 2-3 cm field water level during current active vegetative tillering.',
       },
       upcoming: [
-        { task: 'Fertilizer application', dueInDays: 5 },
-        { task: 'Weed management', dueInDays: 9 },
-        { task: 'Disease monitoring', dueInDays: 15 },
-        { task: 'Panicle initiation irrigation', dueInDays: 22 },
+        { task: 'Top-dressing Nitrogen (Urea + Zn)', dueInDays: 4 },
+        { task: 'Pheromone trap installation for stem borer', dueInDays: 8 },
+        { task: 'Booting stage irrigation replenishment', dueInDays: 14 },
+        { task: 'Pre-harvest grain maturity inspection', dueInDays: 32 },
+      ],
+    },
+  },
+  {
+    id: 'groundnut',
+    name: 'Groundnut / Peanut (Arachis hypogaea)',
+    season: 'Rabi',
+    idealSoil: 'Well-drained sandy loam or red loamy soil, rich in calcium',
+    soilPh: '6.0 – 7.5',
+    tempRange: '25°C – 30°C',
+    waterRequirement: '450 – 600 mm (58% water savings vs Paddy)',
+    seedRate: '50 – 60 kg kernel / acre',
+    sowingDepth: '4 – 5 cm',
+    spacing: '30 cm × 10 cm',
+    fertilizerDose: {
+      nitrogen: '10 kg N / acre (Rhizobium inoculated)',
+      phosphorus: '20 kg P2O5 / acre',
+      potassium: '30 kg K2O / acre',
+      zinc: '100 kg Gypsum at 45 DAS (Pegging)',
+    },
+    criticalIrrigationStages: [
+      'Flowering stage (20-25 DAS)',
+      'Peg penetration stage (40-45 DAS)',
+      'Pod development stage (65-75 DAS)',
+    ],
+    keyPests: ['Tikka Leaf Spot', 'Collar Rot', 'Leaf Miner', 'White Grub'],
+    calendar: {
+      completed: ['Field plowing & fine tilth', 'Seed treatment with Trichoderma & Rhizobium', 'Sowing'],
+      today: {
+        task: 'Post-emergence weed inspection',
+        description: 'Scout for broadleaf weeds before peg formation begins.',
+      },
+      upcoming: [
+        { task: 'Gypsum application (100 kg/acre)', dueInDays: 7 },
+        { task: 'Flowering irrigation (light)', dueInDays: 11 },
+        { task: 'Tikka disease prophylactic spray (Hexaconazole)', dueInDays: 19 },
+        { task: 'Pod maturity test (inner pod wall darkening)', dueInDays: 38 },
       ],
     },
   },
   {
     id: 'mustard',
-    name: 'Mustard (Brassica juncea)',
+    name: 'Mustard / Rapeseed (Brassica juncea)',
     season: 'Rabi',
-    idealSoil: 'Sandy loam to alluvial rich soil with good internal drainage',
+    idealSoil: 'Light to heavy loamy soil with good internal drainage',
     soilPh: '6.0 – 7.5',
     tempRange: '15°C – 25°C',
-    waterRequirement: '250 – 350 mm',
-    seedRate: '1.5 – 2.0 kg / acre',
-    sowingDepth: '3 – 4 cm',
+    waterRequirement: '300 – 400 mm (70% water savings vs Paddy)',
+    seedRate: '1.5 – 2 kg / acre',
+    sowingDepth: '2 – 3 cm (fine seedbed)',
     spacing: '30 cm × 10 cm',
     fertilizerDose: {
-      nitrogen: '25 kg N / acre',
-      phosphorus: '15 kg P2O5 / acre',
-      potassium: '10 kg K2O / acre',
-      zinc: '5 kg Sulphur / acre',
+      nitrogen: '32 kg N / acre',
+      phosphorus: '16 kg P2O5 / acre',
+      potassium: '16 kg K2O / acre',
+      zinc: '10 kg Elemental Sulphur / acre',
     },
-    criticalIrrigationStages: ['Flowering initiation (30-35 DAS)', 'Pod development (55-65 DAS)'],
-    keyPests: ['Mustard Aphid', 'White Rust', 'Alternaria Blight', 'Painted Bug'],
+    criticalIrrigationStages: [
+      'Rosette / Pre-flowering stage (28-35 DAS)',
+      'Pod filling / Siliqua stage (55-65 DAS)',
+    ],
+    keyPests: ['Mustard Aphid (Lipaphis erysimi)', 'Alternaria Blight', 'White Rust'],
     calendar: {
-      completed: ['Land preparation', 'Sowing', 'First irrigation'],
+      completed: ['Pre-sowing irrigation', 'Basal NPK + Sulphur', 'Line sowing'],
       today: {
-        task: 'Aphid scouting',
-        description: 'Inspect leaves for aphid colonies — apply treatment if density exceeds 50 per plant.',
+        task: 'Seedling thinning to 10cm plant-to-plant spacing',
+        description: 'Crucial at 15-20 DAS to avoid overcrowding and ensure strong branching.',
       },
       upcoming: [
-        { task: 'Flowering irrigation', dueInDays: 5 },
-        { task: 'Fungicide spray (Alternaria)', dueInDays: 10 },
-        { task: 'Pod development irrigation', dueInDays: 18 },
-        { task: 'Harvest readiness check', dueInDays: 30 },
+        { task: 'Aphid scouting on top 10cm twigs', dueInDays: 6 },
+        { task: 'First critical irrigation (Pre-flowering)', dueInDays: 12 },
+        { task: 'Foliar spray for Alternaria (Mancozeb)', dueInDays: 21 },
+        { task: 'Siliqua yellowing inspection for harvesting', dueInDays: 45 },
       ],
     },
   },
@@ -115,7 +156,7 @@ const CROPS_CATALOG: CropInfo[] = [
     id: 'maize',
     name: 'Maize / Corn (Zea mays)',
     season: 'Kharif',
-    idealSoil: 'Well-drained deep fertile loamy soil rich in organic matter',
+    idealSoil: 'Deep, fertile well-drained sandy loam to silty loam',
     soilPh: '6.5 – 7.5',
     tempRange: '20°C – 30°C',
     waterRequirement: '500 – 600 mm',
@@ -151,6 +192,7 @@ const CROPS_CATALOG: CropInfo[] = [
 ];
 
 export default function CropDetails() {
+  const { t } = useLanguage();
   const [selectedCrop, setSelectedCrop] = useState<CropInfo>(CROPS_CATALOG[0]);
   const [loading, setLoading] = useState(true);
   React.useEffect(() => {
@@ -208,10 +250,10 @@ export default function CropDetails() {
             className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 bg-white/80 hover:bg-white px-4 py-2 rounded-xl shadow-xs border border-emerald-200/60 transition-all"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
+            {t('back', 'Back to Dashboard')}
           </Link>
           <span className="text-xs font-bold px-3 py-1 bg-emerald-100/90 text-emerald-800 rounded-full border border-emerald-300">
-            🌾 Agronomic Knowledge Base
+            🌾 {t('crop_details', 'Crop Details')}
           </span>
         </div>
 
@@ -219,13 +261,13 @@ export default function CropDetails() {
         <div className="bg-white/85 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white/80 shadow-md">
           <div className="flex items-center gap-3 text-emerald-700 font-bold text-xs uppercase tracking-wider mb-2">
             <BookOpen className="w-4 h-4 text-emerald-600" />
-            Standard Agronomy Parameters &amp; Schedules
+            {t('crop_lifecycle', 'Standard Agronomy Parameters & Schedules')}
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Crop Details &amp; Cultivation Specifications
+            {t('crop_details', 'Crop Details & Cultivation Specifications')}
           </h1>
           <p className="text-slate-600 text-sm md:text-base mt-2 max-w-3xl leading-relaxed">
-            Essential agronomic parameters, soil requirements, recommended fertilizer dosages (NPK+Zn), and critical irrigation windows.
+            {t('agronomic_guide', 'Essential agronomic parameters, soil requirements, recommended fertilizer dosages (NPK+Zn), and critical irrigation windows.')}
           </p>
 
           {/* Crop Selector Tabs */}

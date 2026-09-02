@@ -29,17 +29,10 @@ const ROLES: RoleOption[] = [
   },
   {
     id: 'administrator',
-    title: 'Administrator',
+    title: 'Agriculture Extension Officer',
     emoji: '🧑‍💼',
-    subtitle: 'Manage farmers & distress alerts',
+    subtitle: 'Manage farmers, telemetry & distress triage',
     badge: 'Agri Officers',
-  },
-  {
-    id: 'bank',
-    title: 'Bank / Insurance',
-    emoji: '🏦',
-    subtitle: 'Financial & crop insurance data',
-    badge: 'Financial',
   },
 ];
 

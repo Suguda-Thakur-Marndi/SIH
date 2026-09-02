@@ -1,4 +1,4 @@
-export type UserRole = 'farmer' | 'administrator' | 'bank';
+export type UserRole = 'farmer' | 'administrator';
 
 export interface UserSession {
   id: string;
@@ -36,19 +36,6 @@ export interface AdminRegistrationData {
   state: string;
   district: string;
   administratorId: string;
-}
-
-export interface BankRegistrationData {
-  fullName: string;
-  mobileNumber: string;
-  officialEmail: string;
-  password: string;
-  organizationName: string;
-  organizationType: 'Bank' | 'Insurance';
-  employeeId: string;
-  branch: string;
-  state: string;
-  district: string;
 }
 
 export interface StoredUserAccount {
@@ -101,24 +88,6 @@ const DEFAULT_DEMO_ACCOUNTS: StoredUserAccount[] = [
       administratorId: 'AGRI-OD-8821',
       state: 'Odisha',
       district: 'Cuttack',
-    },
-  },
-  {
-    id: 'usr_bank_demo_1',
-    role: 'bank',
-    fullName: 'Meera Patnaik',
-    mobileNumber: '9876543212',
-    email: 'bank@sbi.co.in',
-    passwordHash: 'Password123!',
-    accountStatus: 'active',
-    createdAt: new Date().toISOString(),
-    metadata: {
-      organizationName: 'State Bank of India',
-      organizationType: 'Bank',
-      employeeId: 'SBI-AGRI-9182',
-      branch: 'Bhubaneswar Main Branch',
-      state: 'Odisha',
-      district: 'Khordha',
     },
   },
 ];
@@ -208,9 +177,7 @@ export const smartCropAuth = {
   getDashboardRoute(role: UserRole): string {
     switch (role) {
       case 'administrator':
-        return '/admin/dashboard';
-      case 'bank':
-        return '/bank-portal/dashboard';
+        return '/officer-dashboard';
       case 'farmer':
       default:
         return '/dashboard';
@@ -541,67 +508,6 @@ export const smartCropAuth = {
     const session: UserSession = {
       id: userId,
       role: 'administrator',
-      fullName: data.fullName.trim(),
-      email: cleanEmail,
-      mobileNumber: cleanPhone,
-      accountStatus: 'pending',
-      metadata,
-    };
-
-    this.saveSession(session);
-    return session;
-  },
-
-  /**
-   * Register Bank / Insurance Account
-   */
-  async registerBank(data: BankRegistrationData): Promise<UserSession> {
-    const cleanEmail = data.officialEmail.trim().toLowerCase();
-    if (!isValidEmail(cleanEmail)) {
-      throw new Error('Please enter a valid official email address.');
-    }
-
-    const cleanPhone = normalizeIndianPhone(data.mobileNumber);
-    if (!isValidIndianPhone(cleanPhone)) {
-      throw new Error('Please enter a valid 10-digit Indian mobile number.');
-    }
-
-    // Check duplicate
-    if (findStoredAccount(cleanEmail)) {
-      throw new Error('An account with this official email already exists. Please log in.');
-    }
-    if (findStoredAccount(cleanPhone)) {
-      throw new Error('An account with this mobile number already exists. Please log in.');
-    }
-
-    const userId = `bnk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    const metadata = {
-      organizationName: data.organizationName,
-      organizationType: data.organizationType,
-      employeeId: data.employeeId,
-      branch: data.branch,
-      state: data.state,
-      district: data.district,
-      officialEmail: cleanEmail,
-    };
-
-    const newAccount: StoredUserAccount = {
-      id: userId,
-      role: 'bank',
-      fullName: data.fullName.trim(),
-      email: cleanEmail,
-      mobileNumber: cleanPhone,
-      passwordHash: data.password,
-      accountStatus: 'pending',
-      createdAt: new Date().toISOString(),
-      metadata,
-    };
-
-    saveStoredAccount(newAccount);
-
-    const session: UserSession = {
-      id: userId,
-      role: 'bank',
       fullName: data.fullName.trim(),
       email: cleanEmail,
       mobileNumber: cleanPhone,

@@ -6,21 +6,26 @@ const PUBLIC_PATHS = [
   '/',
   '/authentication',
   '/onboarding',
+  '/dashboard',
+  '/crop-monitoring',
+  '/crop-details',
+  '/risk-details',
+  '/recommended-actions',
+  '/alternative-crop',
+  '/full-crop-guide',
   '/market',
   '/schemes',
-  '/full-crop-guide',
-  '/alternative-crop',
-  '/financial-support',
-  '/financial-support/list',
-  '/financial-support/detail',
-  '/financial-support/acknowledgement',
   '/ai-chat',
+  '/farmer-profile',
+  '/notifications',
   '/unauthorized',
   '/admin/dashboard',
-  '/officer-dashboard/map',
-  '/agriculture-officer-dashboard',
   '/officer-dashboard',
+  '/officer-dashboard/analytics',
+  '/officer-dashboard/map',
   '/officer-dashboard/farmers',
+  '/officer-dashboard/interventions',
+  '/officer-dashboard/settings',
 ];
 
 // Define public API route prefixes
@@ -28,32 +33,26 @@ const PUBLIC_API_PREFIXES = [
   '/api/auth/login',
   '/api/auth/register',
   '/api/auth/logout',
-  '/api/farmer/register',
-  '/api/banks/register',
+  '/api/farmer',
   '/api/db-check',
-  '/api/facilities',
   '/api/translate',
   '/api/sarvam',
   '/api/filter',
   '/api/locate',
   '/api/ai/',
-  '/api/officer/farmers',
-  '/api/officer/analytics',
-  '/api/officer/dashboard',
+  '/api/agentic',
+  '/api/geocode',
+  '/api/officer',
+  '/api/notifications',
+  '/api/risk',
+  '/api/disaster',
+  '/api/test-sms',
 ];
 
 // Admin / Officer only routes
 const ADMIN_ROUTE_PREFIXES = [
   '/admin/settings',
   '/government/admin',
-];
-
-// Bank Partner only routes
-const BANK_ROUTE_PREFIXES = [
-  '/bank',
-  '/bank-portal',
-  '/bank-insurance',
-  '/api/banks',
 ];
 
 export default function middleware(req: NextRequest) {
@@ -75,7 +74,7 @@ export default function middleware(req: NextRequest) {
     PUBLIC_PATHS.includes(pathname) ||
     pathname.startsWith('/schemes/') ||
     pathname.startsWith('/full-crop-guide') ||
-    pathname.startsWith('/financial-support');
+    pathname.startsWith('/officer-dashboard/');
 
   // 3. Extract auth credentials from cookies or Authorization header
   const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
@@ -118,9 +117,7 @@ export default function middleware(req: NextRequest) {
   if (isAuthenticated && pathname === '/authentication') {
     let dashboardUrl = '/dashboard';
     if (userRole === 'administrator') {
-      dashboardUrl = '/admin/dashboard';
-    } else if (userRole === 'bank') {
-      dashboardUrl = '/bank-portal/dashboard';
+      dashboardUrl = '/officer-dashboard';
     }
     return NextResponse.redirect(new URL(dashboardUrl, req.url));
   }
@@ -158,23 +155,6 @@ export default function middleware(req: NextRequest) {
           error: {
             code: 'forbidden',
             message: 'Access denied. Administrator / Agriculture Officer privileges required.',
-          },
-        },
-        { status: 403 }
-      );
-    }
-    return NextResponse.redirect(new URL('/unauthorized', req.url));
-  }
-
-  // 8. RBAC: Bank Partner routes
-  const isBankRoute = BANK_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-  if (isBankRoute && userRole !== 'bank' && userRole !== 'administrator') {
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'forbidden',
-            message: 'Access denied. Bank Partner privileges required.',
           },
         },
         { status: 403 }

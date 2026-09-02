@@ -4,6 +4,7 @@ import React from 'react';
 import { VoiceButton } from './VoiceButton';
 import { EligibilityBadge } from './EligibilityBadge';
 
+import { useLanguage } from '@/lib/language-context';
 interface SchemeHeroProps {
   farmerName: string;
   district: string;
@@ -25,6 +26,7 @@ export const SchemeHero: React.FC<SchemeHeroProps> = ({
   isSimpleText,
   onToggleSimpleText,
 }) => {
+  const { t } = useLanguage();
   const narrationText = `ନମସ୍କାର ${farmerName}। ଆପଣଙ୍କ ଫସଲ ${crop}, ଜମି ${landArea} ଏବଂ ମୟୂରଭଞ୍ଜ ଜିଲ୍ଲା ଆଧାରରେ ଆପଣଙ୍କ ପାଇଁ ${matchCount} ଟି ସରକାରୀ ଯୋଜନା ଉପଲବ୍ଧ ଅଛି। ସର୍ବାଧିକ ${topMatchPercent} ପ୍ରତିଶତ ଯୋଗ୍ୟତା ଅଛି।`;
 
   return (
@@ -35,7 +37,7 @@ export const SchemeHero: React.FC<SchemeHeroProps> = ({
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1A1A1A] text-[#CFE362] text-xs font-bold mb-3 shadow-sm">
               <span>🏛️</span>
-              <span>Government Schemes & Subsidies</span>
+              <span>{t('government_schemes_subsidies', 'Government Schemes & Subsidies')}{' '}</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-[#1A1A1A] tracking-tight">
               Support for you

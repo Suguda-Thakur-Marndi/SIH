@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useLanguage } from "@/lib/language-context";
 import { CropMarketInfo, Market } from "../types";
 import { calculateNetRealization, formatCurrency } from "../marketService";
 
@@ -21,6 +22,7 @@ export const BestMarketRecommendation: React.FC<BestMarketRecommendationProps> =
   onOpenMarket,
   onOpenCompareAll,
 }) => {
+  const { t } = useLanguage();
   if (!bestMarket) return null;
 
   const bestNet = calculateNetRealization(bestMarket.pricePerQuintal, bestMarket.transportCostPerQuintal);
@@ -45,10 +47,10 @@ export const BestMarketRecommendation: React.FC<BestMarketRecommendationProps> =
         <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 sm:pb-5 border-b border-white/10">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-0.5 sm:py-1 rounded-full bg-amber-400 text-zinc-950 font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-sm">
-              <span>🏆</span> Best Market For Your Crop
+              <span>🏆</span> {t('best_market_for_your_crop', 'Best Market For Your Crop')}
             </span>
             <span className="text-[10px] sm:text-xs text-emerald-300/90 font-medium hidden xs:inline">
-              Max Take-Home Cash
+              {t('max_takehome_cash', 'Max Take-Home Cash')}
             </span>
           </div>
 
@@ -85,7 +87,7 @@ export const BestMarketRecommendation: React.FC<BestMarketRecommendationProps> =
               {/* Gross Price */}
               <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/5">
                 <span className="block text-[9px] sm:text-[11px] font-bold text-zinc-400 uppercase tracking-wider truncate">
-                  Mandi Price
+                  {t('mandi_price_label', 'Mandi Price')}
                 </span>
                 <span className="block text-base sm:text-2xl font-black text-white mt-0.5">
                   {formatCurrency(bestMarket.pricePerQuintal)}
@@ -104,7 +106,7 @@ export const BestMarketRecommendation: React.FC<BestMarketRecommendationProps> =
               {/* Estimated Transport */}
               <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/5">
                 <span className="block text-[9px] sm:text-[11px] font-bold text-amber-300 uppercase tracking-wider truncate">
-                  Est. Freight
+                  {t('est_freight', 'Est. Freight')}
                 </span>
                 <span className="block text-base sm:text-2xl font-black text-amber-300 mt-0.5">
                   {formatCurrency(bestMarket.transportCostPerQuintal)}
@@ -136,7 +138,7 @@ export const BestMarketRecommendation: React.FC<BestMarketRecommendationProps> =
           <div className="lg:col-span-5 flex flex-col justify-center">
             <div className="relative rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-4 sm:p-7 shadow-xl border border-emerald-400/40 text-center">
               <span className="inline-block text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-950 bg-emerald-200 px-2.5 py-0.5 sm:py-1 rounded-full shadow-xs mb-1 sm:mb-2">
-                Estimated Net Realization
+                {t('estimated_net_realization', 'Estimated Net Realization')}
               </span>
 
               <div className="flex items-baseline justify-center gap-1 my-1 sm:my-2">
@@ -152,13 +154,13 @@ export const BestMarketRecommendation: React.FC<BestMarketRecommendationProps> =
 
               <div className="mt-3 pt-3 border-t border-emerald-400/30 grid grid-cols-2 gap-2 text-left text-[11px] sm:text-xs">
                 <div>
-                  <span className="text-emerald-200 block text-[10px]">Gross vs MSP:</span>
+                  <span className="text-emerald-200 block text-[10px]">{t('gross_vs_msp_label', 'Gross vs MSP:')}</span>
                   <span className={`font-extrabold ${mspDiff >= 0 ? "text-emerald-100" : "text-amber-200"}`}>
                     {mspDiff >= 0 ? `+₹${mspDiff} Above` : `−₹${Math.abs(mspDiff)} Below`}
                   </span>
                 </div>
                 <div>
-                  <span className="text-emerald-200 block text-[10px]">Net vs MSP:</span>
+                  <span className="text-emerald-200 block text-[10px]">{t('net_vs_msp_label', 'Net vs MSP:')}</span>
                   <span className={`font-extrabold ${netVsMspDiff >= 0 ? "text-emerald-100" : "text-amber-200"}`}>
                     {netVsMspDiff >= 0 ? `+₹${netVsMspDiff}` : `−₹${Math.abs(netVsMspDiff)}`}
                   </span>
@@ -171,14 +173,14 @@ export const BestMarketRecommendation: React.FC<BestMarketRecommendationProps> =
                   onClick={() => onOpenMarket(bestMarket)}
                   className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 sm:py-3 px-4 rounded-xl bg-zinc-950 hover:bg-zinc-900 text-white font-bold text-xs sm:text-sm shadow-md active:scale-95 transition-all border border-zinc-800"
                 >
-                  <span>View Mandi Details</span>
+                  <span>{t('view_mandi_details', 'View Mandi Details')}</span>
                   <span>→</span>
                 </button>
                 <button
                   onClick={onOpenCompareAll}
                   className="w-full inline-flex items-center justify-center gap-1 py-2.5 sm:py-3 px-4 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs sm:text-sm backdrop-blur-sm transition-all border border-white/25 active:scale-95"
                 >
-                  <span>Compare All</span>
+                  <span>{t('compare_all', 'Compare All')}</span>
                 </button>
               </div>
             </div>

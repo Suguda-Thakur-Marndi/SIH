@@ -4,6 +4,7 @@ import React from "react";
 import { CropMarketInfo, Market, ComputedMarketMetrics } from "../types";
 import { formatCurrency } from "../marketService";
 
+import { useLanguage } from '@/lib/language-context';
 interface NetRealizationCalculatorProps {
   currentCrop: CropMarketInfo;
   bestMarket: Market | null;
@@ -21,6 +22,7 @@ export const NetRealizationCalculator: React.FC<NetRealizationCalculatorProps> =
   onQuantityChange,
   marketsWithMetrics,
 }) => {
+  const { t } = useLanguage();
   if (!bestMarket) return null;
 
   return (
@@ -29,8 +31,7 @@ export const NetRealizationCalculator: React.FC<NetRealizationCalculatorProps> =
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-lg sm:text-2xl font-black text-zinc-900 tracking-tight flex items-center gap-1.5">
-              <span>💰</span> Batch Profit Estimator
-            </h2>
+              <span>💰</span> {t('batch_profit_estimator', 'Batch Profit Estimator')}{' '}</h2>
             <span className="bg-amber-100 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full border border-amber-300">
               Interactive
             </span>
@@ -65,7 +66,7 @@ export const NetRealizationCalculator: React.FC<NetRealizationCalculatorProps> =
         <div className="lg:col-span-6 p-4 sm:p-5 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between gap-2">
             <label htmlFor="harvest-qty-slider" className="text-xs font-bold uppercase tracking-wider text-zinc-700">
-              Harvest Quantity:
+              {t('harvest_quantity', 'Harvest Quantity:')}
             </label>
             <div className="flex items-center gap-1.5">
               <input
@@ -102,7 +103,7 @@ export const NetRealizationCalculator: React.FC<NetRealizationCalculatorProps> =
           <div className="p-3 rounded-xl bg-emerald-100/70 border border-emerald-300 text-emerald-950 text-xs flex items-start gap-2">
             <span className="text-sm shrink-0">💡</span>
             <div className="leading-snug">
-              <span className="font-bold">Golden Rule:</span> Compare total in-hand cash after freight, not just headline mandi bids.
+              <span className="font-bold">{t('golden_rule', 'Golden Rule:')}{' '}</span> Compare total in-hand cash after freight, not just headline mandi bids.
             </div>
           </div>
         </div>
@@ -112,7 +113,7 @@ export const NetRealizationCalculator: React.FC<NetRealizationCalculatorProps> =
           {/* Gross Total */}
           <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-zinc-200 text-center shadow-xs">
             <span className="text-[10px] sm:text-[11px] font-bold text-zinc-500 uppercase tracking-wider block">
-              Gross Mandi Revenue
+              {t('gross_mandi_revenue', 'Gross Mandi Revenue')}
             </span>
             <span className="text-lg sm:text-2xl font-extrabold text-zinc-900 block my-0.5">
               {formatCurrency(bestMarket.pricePerQuintal * quantityQtl)}
@@ -125,7 +126,7 @@ export const NetRealizationCalculator: React.FC<NetRealizationCalculatorProps> =
           {/* Transport Total */}
           <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-amber-50/80 border border-amber-200 text-center shadow-xs">
             <span className="text-[10px] sm:text-[11px] font-bold text-amber-800 uppercase tracking-wider block">
-              Total Freight Cost
+              {t('total_freight_cost', 'Total Freight Cost')}
             </span>
             <span className="text-lg sm:text-2xl font-extrabold text-amber-700 block my-0.5">
               −{formatCurrency(bestMarket.transportCostPerQuintal * quantityQtl)}
@@ -138,7 +139,7 @@ export const NetRealizationCalculator: React.FC<NetRealizationCalculatorProps> =
           {/* Net Profit in Hand */}
           <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-700 to-teal-800 text-white text-center shadow-md">
             <span className="text-[10px] sm:text-[11px] font-bold text-emerald-200 uppercase tracking-wider block">
-              In-Hand Net Cash
+              {t('inhand_net_cash', 'In-Hand Net Cash')}
             </span>
             <span className="text-xl sm:text-2xl font-black text-white block my-0.5">
               {formatCurrency((bestMarket.pricePerQuintal - bestMarket.transportCostPerQuintal) * quantityQtl)}

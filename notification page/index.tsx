@@ -10,7 +10,9 @@ import { useNotificationStore } from './store';
 import VoiceButton from '../Government equipment schemes/components/VoiceButton';
 import { NotificationCategory, NotificationItem } from './types';
 
+import { useLanguage } from '@/lib/language-context';
 export default function NotificationsHub() {
+  const { t } = useLanguage();
   const { notifications, activeFilter, unreadCount, setFilter, fetchNotifications, loading } = useNotificationStore();
 
   // Fetch from RDS on mount
@@ -94,7 +96,7 @@ export default function NotificationsHub() {
                 <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-white/90 shadow-sm p-3 text-center">
                   <div className="flex items-center justify-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span className="text-xs font-bold text-emerald-900">Connected to AWS RDS</span>
+                    <span className="text-xs font-bold text-emerald-900">{t('connected_to_aws_rds', 'Connected to AWS RDS')}{' '}</span>
                   </div>
                   <p className="text-[10px] text-slate-600 mt-1">Real-time notification feed</p>
                 </div>
@@ -113,7 +115,7 @@ export default function NotificationsHub() {
                 {loading && (
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30">
                     <div className="w-3 h-3 border-2 border-emerald-300 border-t-emerald-700 rounded-full animate-spin"></div>
-                    <span className="text-xs font-bold text-emerald-900">Fetching from RDS...</span>
+                    <span className="text-xs font-bold text-emerald-900">{t('fetching_from_rds', 'Fetching from RDS...')}{' '}</span>
                   </div>
                 )}
                 <div className="ml-auto">

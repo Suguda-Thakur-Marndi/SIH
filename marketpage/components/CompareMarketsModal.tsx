@@ -4,6 +4,7 @@ import React from "react";
 import { CropMarketInfo, Market, ComputedMarketMetrics } from "../types";
 import { formatCurrency } from "../marketService";
 
+import { useLanguage } from '@/lib/language-context';
 interface CompareMarketsModalProps {
   currentCrop: CropMarketInfo;
   marketsWithMetrics: { market: Market; metrics: ComputedMarketMetrics }[];
@@ -21,6 +22,7 @@ export const CompareMarketsModal: React.FC<CompareMarketsModalProps> = ({
   onClose,
   onSelectMarket,
 }) => {
+  const { t } = useLanguage();
   if (!isOpen) return null;
 
   const sorted = [...marketsWithMetrics].sort(
@@ -48,7 +50,7 @@ export const CompareMarketsModal: React.FC<CompareMarketsModalProps> = ({
               <span>MSP {formatCurrency(currentCrop.msp)}/qtl</span>
             </div>
             <h2 className="text-lg sm:text-2xl font-black tracking-tight">
-              All Regional Mandis Matrix
+              {t('all_regional_mandis_matrix', 'All Regional Mandis Matrix')}
             </h2>
             <p className="text-[11px] sm:text-xs text-zinc-300 mt-0.5">
               Ranked by Net Realization for {quantityQtl} Qtl batch.
@@ -127,12 +129,12 @@ export const CompareMarketsModal: React.FC<CompareMarketsModalProps> = ({
               <thead>
                 <tr className="border-b border-zinc-200 text-[11px] font-black uppercase tracking-wider text-zinc-500 bg-zinc-50">
                   <th className="py-3 px-3 rounded-l-xl">Rank</th>
-                  <th className="py-3 px-3">Mandi Yard</th>
+                  <th className="py-3 px-3">{t('mandi_yard', 'Mandi Yard')}{' '}</th>
                   <th className="py-3 px-3">Distance</th>
-                  <th className="py-3 px-3 text-right">Gross Price</th>
+                  <th className="py-3 px-3 text-right">{t('gross_price', 'Gross Price')}{' '}</th>
                   <th className="py-3 px-3 text-right">Freight</th>
                   <th className="py-3 px-4 text-right bg-emerald-50 font-black text-emerald-950">
-                    Net Realization
+                    {t('net_realization', 'Net Realization')}
                   </th>
                   <th className="py-3 px-3 text-right">Total Net ({quantityQtl} Qtl)</th>
                   <th className="py-3 px-3 text-center">vs MSP</th>
@@ -238,7 +240,7 @@ export const CompareMarketsModal: React.FC<CompareMarketsModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold transition-colors shrink-0 text-xs"
           >
-            Close
+            {t("close", "Close")}
           </button>
         </div>
       </div>

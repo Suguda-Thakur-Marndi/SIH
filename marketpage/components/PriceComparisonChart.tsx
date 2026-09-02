@@ -4,6 +4,7 @@ import React from "react";
 import { CropMarketInfo, Market, ComputedMarketMetrics } from "../types";
 import { formatCurrency } from "../marketService";
 
+import { useLanguage } from '@/lib/language-context';
 interface PriceComparisonChartProps {
   currentCrop: CropMarketInfo;
   marketsWithMetrics: { market: Market; metrics: ComputedMarketMetrics }[];
@@ -15,6 +16,7 @@ export const PriceComparisonChart: React.FC<PriceComparisonChartProps> = ({
   marketsWithMetrics,
   onOpenMarket,
 }) => {
+  const { t } = useLanguage();
   if (!marketsWithMetrics.length) return null;
 
   const maxPrice = Math.max(
@@ -28,8 +30,7 @@ export const PriceComparisonChart: React.FC<PriceComparisonChartProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-lg sm:text-2xl font-black text-zinc-900 tracking-tight flex items-center gap-1.5">
-              <span>📊</span> Gross Price vs In-Hand Net
-            </h2>
+              <span>📊</span> {t('gross_price_vs_inhand_net', 'Gross Price vs In-Hand Net')}{' '}</h2>
             <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded-full border border-emerald-300">
               Benchmark
             </span>
@@ -43,11 +44,11 @@ export const PriceComparisonChart: React.FC<PriceComparisonChartProps> = ({
         <div className="flex items-center gap-3 text-[11px] sm:text-xs font-bold text-zinc-600">
           <div className="flex items-center gap-1">
             <span className="w-2.5 h-2.5 rounded bg-zinc-400"></span>
-            <span>Gross Price</span>
+            <span>{t('gross_price', 'Gross Price')}{' '}</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-2.5 h-2.5 rounded bg-emerald-600"></span>
-            <span>Net In-Hand</span>
+            <span>{t('net_inhand', 'Net In-Hand')}{' '}</span>
           </div>
         </div>
       </div>

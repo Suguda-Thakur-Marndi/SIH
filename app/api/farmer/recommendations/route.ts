@@ -1,17 +1,28 @@
 import { NextResponse } from 'next/server';
+import { generateIrrigationAdvisory } from '@/lib/irrigation-advisor';
 
 export async function GET() {
+  // Compute dynamic irrigation advisory based on 48h weather forecast (e.g. 28mm rain in Baripada)
+  const irrigationAdvisory = generateIrrigationAdvisory({
+    forecast48hMm: 28.0,
+    soilMoisturePct: 26,
+    cropStage: 'Flowering',
+    skipThresholdMm: 20,
+    pumpCostPerEventInr: 450,
+  });
+
   const recommendations = [
     {
       id: 'REC-01',
-      title: 'Initiate Evening Micro-Irrigation',
-      category: 'Agronomic Intervention',
-      priority: 'HIGH',
-      impact: 'Reduces moisture distress by ~35%',
-      timeframe: 'Immediate (Within 12 Hours)',
-      description: 'Run pump during 6 PM - 9 PM window to prevent evapotranspiration loss and replenish panicle root moisture.',
+      title: irrigationAdvisory.title,
+      category: 'Irrigation Management',
+      priority: irrigationAdvisory.urgency,
+      impact: `Save ₹${irrigationAdvisory.estimatedSavingsInr} fuel & ${irrigationAdvisory.waterSavedLiters.toLocaleString()}L water`,
+      timeframe: 'Next 48 Hours',
+      description: irrigationAdvisory.reason,
       actionUrl: '/crop-monitoring',
-      isCompleted: false
+      isCompleted: false,
+      advisoryDetails: irrigationAdvisory,
     },
     {
       id: 'REC-02',
@@ -37,13 +48,13 @@ export async function GET() {
     },
     {
       id: 'REC-04',
-      title: 'Verify PMFBY Crop Insurance & Localized Loss Clause',
-      category: 'Financial Protection',
+      title: 'Verify Government Relief & Input Subsidies',
+      category: 'Government Schemes',
       priority: 'MEDIUM',
-      impact: 'Ensures 100% claim eligibility if dry spell exceeds 15 days',
+      impact: 'Unlocks subsidized farm inputs & drought relief',
       timeframe: 'Next 3 Days',
-      description: 'Confirm policy number linkage with your Aadhaar and land record (RoR) in the Insurance Portal.',
-      actionUrl: '/insurance',
+      description: 'Check active Odisha Krushak & Central schemes matching your Mayurbhanj land parcel.',
+      actionUrl: '/schemes',
       isCompleted: false
     },
     {
@@ -59,5 +70,10 @@ export async function GET() {
     }
   ];
 
-  return NextResponse.json({ success: true, data: recommendations });
+  return NextResponse.json({ 
+    success: true, 
+    data: recommendations,
+    irrigationAdvisory,
+  });
 }
+

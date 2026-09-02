@@ -26,7 +26,9 @@ import { MarketDetailsModal } from "./components/MarketDetailsModal";
 import { CompareMarketsModal } from "./components/CompareMarketsModal";
 import { MarketLoadingSkeleton, MarketErrorState } from "./components/MarketStateViews";
 
+import { useLanguage } from '@/lib/language-context';
 export default function MarketPage() {
+  const { t } = useLanguage();
   // ── 1. State ─────────────────────────────────────────────────────────────
   const [crops] = useState<CropMarketInfo[]>(REGISTERED_CROPS_MARKET);
   const [selectedCropId, setSelectedCropId] = useState<string>(REGISTERED_CROPS_MARKET[0].id);
@@ -182,11 +184,11 @@ export default function MarketPage() {
         <div className="flex items-center justify-between flex-wrap gap-2 pb-0.5">
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full sm:w-auto">
             {[
-              { id: "all", label: "🌟 All Insights" },
-              { id: "mandis", label: "🏪 Nearby Mandis" },
-              { id: "calculator", label: "💰 Profit Estimator" },
-              { id: "trends", label: "📈 Price Trends" },
-              { id: "logistics", label: "🚚 Logistics" },
+              { id: "all", label: t("all_insights", "🌟 All Insights") },
+              { id: "mandis", label: t("nearby_mandis", "🏪 Nearby Mandis") },
+              { id: "calculator", label: t("profit_estimator", "💰 Profit Estimator") },
+              { id: "trends", label: t("price_trends", "📈 Price Trends") },
+              { id: "logistics", label: t("logistics", "🚚 Logistics") },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -203,7 +205,7 @@ export default function MarketPage() {
           </div>
 
           <div className="text-[11px] sm:text-xs text-zinc-600 font-medium flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-start">
-            <span>Registered Plot:</span>
+            <span>{t('registered_plot', 'Registered Plot:')}{' '}</span>
             <span className="font-bold text-zinc-900 bg-white/85 px-2 py-0.5 rounded-md border border-zinc-300 truncate max-w-[200px] sm:max-w-none">
               Plot #4, Baripada, Mayurbhanj
             </span>
@@ -308,7 +310,7 @@ export default function MarketPage() {
           }`}
         >
           <span className="text-sm">🌟</span>
-          <span>Overview</span>
+          <span>{t("overview", "Overview")}</span>
         </button>
         <button
           onClick={() => setActiveTab("mandis")}
@@ -317,7 +319,7 @@ export default function MarketPage() {
           }`}
         >
           <span className="text-sm">🏪</span>
-          <span>Mandis</span>
+          <span>{t("mandis", "Mandis")}</span>
         </button>
         <button
           onClick={() => setActiveTab("calculator")}
@@ -326,7 +328,7 @@ export default function MarketPage() {
           }`}
         >
           <span className="text-sm">💰</span>
-          <span>Calculator</span>
+          <span>{t("calculator", "Calculator")}</span>
         </button>
         <button
           onClick={() => setIsCompareAllOpen(true)}

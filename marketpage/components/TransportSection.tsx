@@ -5,6 +5,7 @@ import { Market } from "../types";
 import { TRANSPORT_MODES } from "../mockData";
 import { formatCurrency } from "../marketService";
 
+import { useLanguage } from '@/lib/language-context';
 interface TransportSectionProps {
   markets: Market[];
   quantityQtl: number;
@@ -14,20 +15,20 @@ export const TransportSection: React.FC<TransportSectionProps> = ({
   markets,
   quantityQtl,
 }) => {
+  const { t } = useLanguage();
   return (
     <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-white/85 backdrop-blur-xl border border-emerald-800/15 p-4 sm:p-7 shadow-xs">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3.5 sm:pb-5 border-b border-zinc-200">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-lg sm:text-2xl font-black text-zinc-900 tracking-tight flex items-center gap-1.5">
-              <span>🚚</span> Logistics & Estimated Freight
-            </h2>
+              <span>🚚</span> {t('logistics_estimated_freight', 'Logistics & Estimated Freight')}{' '}</h2>
             <span className="bg-amber-100 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full border border-amber-300">
               Freight
             </span>
           </div>
           <p className="text-xs sm:text-sm text-zinc-600 mt-0.5">
-            Distance-based freight from your plot (Baripada Block) to regional mandis.
+            {t('distancebased_freight_from_your_plot_bar', 'Distance-based freight from your plot (Baripada Block) to regional mandis.')}
           </p>
         </div>
       </div>
@@ -36,7 +37,7 @@ export const TransportSection: React.FC<TransportSectionProps> = ({
         {/* Left: Transport Comparison Table */}
         <div className="lg:col-span-6 space-y-2.5">
           <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-700">
-            Mandi Freight Breakdown
+            {t('mandi_freight_breakdown', 'Mandi Freight Breakdown')}
           </h3>
           <div className="divide-y divide-zinc-200/80 rounded-xl sm:rounded-2xl border border-zinc-200 bg-zinc-50 overflow-hidden">
             {markets.map((m) => {
@@ -75,7 +76,7 @@ export const TransportSection: React.FC<TransportSectionProps> = ({
         {/* Right: Available Transport Vehicle Options */}
         <div className="lg:col-span-6 space-y-2.5">
           <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-700">
-            Recommended Freight Vehicles
+            {t('recommended_freight_vehicles', 'Recommended Freight Vehicles')}
           </h3>
           <div className="grid grid-cols-1 gap-2.5">
             {TRANSPORT_MODES.map((veh, idx) => (

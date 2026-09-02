@@ -4,6 +4,7 @@ import React from "react";
 import { CropMarketInfo, Market, ComputedMarketMetrics } from "../types";
 import { formatCurrency } from "../marketService";
 
+import { useLanguage } from '@/lib/language-context';
 interface MSPComparisonSectionProps {
   currentCrop: CropMarketInfo;
   marketsWithMetrics: { market: Market; metrics: ComputedMarketMetrics }[];
@@ -13,16 +14,16 @@ export const MSPComparisonSection: React.FC<MSPComparisonSectionProps> = ({
   currentCrop,
   marketsWithMetrics,
 }) => {
+  const { t } = useLanguage();
   return (
     <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-white/85 backdrop-blur-xl border border-emerald-800/15 p-4 sm:p-7 shadow-xs">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3.5 sm:pb-5 border-b border-zinc-200">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-lg sm:text-2xl font-black text-zinc-900 tracking-tight flex items-center gap-1.5">
-              <span>⚖️</span> Govt MSP Benchmark
-            </h2>
+              <span>⚖️</span> {t('govt_msp_benchmark', 'Govt MSP Benchmark')}{' '}</h2>
             <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full border border-blue-300">
-              MSP 2026-27
+              {t('msp_202627', 'MSP 2026-27')}
             </span>
           </div>
           <p className="text-xs sm:text-sm text-zinc-600 mt-0.5">
@@ -37,9 +38,9 @@ export const MSPComparisonSection: React.FC<MSPComparisonSectionProps> = ({
         <span className="text-base sm:text-xl shrink-0">⚠️</span>
         <div className="leading-snug">
           <span className="font-extrabold block text-amber-900">
-            Farmer Note on Net vs MSP:
+            {t('farmer_note_on_net_vs_msp', 'Farmer Note on Net vs MSP:')}
           </span>
-          A mandi gross price above MSP does not guarantee net profit above MSP if freight exceeds the premium. Always look at the <strong className="text-emerald-900 underline">Net Realization</strong>.
+          A mandi gross price above MSP does not guarantee net profit above MSP if freight exceeds the premium. Always look at the <strong className="text-emerald-900 underline">{t('net_realization', 'Net Realization')}</strong>.
         </div>
       </div>
 
@@ -67,28 +68,28 @@ export const MSPComparisonSection: React.FC<MSPComparisonSectionProps> = ({
                       : "bg-rose-100 text-rose-800"
                   }`}
                 >
-                  {metrics.isAboveMsp ? "✓ Above MSP" : "⚠ Below MSP"}
+                  {metrics.isAboveMsp ? `✓ ${t('above_msp', 'Above MSP')}` : `⚠ ${t('below_msp', 'Below MSP')}`}
                 </span>
               </div>
 
               <div className="mt-2.5 space-y-1.5 text-xs">
                 <div className="flex justify-between items-center">
-                  <span className="text-zinc-500 text-[11px]">Mandi Price:</span>
+                  <span className="text-zinc-500 text-[11px]">{t('mandi_price', 'Mandi Price:')}{' '}</span>
                   <span className="font-bold text-zinc-900">{formatCurrency(market.pricePerQuintal)}/qtl</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-zinc-500 text-[11px]">Govt MSP:</span>
+                  <span className="text-zinc-500 text-[11px]">{t('govt_msp', 'Govt MSP:')}{' '}</span>
                   <span className="font-semibold text-zinc-700">{formatCurrency(currentCrop.msp)}/qtl</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-zinc-500 text-[11px]">Gross vs MSP:</span>
+                  <span className="text-zinc-500 text-[11px]">{t('gross_vs_msp', 'Gross vs MSP:')}{' '}</span>
                   <span className={`font-bold ${grossDiff >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
                     {grossDiff >= 0 ? `+${formatCurrency(grossDiff)}` : `−${formatCurrency(Math.abs(grossDiff))}`}/qtl
                   </span>
                 </div>
 
                 <div className="pt-2 border-t border-zinc-200 flex justify-between items-center">
-                  <span className="font-bold text-zinc-800 text-[11px]">Net vs MSP:</span>
+                  <span className="font-bold text-zinc-800 text-[11px]">{t('net_vs_msp', 'Net vs MSP:')}{' '}</span>
                   <span
                     className={`font-black text-[11px] px-2 py-0.5 rounded ${
                       netDiff >= 0

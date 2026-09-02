@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import { processSmsAlert } from '@/lib/notifications/service';
 import { getRiskPriority } from '@/lib/notifications/rules';
+import { calculateFarmerTrend } from '@/lib/trend-calculator';
 
 /**
  * POST /api/risk/check-all
  * Scheduled job to evaluate distress risk across monitored farmers.
+ * Detects both:
+ *  1. Threshold crossings (LOW/MODERATE → HIGH/CRITICAL)
+ *  2. Rising trends (≥ 15-point increase over 7 days, regardless of band)
  */
 export async function POST(req: NextRequest) {
   // 1. Authorization check
@@ -27,17 +31,26 @@ export async function POST(req: NextRequest) {
     `);
 
     let alertsSent = 0;
+    let trendAlertsSent = 0;
 
     for (const farmer of farmers) {
-      // In a real app, we'd invoke the AI risk engine here to calculate a new score.
-      // For this MVP, we fetch the latest scores to detect if a threshold was crossed.
-
+      // Fetch the latest 2 scores for threshold-crossing detection
       const [scores]: any = await connection.query(`
-        SELECT overall_score, ai_explanation 
+        SELECT overall_score, ai_explanation, rainfall_risk, market_risk, loan_risk
         FROM risk_scores 
         WHERE farmer_id = ? 
         ORDER BY calculated_at DESC 
         LIMIT 2
+      `, [farmer.user_id]);
+
+      // Fetch the score from ~7 days ago for trend detection
+      const [scores7dAgo]: any = await connection.query(`
+        SELECT score AS overall_score, rainfall_risk, market_risk, loan_risk
+        FROM risk_scores 
+        WHERE farmer_id = ? 
+          AND created_at <= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        ORDER BY created_at DESC 
+        LIMIT 1
       `, [farmer.user_id]);
 
       if (scores.length > 0) {
@@ -47,7 +60,7 @@ export async function POST(req: NextRequest) {
         const currentPriority = getRiskPriority(currentScore);
         const previousPriority = getRiskPriority(previousScore);
 
-        // Threshold crossing detection: 
+        // --- Existing: Threshold crossing detection ---
         // Only send if we escalated into HIGH or CRITICAL from a lower band
         if (
           (currentPriority === 'HIGH' && previousPriority !== 'HIGH' && previousPriority !== 'CRITICAL') ||
@@ -80,10 +93,50 @@ export async function POST(req: NextRequest) {
             alertsSent++;
           }
         }
+
+        // --- New: Velocity-based rising trend detection ---
+        const score7dAgo = scores7dAgo.length > 0 ? scores7dAgo[0].overall_score : null;
+
+        const signalDeltas = (scores7dAgo.length > 0 && scores[0].rainfall_risk != null) ? {
+          rainfall_delta: (scores[0].rainfall_risk || 0) - (scores7dAgo[0].rainfall_risk || 0),
+          market_delta: (scores[0].market_risk || 0) - (scores7dAgo[0].market_risk || 0),
+          loan_delta: (scores[0].loan_risk || 0) - (scores7dAgo[0].loan_risk || 0),
+        } : undefined;
+
+        const trend = calculateFarmerTrend(currentScore, score7dAgo, signalDeltas);
+
+        if (trend.trending_up) {
+          // Only send rising-trend alert if we didn't already send a threshold alert
+          const alreadyAlerted = (
+            (currentPriority === 'HIGH' && previousPriority !== 'HIGH' && previousPriority !== 'CRITICAL') ||
+            (currentPriority === 'CRITICAL' && previousPriority !== 'CRITICAL')
+          );
+
+          if (!alreadyAlerted) {
+            const trendReasons = [
+              `Risk score rose ${trend.trend_delta_7d} points in 7 days`,
+              `Primary driver: ${trend.primary_signal_change}`,
+            ];
+
+            const trendResult = await processSmsAlert({
+              farmerId: farmer.user_id,
+              type: 'RISING_TREND',
+              priority: 'WARNING',
+              score: currentScore,
+              reasons: trendReasons,
+              language: farmer.language || 'en',
+              channel: 'SMS'
+            });
+
+            if (trendResult) {
+              trendAlertsSent++;
+            }
+          }
+        }
       }
     }
 
-    return NextResponse.json({ success: true, alertsSent });
+    return NextResponse.json({ success: true, alertsSent, trendAlertsSent });
   } catch (error: any) {
     console.error('Cron risk check error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -91,3 +144,5 @@ export async function POST(req: NextRequest) {
     if (connection) connection.release();
   }
 }
+
+

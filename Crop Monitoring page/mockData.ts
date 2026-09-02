@@ -588,12 +588,21 @@ export const WEATHER_FORECAST: WeatherDay[] = [
   }
 ];
 
-export function formatDateString(dateStr: string): string {
+export function formatDateString(
+  dateStr: string,
+  t?: (key: string, fallback?: string) => string
+): string {
   if (!dateStr) return "";
   try {
     const [y, m, d] = dateStr.split("-").map(Number);
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    return `${months[m - 1]} ${d}, ${y}`;
+    const monthKeys = [
+      "month_jan_short", "month_feb_short", "month_mar_short", "month_apr_short",
+      "month_may_short", "month_jun_short", "month_jul_short", "month_aug_short",
+      "month_sep_short", "month_oct_short", "month_nov_short", "month_dec_short"
+    ];
+    const defaultMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthName = t ? t(monthKeys[m - 1], defaultMonths[m - 1]) : defaultMonths[m - 1];
+    return `${monthName} ${d}, ${y}`;
   } catch {
     return dateStr;
   }
@@ -610,63 +619,227 @@ export function getDaysDifference(targetDateStr: string): number {
   }
 }
 
-export function getActivityTypeBadge(type: ActivityType): ActivityBadgeStyle {
+export function getActivityTypeBadge(
+  type: ActivityType,
+  t?: (key: string, fallback?: string) => string
+): ActivityBadgeStyle {
+  const tr = t || ((_k: string, fb?: string) => fb || _k);
   switch (type) {
     case "irrigation":
       return {
-        label: "Irrigation",
+        label: tr("irrigation", "Irrigation"),
         bg: "bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800",
         dot: "bg-blue-500",
         icon: "💧"
       };
     case "fertilizer":
       return {
-        label: "Nutrient / Fertilizer",
+        label: tr("fertilizer", "Nutrient / Fertilizer"),
         bg: "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
         dot: "bg-emerald-500",
         icon: "🧪"
       };
     case "inspection":
       return {
-        label: "Field Scouting",
+        label: tr("inspection", "Field Scouting"),
         bg: "bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800",
         dot: "bg-purple-500",
         icon: "🔍"
       };
     case "pest_control":
       return {
-        label: "Pest Management",
+        label: tr("pest_control", "Pest Management"),
         bg: "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800",
         dot: "bg-rose-500",
         icon: "🛡️"
       };
     case "weeding":
       return {
-        label: "Weed Control",
+        label: tr("opt_weeding", "Weed Control"),
         bg: "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800",
         dot: "bg-amber-500",
         icon: "🌾"
       };
     case "harvest":
       return {
-        label: "Harvest Operation",
+        label: tr("opt_harvest", "Harvest Operation"),
         bg: "bg-yellow-100 dark:bg-yellow-950/60 text-yellow-800 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700",
         dot: "bg-yellow-500",
         icon: "🚜"
       };
     case "stage_change":
       return {
-        label: "Stage Transition",
+        label: tr("event_stage_change", "Stage Transition"),
         bg: "bg-teal-100 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800",
         dot: "bg-teal-500",
         icon: "🌱"
       };
     default:
       return {
-        label: "Task",
+        label: tr("tasks", "Task"),
         bg: "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700",
         dot: "bg-zinc-500",
         icon: "📋"
       };
   }
 }
+
+export function getActivityTitle(
+  act: { title: string; titleKey?: string },
+  t: (key: string, fallback?: string) => string
+): string {
+  if (act.titleKey) return t(act.titleKey, act.title);
+  const keyMap: Record<string, string> = {
+    "Seed Sowing & Nursery Setup": "act_seed_sowing_nursery",
+    "Field Bunding & First Irrigation": "act_field_bunding_irrigation",
+    "Field Inspection & Tiller Count": "act_field_inspection_tiller",
+    "Irrigation Check & Water Level Monitoring": "act_irrigation_check_water_level",
+    "Zinc Sulphate Micronutrient Application": "act_zinc_sulphate_micronutrient",
+    "Weed Management (Cono-weeder Operation)": "act_weed_management_cono_weeder",
+    "Top Dressing Nitrogen (Urea 2nd Split)": "act_top_dressing_nitrogen_urea",
+    "Stem Borer & Leaf Folder Pheromone Trap Setup": "act_stem_borer_leaf_folder_trap",
+    "Mid-Season Irrigation & Drainage Cycle": "act_mid_season_irrigation_drainage",
+    "Panicle Initiation Stage Inspection": "act_panicle_initiation_inspection",
+    "0:52:34 Foliar Spray (Mono Potassium Phosphate)": "act_foliar_spray_mpp",
+    "Combined Harvesting Operation": "act_combined_harvesting_operation",
+    "Seed Sowing & Sulphur Application": "act_seed_sowing_sulphur",
+    "Thinning and First Hoeing": "act_thinning_first_hoeing",
+    "First Post-Sowing Irrigation": "act_first_post_sowing_irrigation",
+    "Aphid Surveillance & Neem Oil Spray": "act_aphid_surveillance_neem_oil",
+    "Seed Bed Preparation & Sowing": "act_seed_bed_prep_sowing",
+    "CRI Stage 1st Irrigation (Critical)": "act_cri_stage_irrigation"
+  };
+  const key = keyMap[act.title];
+  return key ? t(key, act.title) : act.title;
+}
+
+export function getCropName(
+  crop: { name: string },
+  t: (key: string, fallback?: string) => string
+): string {
+  if (crop.name.includes("Paddy")) return t("crop_paddy", crop.name);
+  if (crop.name.includes("Mustard")) return t("crop_mustard", crop.name);
+  if (crop.name.includes("Wheat")) return t("crop_wheat", crop.name);
+  if (crop.name.includes("Groundnut")) return t("crop_groundnut", crop.name);
+  return crop.name;
+}
+
+export function getCropType(
+  type: string,
+  t: (key: string, fallback?: string) => string
+): string {
+  if (type === "Cereal Grain") return t("cereal_grain", type);
+  if (type === "Oilseed Cash Crop") return t("oilseed_cash_crop", type);
+  if (type === "Oilseed Legume") return t("oilseed_legume", type);
+  return type;
+}
+
+export function getStageName(
+  name: string,
+  t: (key: string, fallback?: string) => string
+): string {
+  const normKey = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  return t(normKey, name);
+}
+
+export function getWeatherDayName(
+  dayName: string,
+  t: (key: string, fallback?: string) => string
+): string {
+  if (!dayName) return "";
+  const lower = dayName.toLowerCase();
+  if (lower === "today") return t("today", "Today");
+  if (lower === "tomorrow") return t("tomorrow", "Tomorrow");
+  return t(`day_${lower}`, t(lower, dayName));
+}
+
+export function translateWeatherAlert(
+  alert: string | undefined,
+  t: (key: string, fallback?: string, params?: Record<string, string | number>) => string,
+  weather?: Partial<WeatherDay>
+): string {
+  if (!alert) return "";
+
+  // 1. Thunderstorm alerts
+  if (alert.includes("Thunderstorm") || alert.includes("⛈️")) {
+    return t("alert_thunderstorm", alert);
+  }
+
+  // 2. Heavy rain / fertilizer leaching alerts
+  if (alert.includes("Heavy rain likely") || (alert.includes("Delay fertilizer") && alert.includes("leaching"))) {
+    const chanceMatch = alert.match(/(\d+)%\s*chance/i);
+    const chance = chanceMatch ? chanceMatch[1] : weather?.rainChance ? String(weather.rainChance) : "100";
+    return t(
+      "alert_heavy_rain_leaching",
+      `🌧️ Heavy rain likely (${chance}% chance). Delay fertilizer top-dressing to prevent leaching.`,
+      { chance }
+    );
+  }
+
+  // 3. Moderate to heavy rainfall alerts
+  if (alert.includes("Moderate to heavy rainfall") || alert.includes("Moderate rainfall")) {
+    const chanceMatch = alert.match(/(\d+)%\s*chance/i);
+    const chance = chanceMatch ? chanceMatch[1] : weather?.rainChance ? String(weather.rainChance) : "75";
+    return t(
+      "alert_heavy_rain",
+      `🌧️ Moderate to heavy rainfall (${chance}% chance) expected. Postpone foliar nutrient sprays.`,
+      { chance }
+    );
+  }
+
+  // 4. Rain expected / postpone foliar sprays
+  if (alert.includes("Rain expected") || alert.includes("Postpone foliar")) {
+    const chanceMatch = alert.match(/(\d+)%\s*chance/i);
+    const chance = chanceMatch ? chanceMatch[1] : weather?.rainChance ? String(weather.rainChance) : "60";
+    return t(
+      "alert_rain_expected",
+      `🌦️ Rain expected (${chance}% chance). Postpone foliar sprays.`,
+      { chance }
+    );
+  }
+
+  // 5. Rain forecast tomorrow
+  if (alert.includes("Rain forecast tomorrow")) {
+    const chanceMatch = alert.match(/(\d+)%\s*chance/i);
+    const chance = chanceMatch ? chanceMatch[1] : weather?.rainChance ? String(weather.rainChance) : "70";
+    return t(
+      "alert_rain_tomorrow",
+      `🌦️ Rain forecast tomorrow (${chance}% chance). Plan field tasks accordingly.`,
+      { chance }
+    );
+  }
+
+  // 6. Sunny day & urea top-dressing
+  if (alert.includes("urea top-dressing") || (alert.includes("Clear sunny day") && alert.includes("cono-weeder"))) {
+    return t("alert_sunny_urea", "☀️ Clear sunny day. Optimal timing for urea top-dressing & cono-weeder.");
+  }
+
+  // 7. Sunny good field window
+  if (alert.includes("Good field window") || (alert.includes("manual weeding") && alert.includes("scouting"))) {
+    return t("alert_sunny_good_window", "☀️ Good field window. Ideal for inspection, scouting & manual weeding.");
+  }
+
+  // 8. Clear skies tomorrow
+  if (alert.includes("Clear skies tomorrow")) {
+    return t("alert_clear_skies", "☀️ Clear skies tomorrow. Good window for top-dressing and mechanical operations.");
+  }
+
+  // 9. Partly cloudy / field inspection window
+  if (alert.includes("Partly cloudy") || alert.includes("Ideal morning window for field inspection")) {
+    return t("alert_partly_cloudy_window", "⛅ Partly cloudy. Good morning window for field inspection and soil testing.");
+  }
+
+  // 10. Humidity & fungal spores
+  if (alert.includes("relative humidity") || alert.includes("fungal spores")) {
+    const humMatch = alert.match(/(\d+)%/);
+    const humidity = humMatch ? humMatch[1] : weather?.humidity ? String(weather.humidity) : "85";
+    return t(
+      "alert_humidity_fungal",
+      `💧 Morning relative humidity ${humidity}% — favorable for fungal spores. Maintain drainage bunds.`,
+      { humidity }
+    );
+  }
+
+  return alert;
+}
+

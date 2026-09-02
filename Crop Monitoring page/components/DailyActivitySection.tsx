@@ -2,7 +2,8 @@
 
 import React, { useMemo } from "react";
 import { RegisteredCrop } from "../types";
-import { formatDateString, getActivityTypeBadge } from "../mockData";
+import { formatDateString, getActivityTypeBadge, getActivityTitle } from "../mockData";
+import { useLanguage } from "@/lib/language-context";
 
 interface DailyActivitySectionProps {
   currentCrop: RegisteredCrop;
@@ -15,6 +16,7 @@ export const DailyActivitySection: React.FC<DailyActivitySectionProps> = ({
   onToggleActivity,
   onSelectDate,
 }) => {
+  const { t } = useLanguage();
   const todaysActivities = useMemo(
     () => currentCrop.activities.filter((act) => act.date === "2026-08-25"),
     [currentCrop.activities]
@@ -37,21 +39,21 @@ export const DailyActivitySection: React.FC<DailyActivitySectionProps> = ({
         <div className="flex items-center justify-between pb-3 border-b border-white/50">
           <div>
             <h3 className="text-base font-bold text-zinc-800 flex items-center gap-2">
-              <span>⚡</span> Today&apos;s Action Checklist
+              <span>⚡</span> {t('today_action_checklist', "Today's Action Checklist")}
             </h3>
-            <p className="text-xs text-zinc-500">25 Aug 2026 — immediate field attention</p>
+            <p className="text-xs text-zinc-500">{formatDateString("2026-08-25", t)} — {t('immediate_field_attention', 'immediate field attention')}</p>
           </div>
           <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100/80 text-emerald-700 border border-emerald-200/50">
-            {todaysActivities.filter((a) => a.status === "completed").length}/{todaysActivities.length} Done
+            {todaysActivities.filter((a) => a.status === "completed").length}/{todaysActivities.length} {t('done_btn', 'Done')}
           </span>
         </div>
 
         {todaysActivities.length === 0 ? (
-          <p className="text-xs text-zinc-500 py-4 text-center">No tasks today.</p>
+          <p className="text-xs text-zinc-500 py-4 text-center">{t('no_tasks_today', 'No tasks today.')}</p>
         ) : (
           <div className="space-y-3">
             {todaysActivities.map((act) => {
-              const badge = getActivityTypeBadge(act.type);
+              const badge = getActivityTypeBadge(act.type, t);
               const isDone = act.status === "completed";
               return (
                 <div
@@ -75,7 +77,7 @@ export const DailyActivitySection: React.FC<DailyActivitySectionProps> = ({
                   <div className="space-y-0.5 flex-1">
                     <div className="flex items-center justify-between">
                       <h5 className={`text-sm font-bold ${isDone ? "line-through text-zinc-400" : "text-zinc-800"}`}>
-                        {act.title}
+                        {getActivityTitle(act, t)}
                       </h5>
                       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border bg-white/70 ${badge.bg}`}>
                         {act.time}
@@ -95,16 +97,16 @@ export const DailyActivitySection: React.FC<DailyActivitySectionProps> = ({
         <div className="flex items-center justify-between pb-3 border-b border-white/50">
           <div>
             <h3 className="text-base font-bold text-zinc-800 flex items-center gap-2">
-              <span>⏳</span> Upcoming Activities
+              <span>⏳</span> {t('upcoming_activities', 'Upcoming Activities')}
             </h3>
-            <p className="text-xs text-zinc-500">Next critical interventions</p>
+            <p className="text-xs text-zinc-500">{t('next_interventions', 'Next critical interventions')}</p>
           </div>
-          <span className="text-xs text-zinc-400 font-medium">Chronological</span>
+          <span className="text-xs text-zinc-400 font-medium">{t('chronological', 'Chronological')}</span>
         </div>
 
         <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
           {upcomingActivities.slice(0, 5).map((act) => {
-            const badge = getActivityTypeBadge(act.type);
+            const badge = getActivityTypeBadge(act.type, t);
             return (
               <div
                 key={act.id}
@@ -114,14 +116,14 @@ export const DailyActivitySection: React.FC<DailyActivitySectionProps> = ({
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-xl bg-white/80 border border-white/60 flex flex-col items-center justify-center shrink-0">
                     <span className="text-[10px] font-bold text-zinc-400 uppercase">
-                      {formatDateString(act.date).split(" ")[0]}
+                      {formatDateString(act.date, t).split(" ")[0]}
                     </span>
                     <span className="text-sm font-extrabold text-emerald-600">
-                      {formatDateString(act.date).split(" ")[1]?.replace(",", "") || ""}
+                      {formatDateString(act.date, t).split(" ")[1]?.replace(",", "") || ""}
                     </span>
                   </div>
                   <div>
-                    <h5 className="text-xs sm:text-sm font-bold text-zinc-800">{act.title}</h5>
+                    <h5 className="text-xs sm:text-sm font-bold text-zinc-800">{getActivityTitle(act, t)}</h5>
                     <p className="text-[11px] text-zinc-500 line-clamp-1">{act.description}</p>
                   </div>
                 </div>

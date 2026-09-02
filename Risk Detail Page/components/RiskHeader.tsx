@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ShieldAlert } from 'lucide-react';
 import LanguageSelector from '@/components/LanguageSelector';
+import { DataSaverToggle } from '@/components/DataSaverToggle';
 import { useLanguage } from '@/lib/language-context';
 
 interface RiskHeaderProps {
@@ -23,12 +24,13 @@ export default function RiskHeader({ overallScore, cropName = 'Paddy (Swarna MTU
           <ArrowLeft className="w-4 h-4 text-emerald-700" />
           <span>{t('back', 'Back to Dashboard')}</span>
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <DataSaverToggle />
           <LanguageSelector variant="glass" />
           <span className="px-4 py-1.5 rounded-full text-xs font-bold bg-white/70 backdrop-blur-xl text-emerald-900 border border-emerald-500/30 shadow-sm hidden sm:flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
             <span className="w-2 h-2 rounded-full bg-emerald-600 -ml-3.5"></span>
-            Live Field Telemetry: Active
+            {t('live_status', 'Live Field Telemetry: Active')}
           </span>
         </div>
       </div>
@@ -43,22 +45,22 @@ export default function RiskHeader({ overallScore, cropName = 'Paddy (Swarna MTU
           <div className="md:col-span-2 space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-900/10 backdrop-blur-md border border-emerald-600/20 text-xs font-bold tracking-wider text-emerald-950 uppercase">
               <ShieldAlert className="w-4 h-4 text-emerald-700" />
-              <span>CROP DISTRESS ENGINE &bull; AWS RDS + GEMINI AI</span>
+              <span>{t('distress_intelligence', 'Crop Distress Risk Intelligence')}</span>
             </div>
             
             <h1 className="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
-              Farm Distress Risk Breakdown
+              {t('risk_breakdown', 'Farm Distress Risk Breakdown')}
             </h1>
             
             <p className="text-slate-700 text-sm md:text-base leading-relaxed max-w-2xl font-medium">
-              Aggregated agronomic assessment combining satellite NDVI, on-field soil moisture telemetry, Doppler radar rainfall forecasts, and local APMC market price trends for <span className="text-emerald-800 font-bold bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-300/60">{cropName}</span>.
+              {t('hero_subtitle', 'AI-powered crop monitoring, distress risk scoring, and personalized farming guidance.')} (<span className="text-emerald-800 font-bold bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-300/60">{cropName}</span>)
             </p>
           </div>
 
           {/* Distress Index Badge */}
           <div className="flex flex-col items-center justify-center p-6 bg-white/60 backdrop-blur-xl rounded-3xl border border-white/90 shadow-lg text-center transform hover:scale-[1.02] transition-transform">
             <span className="text-xs font-bold text-slate-600 uppercase tracking-widest mb-1">
-              Overall Distress Index
+              {t('distress_score', 'Overall Distress Index')}
             </span>
             <div className="text-5xl md:text-6xl font-black text-emerald-900 tracking-tight flex items-baseline">
               {overallScore}
@@ -66,7 +68,7 @@ export default function RiskHeader({ overallScore, cropName = 'Paddy (Swarna MTU
             </div>
             <div className="mt-2.5 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-900 border border-amber-500/30">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
-              HIGH DISTRESS LEVEL
+              {t('critical_distress', 'HIGH DISTRESS LEVEL')}
             </div>
           </div>
         </div>

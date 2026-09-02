@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useLanguage } from '@/lib/language-context';
 
 export const MarketLoadingSkeleton: React.FC = () => {
   return (
@@ -50,20 +51,21 @@ export const MarketErrorState: React.FC<MarketErrorStateProps> = ({
   onRetry,
   errorMessage = "Unable to load real-time market rates from AGMARKNET / e-NAM server.",
 }) => {
+  const { t } = useLanguage();
   return (
     <div className="my-10 p-8 rounded-3xl bg-white/90 backdrop-blur-xl border border-rose-200 shadow-sm text-center max-w-xl mx-auto space-y-4">
       <div className="w-14 h-14 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-2xl mx-auto font-bold">
         ⚠️
       </div>
-      <h3 className="text-lg font-black text-zinc-900">Mandi Connection Unavailable</h3>
+      <h3 className="text-lg font-black text-zinc-900">{t('mandi_connection_unavailable', 'Mandi Connection Unavailable')}</h3>
       <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">
-        {errorMessage} Please check your network connection or retry the live data fetch.
+        {errorMessage} {t('please_check_network_or_retry', 'Please check your network connection or retry the live data fetch.')}
       </p>
       <button
         onClick={onRetry}
         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md transition-colors"
       >
-        <span>🔄 Retry Live Rates</span>
+        <span>{t('retry_live_rates', '🔄 Retry Live Rates')}</span>
       </button>
     </div>
   );

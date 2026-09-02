@@ -3,6 +3,7 @@
 import React from 'react';
 import { DocumentItem } from '../types';
 
+import { useLanguage } from '@/lib/language-context';
 interface DocumentChecklistProps {
   schemeId: string;
   documents: DocumentItem[];
@@ -14,13 +15,14 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
   documents,
   onToggleReady,
 }) => {
+  const { t } = useLanguage();
   const readyCount = documents.filter((d) => d.status === 'ready').length;
   const totalCount = documents.length;
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between text-xs mb-2">
-        <span className="text-[#6B6B66] font-medium">Document Readiness Status</span>
+        <span className="text-[#6B6B66] font-medium">{t('document_readiness_status', 'Document Readiness Status')}{' '}</span>
         <span
           className={`font-bold px-2.5 py-0.5 rounded-full ${
             readyCount === totalCount
@@ -64,7 +66,7 @@ export const DocumentChecklist: React.FC<DocumentChecklistProps> = ({
                     </span>
                     {doc.required && (
                       <span className="text-[10px] uppercase font-bold text-[#E4574B]">
-                        Required
+                        {t('required', 'Required')}
                       </span>
                     )}
                   </div>

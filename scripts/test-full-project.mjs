@@ -14,7 +14,6 @@ function createTestToken(payload) {
 const adminToken = createTestToken({ id: 'adm_01', role: 'administrator', name: 'Test Administrator' });
 const officerToken = createTestToken({ id: 'usr_admin_demo_1', role: 'officer', name: 'Dr. Anil Verma' });
 const farmerToken = createTestToken({ id: 'frm_01', role: 'farmer', name: 'Ramesh Kumar Patel' });
-const bankToken = createTestToken({ id: 'bnk_01', role: 'bank_partner', name: 'SBI Agri Branch' });
 
 const FRONTEND_PAGES = [
   { path: '/', expected: [200, 307, 308], name: 'Root Home' },
@@ -29,11 +28,6 @@ const FRONTEND_PAGES = [
   { path: '/full-crop-guide', expected: [200], name: 'Full Crop Guide' },
   { path: '/market', expected: [200], name: 'Mandi Market Rates' },
   { path: '/schemes', expected: [200], name: 'Government Schemes' },
-  { path: '/equipment', expected: [200], name: 'Equipment Marketplace' },
-  { path: '/financial-support', expected: [200], name: 'Financial Support (KCC)' },
-  { path: '/financial-support/detail', expected: [200], name: 'Facility Application' },
-  { path: '/financial-support/acknowledgement', expected: [200], name: 'Loan Receipt' },
-  { path: '/insurance', expected: [200], name: 'Crop Insurance (PMFBY)' },
   { path: '/farmer-profile', expected: [200], name: 'Farmer Profile' },
   { path: '/notifications', expected: [200], name: 'Notifications Center' },
   { path: '/ai-chat', expected: [200], name: 'AI Agronomist Chat' },
@@ -46,15 +40,8 @@ const FRONTEND_PAGES = [
   { path: '/officer-dashboard/interventions', expected: [200], name: 'Intervention History' },
   { path: '/officer-dashboard/settings', expected: [200], name: 'Officer Settings' },
 
-  // Bank Portal
-  { path: '/bank-portal', expected: [200], name: 'Bank Portal Landing' },
-  { path: '/bank-portal/dashboard', expected: [200], name: 'Bank Dashboard' },
-  { path: '/bank-portal/facilities', expected: [200], name: 'Credit Facilities' },
-  { path: '/bank-portal/facilities/add', expected: [200], name: 'Add Facility' },
-  { path: '/bank-insurance/dashboard', expected: [200], name: 'Bank & Insurance Underwriting' },
-
-  // Government CHC Hub
-  { path: '/government/dashboard', expected: [200], name: 'Government CHC Hub' },
+  // Government Portal
+  { path: '/government/dashboard', expected: [200], name: 'Government Dashboard' },
 ];
 
 const AI_API_TESTS = [
@@ -112,8 +99,6 @@ const BACKEND_API_TESTS = [
   { path: '/api/farmer/risk', method: 'GET', token: farmerToken, name: 'Farmer Risk Assessment' },
   { path: '/api/farmer/recommendations', method: 'GET', token: farmerToken, name: 'Farmer Recommendations' },
   { path: '/api/farmer/FARMER-001', method: 'GET', token: farmerToken, name: 'Farmer Profile Dossier' },
-  { path: '/api/equipment', method: 'GET', token: farmerToken, name: 'Equipment Marketplace Catalog' },
-  { path: '/api/facilities', method: 'GET', token: farmerToken, name: 'Financial Credit Facilities' },
   { path: '/api/notifications', method: 'GET', token: farmerToken, name: 'Notifications API' },
 ];
 

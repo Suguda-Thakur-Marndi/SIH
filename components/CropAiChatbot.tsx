@@ -9,6 +9,7 @@ import {
   Volume2,
   RotateCcw,
 } from 'lucide-react';
+import { useLanguage } from '@/lib/language-context';
 
 interface ChatMessage {
   id: string;
@@ -31,13 +32,33 @@ export default function CropAiChatbot({
   currentStageName = 'Active Cultivation',
   className = '',
 }: CropAiChatbotProps) {
+  const { language, currentLanguageOption, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
-  const [voiceLang] = useState<'en-IN' | 'hi-IN' | 'or-IN'>('en-IN');
+
+  const voiceLang = React.useMemo(() => {
+    const map: Record<string, string> = {
+      hi: 'hi-IN',
+      or: 'or-IN',
+      bn: 'bn-IN',
+      te: 'te-IN',
+      ta: 'ta-IN',
+      mr: 'mr-IN',
+      gu: 'gu-IN',
+      pa: 'pa-IN',
+      kn: 'kn-IN',
+      ml: 'ml-IN',
+      as: 'as-IN',
+      ur: 'ur-IN',
+      ne: 'ne-NP',
+      en: 'en-IN',
+    };
+    return map[language] || 'en-IN';
+  }, [language]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -114,6 +135,8 @@ export default function CropAiChatbot({
             cropId: currentCropId,
             stage: currentStageName,
             district: 'Mayurbhanj, Odisha',
+            language: currentLanguageOption.name,
+            languageCode: language,
           },
         }),
       }).catch(() => null);
@@ -166,7 +189,7 @@ export default function CropAiChatbot({
     } finally {
       setIsLoading(false);
     }
-  }, [inputText, isLoading, currentCropName, currentCropId, currentStageName, autoSpeak, handleSpeakMessage]);
+  }, [inputText, isLoading, currentCropName, currentCropId, currentStageName, autoSpeak, handleSpeakMessage, currentLanguageOption.name, language]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -289,7 +312,7 @@ export default function CropAiChatbot({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-extrabold text-sm tracking-tight">AI Voice Agronomist</h3>
+                  <h3 className="font-extrabold text-sm tracking-tight">{t('ai_chat', 'AI Voice Agronomist')}</h3>
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 </div>
                 <p className="text-[11px] text-emerald-200 font-medium truncate max-w-[180px]">

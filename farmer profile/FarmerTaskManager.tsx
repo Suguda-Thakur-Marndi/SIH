@@ -8,8 +8,10 @@ import { InteractiveCalendar } from "@/Crop Monitoring page/components/Interacti
 import { SelectedDatePanel } from "@/Crop Monitoring page/components/SelectedDatePanel";
 import { AddActivityModal } from "@/Crop Monitoring page/components/AddActivityModal";
 import { v4 as uuidv4 } from "uuid";
+import { useLanguage } from "@/lib/language-context";
 
 export default function FarmerTaskManager() {
+  const { t } = useLanguage();
   const [crop, setCrop] = useState<RegisteredCrop>(() => ({
     ...INITIAL_CROPS[0],
     activities: [] as Activity[],
@@ -43,7 +45,7 @@ export default function FarmerTaskManager() {
 
   return (
     <div className="bg-white/85 backdrop-blur-xl rounded-2xl p-6 border border-white/80 shadow-md space-y-4">
-      <h2 className="font-bold text-xl mb-4 text-slate-900">Task Calendar & Management</h2>
+      <h2 className="font-bold text-xl mb-4 text-slate-900">{t('task_manager', 'Task Calendar & Management')}</h2>
       <div className="h-[500px]">
         <InteractiveCalendar
           currentCrop={crop}

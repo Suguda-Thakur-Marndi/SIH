@@ -1,8 +1,10 @@
 "use client";
 
 import React from "react";
+import { useLanguage } from "@/lib/language-context";
+import LanguageSelector from "@/components/LanguageSelector";
 import { RegisteredCrop } from "../types";
-import { formatDateString, getDaysDifference } from "../mockData";
+import { formatDateString, getDaysDifference, getCropName, getCropType } from "../mockData";
 
 interface CropHeaderProps {
   crops: RegisteredCrop[];
@@ -21,6 +23,7 @@ export const CropHeader: React.FC<CropHeaderProps> = ({
   onOpenAiDrawer,
   onOpenAddModal
 }) => {
+  const { t } = useLanguage();
   const currentCrop = crops.find((c) => c.id === selectedCropId) || crops[0];
 
   return (
@@ -36,21 +39,26 @@ export const CropHeader: React.FC<CropHeaderProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold uppercase tracking-wider text-[#10b981] bg-[#10b981]/20 px-2 py-0.5 rounded-md border border-[#10b981]/30">
-                  Smart Farm OS
+                  {t("smart_farm_os", "Smart Farm OS")}
                 </span>
-                <span className="text-xs text-zinc-400">Mayurbhanj Cluster #04</span>
+                <span className="text-xs text-zinc-400">{t("mayurbhanj_cluster", "Mayurbhanj Cluster #04")}</span>
               </div>
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-black flex items-center gap-2">
-                Crop Monitoring & Dynamic Calendar
+                {t("crop_lifecycle", "Crop Lifecycle")} & {t("dynamic_calendar", "Dynamic Calendar")}
               </h1>
             </div>
           </div>
 
           {/* Crop Switcher & Action Controls */}
           <div className="flex items-center flex-wrap gap-2.5">
+            {/* Language Selector in Header */}
+            <div className="shrink-0">
+              <LanguageSelector variant="compact" />
+            </div>
+
             {/* Crop Selector Dropdown */}
             <div className="relative">
-              <label htmlFor="crop-select" className="sr-only">Select Registered Crop</label>
+              <label htmlFor="crop-select" className="sr-only">{t("select_registered_crop", "Select Registered Crop")}</label>
               <select
                 id="crop-select"
                 value={selectedCropId}
@@ -59,7 +67,7 @@ export const CropHeader: React.FC<CropHeaderProps> = ({
               >
                 {crops.map((crop) => (
                   <option key={crop.id} value={crop.id}>
-                    {crop.icon} {crop.name} — {crop.landArea} ({crop.variety})
+                    {crop.icon} {getCropName(crop, t)} — {crop.landArea} ({crop.variety})
                   </option>
                 ))}
               </select>
@@ -76,7 +84,7 @@ export const CropHeader: React.FC<CropHeaderProps> = ({
               className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#0d9488] hover:bg-[#0f766e] text-white text-sm font-semibold shadow-sm transition-all"
             >
               <span>🤖</span>
-              <span>Ask Agronomist AI</span>
+              <span>{t("ai_agronomist", "NVIDIA AI Agronomist")}</span>
             </button>
 
             {/* Quick Action: Add Farm Task */}
@@ -87,13 +95,13 @@ export const CropHeader: React.FC<CropHeaderProps> = ({
               <svg className="w-4 h-4 text-[#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span>Schedule Task</span>
+              <span>{t("schedule_task", "Schedule Task")}</span>
             </button>
 
             {/* Print / Export */}
             <button
               onClick={() => window.print()}
-              title="Print Calendar Schedule"
+              title={t("print_calendar", "Print Calendar Schedule")}
               className="p-2.5 rounded-xl bg-[#27272a] hover:bg-[#3f3f46] text-zinc-300 border border-zinc-700 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +145,7 @@ export const CropHeader: React.FC<CropHeaderProps> = ({
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-sm">
-                    {currentCrop.name}
+                    {getCropName(currentCrop, t)}
                   </h2>
                   <span
                     className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold text-emerald-200"
@@ -148,11 +156,11 @@ export const CropHeader: React.FC<CropHeaderProps> = ({
                       WebkitBackdropFilter: "blur(8px)",
                     }}
                   >
-                    🟢 {currentCrop.healthStatus} Status
+                    🟢 {t(currentCrop.healthStatus.toLowerCase(), currentCrop.healthStatus)} {t("status", "Status")}
                   </span>
                 </div>
                 <p className="text-sm text-emerald-200/80 font-medium mt-0.5">
-                  Variety: {currentCrop.variety} • {currentCrop.cropType}
+                  {t("variety", "Variety")}: {currentCrop.variety} • {getCropType(currentCrop.cropType, t)}
                 </p>
               </div>
             </div>
@@ -168,11 +176,11 @@ export const CropHeader: React.FC<CropHeaderProps> = ({
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-emerald-400">🗓️</span>
-                <span>Sown: <strong className="text-white">{formatDateString(currentCrop.sowingDate)}</strong></span>
+                <span>{t("sown", "Sown")}: <strong className="text-white">{formatDateString(currentCrop.sowingDate, t)}</strong></span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-emerald-400">🚜</span>
-                <span>Target Harvest: <strong className="text-emerald-300">{formatDateString(currentCrop.expectedHarvestDate)}</strong></span>
+                <span>{t("target_harvest", "Target Harvest")}: <strong className="text-emerald-300">{formatDateString(currentCrop.expectedHarvestDate, t)}</strong></span>
               </div>
             </div>
           </div>
@@ -197,9 +205,9 @@ export const CropHeader: React.FC<CropHeaderProps> = ({
                 WebkitBackdropFilter: "blur(8px)",
               }}
             >
-              <p className="text-[10px] text-emerald-300/70 uppercase tracking-widest font-semibold">Current Stage</p>
+              <p className="text-[10px] text-emerald-300/70 uppercase tracking-widest font-semibold">{t("crop_stage", "Crop Stage")}</p>
               <p className="text-sm sm:text-base font-bold text-emerald-300 flex items-center justify-center gap-1 mt-1">
-                🌿 {currentCrop.currentStage}
+                🌿 {t(currentCrop.currentStage.toLowerCase(), currentCrop.currentStage)}
               </p>
             </div>
             <div
@@ -211,10 +219,10 @@ export const CropHeader: React.FC<CropHeaderProps> = ({
                 WebkitBackdropFilter: "blur(8px)",
               }}
             >
-              <p className="text-[10px] text-emerald-300/70 uppercase tracking-widest font-semibold">Days Since Sowing</p>
+              <p className="text-[10px] text-emerald-300/70 uppercase tracking-widest font-semibold">{t("days_since_sowing", "Days Since Sowing")}</p>
               <p className="text-sm sm:text-base font-bold text-white mt-1">
                 {currentCrop.currentStageDays} / {currentCrop.totalCycleDays}{" "}
-                <span className="text-xs font-normal text-zinc-400">days</span>
+                <span className="text-xs font-normal text-zinc-400">{t("days", "days")}</span>
               </p>
             </div>
             <div
@@ -226,10 +234,10 @@ export const CropHeader: React.FC<CropHeaderProps> = ({
                 WebkitBackdropFilter: "blur(8px)",
               }}
             >
-              <p className="text-[10px] text-amber-300/70 uppercase tracking-widest font-semibold">Days to Harvest</p>
+              <p className="text-[10px] text-amber-300/70 uppercase tracking-widest font-semibold">{t("days_to_harvest", "Days to Harvest")}</p>
               <p className="text-sm sm:text-base font-bold text-amber-300 mt-1">
                 {getDaysDifference(currentCrop.expectedHarvestDate)}{" "}
-                <span className="text-xs font-normal text-zinc-400">days left</span>
+                <span className="text-xs font-normal text-zinc-400">{t("days_left", "days left")}</span>
               </p>
             </div>
           </div>
@@ -242,9 +250,9 @@ export const CropHeader: React.FC<CropHeaderProps> = ({
           <span className="text-2xl shrink-0">🌦️</span>
           <div className="space-y-1 flex-1">
             <h4 className="text-sm font-bold text-amber-900 dark:text-amber-200 flex items-center gap-2">
-              Active Weather & Field Advisory
+              {t("active_weather_advisory", "Active Weather & Field Advisory")}
               <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200 uppercase tracking-wide">
-                Real-time Alert
+                {t("realtime_alert", "Real-time Alert")}
               </span>
             </h4>
             <ul className="text-xs sm:text-sm text-amber-800 dark:text-amber-300/90 list-disc list-inside space-y-0.5">

@@ -9,8 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.8.0",
-    "@insforge/sdk": "^1.5.2",
     "@reduxjs/toolkit": "^2.12.0",
     "@supabase/supabase-js": "^2.49.1",
     "bcryptjs": "^3.0.3",
@@ -26,6 +24,7 @@
     "recharts": "^3.10.1",
     "twilio": "^6.1.0",
     "uuid": "^14.0.2",
+    "socket.io-client": "^4.8.1",
     "zustand": "^5.0.15"
   },
   "devDependencies": {

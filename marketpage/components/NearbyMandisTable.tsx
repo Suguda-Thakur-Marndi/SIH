@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Market, ComputedMarketMetrics, MarketFilterState, SortField } from "../types";
 import { formatCurrency } from "../marketService";
 
+import { useLanguage } from '@/lib/language-context';
 interface NearbyMandisTableProps {
   marketsWithMetrics: { market: Market; metrics: ComputedMarketMetrics }[];
   filters: MarketFilterState;
@@ -19,6 +20,7 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
   onOpenMarket,
   onResetFilters,
 }) => {
+  const { t } = useLanguage();
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
 
   const handleSort = (field: SortField) => {
@@ -54,14 +56,13 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-lg sm:text-2xl font-black text-zinc-900 tracking-tight flex items-center gap-1.5">
-              <span>🏪</span> Nearby Mandis
-            </h2>
+              <span>🏪</span> {t('nearby_mandis', 'Nearby Mandis')}{' '}</h2>
             <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded-full border border-emerald-300">
               {marketsWithMetrics.length} Mandis
             </span>
           </div>
           <p className="text-xs sm:text-sm text-zinc-600 mt-0.5">
-            Ranked by Net Realization (Mandi Price − Freight).
+            {t('ranked_by_net_realization', 'Ranked by Net Realization (Mandi Price − Freight).')}
           </p>
         </div>
 
@@ -69,16 +70,16 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
         <div className="flex items-center justify-between sm:justify-end gap-2">
           {/* Mobile Sort Dropdown */}
           <div className="sm:hidden flex items-center gap-1 bg-zinc-100 px-2.5 py-1.5 rounded-xl border border-zinc-300 text-xs">
-            <span className="text-zinc-500 font-bold">Sort:</span>
+            <span className="text-zinc-500 font-bold">{t('sort_label', 'Sort')}:</span>
             <select
               value={filters.sortField}
               onChange={(e) => handleSort(e.target.value as SortField)}
               className="bg-transparent font-bold text-emerald-900 focus:outline-none"
             >
-              <option value="netRealization">Net Realization</option>
-              <option value="pricePerQuintal">Gross Price</option>
-              <option value="distanceKm">Nearest First</option>
-              <option value="transportCostPerQuintal">Lowest Freight</option>
+              <option value="netRealization">{t('net_realization', 'Net Realization')}</option>
+              <option value="pricePerQuintal">{t('gross_price', 'Gross Price')}{' '}</option>
+              <option value="distanceKm">{t('nearest_first', 'Nearest First')}{' '}</option>
+              <option value="transportCostPerQuintal">{t('lowest_freight', 'Lowest Freight')}{' '}</option>
             </select>
           </div>
 
@@ -91,7 +92,7 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
                   : "text-zinc-600 hover:text-zinc-900"
               }`}
             >
-              🗂️ Cards
+              🗂️ {t('cards_view', 'Cards')}
             </button>
             <button
               onClick={() => setViewMode("table")}
@@ -101,7 +102,7 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
                   : "text-zinc-600 hover:text-zinc-900"
               }`}
             >
-              📊 Table
+              📊 {t('table_view', 'Table')}
             </button>
           </div>
         </div>
@@ -116,7 +117,7 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
           </span>
           <input
             type="text"
-            placeholder="Search mandi, district or state..."
+            placeholder={t('search_mandi', 'Search mandi, district or state...')}
             value={filters.searchQuery}
             onChange={(e) => onFilterChange({ ...filters, searchQuery: e.target.value })}
             className="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-zinc-50 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white text-zinc-900 placeholder:text-zinc-400"
@@ -135,7 +136,7 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs">
           {/* Radius Chips */}
           {[
-            { label: "All Radii", val: 500 },
+            { label: t('all_radii', 'All Radii'), val: 500 },
             { label: "≤ 50 km", val: 50 },
             { label: "≤ 100 km", val: 100 },
             { label: "≤ 150 km", val: 150 },
@@ -163,7 +164,7 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
                 : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border border-zinc-200"
             }`}
           >
-            <span>⚡ e-NAM Only</span>
+            <span>⚡ {t('enam_only', 'e-NAM Only')}</span>
           </button>
 
           {/* Above MSP Toggle Chip */}
@@ -175,7 +176,7 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
                 : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border border-zinc-200"
             }`}
           >
-            <span>⚖️ Above MSP</span>
+            <span>⚖️ {t('above_msp', 'Above MSP')}</span>
           </button>
         </div>
       </div>
@@ -184,15 +185,15 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
       {marketsWithMetrics.length === 0 ? (
         <div className="my-6 text-center py-8 px-4 bg-zinc-50/80 rounded-2xl border border-dashed border-zinc-300">
           <div className="text-3xl mb-1.5">🔍</div>
-          <h3 className="text-sm font-bold text-zinc-800">No mandis match your active filters</h3>
+          <h3 className="text-sm font-bold text-zinc-800">{t('no_mandis_match', 'No mandis match your active filters')}</h3>
           <p className="text-xs text-zinc-500 max-w-xs mx-auto mt-0.5">
-            Try expanding radius to 500 km or resetting filters.
+            {t('expand_radius_or_reset', 'Try expanding radius to 500 km or resetting filters.')}
           </p>
           <button
             onClick={onResetFilters}
             className="mt-3.5 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-xs transition-colors"
           >
-            Reset All Filters
+            {t('reset_all_filters', 'Reset All Filters')}
           </button>
         </div>
       ) : (
@@ -245,14 +246,14 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
                 {/* Price Breakdown in Card */}
                 <div className="mt-3 grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-zinc-50 border border-zinc-200/80 text-xs">
                   <div>
-                    <span className="text-zinc-500 block text-[10px] uppercase font-bold">Mandi Price:</span>
+                    <span className="text-zinc-500 block text-[10px] uppercase font-bold">{t('mandi_price', 'Mandi Price:')}{' '}</span>
                     <span className="font-extrabold text-zinc-900 text-sm">
                       {formatCurrency(market.pricePerQuintal)}
                     </span>
                     <span className="text-[10px] text-zinc-400 ml-0.5">/qtl</span>
                   </div>
                   <div>
-                    <span className="text-zinc-500 block text-[10px] uppercase font-bold">Est. Freight:</span>
+                    <span className="text-zinc-500 block text-[10px] uppercase font-bold">{t('est_freight', 'Est. Freight:')}{' '}</span>
                     <span className="font-bold text-amber-700 text-sm">
                       −{formatCurrency(market.transportCostPerQuintal)}
                     </span>
@@ -264,7 +265,7 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
                 <div className="mt-2.5 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
                   <div>
                     <span className="text-[9px] font-bold text-emerald-800 uppercase tracking-wider block">
-                      Net In-Hand Realization
+                      {t('net_inhand_realization', 'Net In-Hand Realization')}
                     </span>
                     <span className="text-lg sm:text-xl font-black text-emerald-950">
                       {formatCurrency(metrics.netRealization)}
@@ -294,7 +295,7 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
                     }}
                     className="w-full py-2 px-3 rounded-xl bg-zinc-900 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5"
                   >
-                    <span>View Mandi Details & Facilities</span>
+                    <span>{t('view_mandi_details_facilities', 'View Mandi Details & Facilities')}{' '}</span>
                     <span>→</span>
                   </button>
                 </div>
@@ -307,33 +308,33 @@ export const NearbyMandisTable: React.FC<NearbyMandisTableProps> = ({
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-zinc-200 text-[11px] font-black uppercase tracking-wider text-zinc-500 bg-zinc-100/60">
-                  <th className="py-3 px-3.5 rounded-l-xl">Rank & Mandi</th>
+                  <th className="py-3 px-3.5 rounded-l-xl">{t('rank_mandi', 'Rank & Mandi')}{' '}</th>
                   <th
                     onClick={() => handleSort("distanceKm")}
                     className="py-3 px-3 cursor-pointer hover:text-emerald-800 select-none"
                   >
-                    Distance {renderSortIndicator("distanceKm")}
+                    {t('market_distance', 'Distance')} {renderSortIndicator("distanceKm")}
                   </th>
                   <th
                     onClick={() => handleSort("pricePerQuintal")}
                     className="py-3 px-3 text-right cursor-pointer hover:text-emerald-800 select-none"
                   >
-                    Mandi Price {renderSortIndicator("pricePerQuintal")}
+                    {t('mandi_price', 'Mandi Price')} {renderSortIndicator("pricePerQuintal")}
                   </th>
                   <th
                     onClick={() => handleSort("transportCostPerQuintal")}
                     className="py-3 px-3 text-right cursor-pointer hover:text-emerald-800 select-none"
                   >
-                    Transport {renderSortIndicator("transportCostPerQuintal")}
+                    {t('transport_cost', 'Transport')} {renderSortIndicator("transportCostPerQuintal")}
                   </th>
                   <th
                     onClick={() => handleSort("netRealization")}
                     className="py-3 px-4 text-right cursor-pointer hover:text-emerald-800 select-none bg-emerald-50/70"
                   >
-                    Net Realization {renderSortIndicator("netRealization")}
+                    {t('net_realization', 'Net Realization')} {renderSortIndicator("netRealization")}
                   </th>
-                  <th className="py-3 px-3 text-center">vs Govt MSP</th>
-                  <th className="py-3 px-3.5 text-right rounded-r-xl">Action</th>
+                  <th className="py-3 px-3 text-center">{t('vs_govt_msp', 'vs Govt MSP')}</th>
+                  <th className="py-3 px-3.5 text-right rounded-r-xl">{t('action', 'Action')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-200/70 text-sm">

@@ -4,6 +4,7 @@ import React from "react";
 import { Market, CropMarketInfo } from "../types";
 import { calculateNetRealization, formatCurrency, formatNumber } from "../marketService";
 
+import { useLanguage } from '@/lib/language-context';
 interface MarketDetailsModalProps {
   market: Market | null;
   currentCrop: CropMarketInfo;
@@ -19,6 +20,7 @@ export const MarketDetailsModal: React.FC<MarketDetailsModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { t } = useLanguage();
   if (!isOpen || !market) return null;
 
   const netRealization = calculateNetRealization(market.pricePerQuintal, market.transportCostPerQuintal);
@@ -116,32 +118,32 @@ export const MarketDetailsModal: React.FC<MarketDetailsModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div className="p-3.5 rounded-xl sm:rounded-2xl bg-zinc-50 border border-zinc-200 space-y-2">
               <h3 className="font-extrabold text-zinc-900 uppercase tracking-wider text-[10px] sm:text-[11px]">
-                Trading & Operational Hours
+                {t('trading_operational_hours', 'Trading & Operational Hours')}
               </h3>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Auction Timings:</span>
+                <span className="text-zinc-500">{t('auction_timings', 'Auction Timings:')}{' '}</span>
                 <span className="font-bold text-zinc-800">{market.tradingHours}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Daily Arrival:</span>
+                <span className="text-zinc-500">{t('daily_arrival', 'Daily Arrival:')}{' '}</span>
                 <span className="font-bold text-zinc-800">{formatNumber(market.dailyArrivalQtl)} Qtl/day</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Accepted Grades:</span>
+                <span className="text-zinc-500">{t('accepted_grades', 'Accepted Grades:')}{' '}</span>
                 <span className="font-bold text-zinc-800 truncate max-w-[150px]">{market.gradeAccepted}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Payment Clearance:</span>
+                <span className="text-zinc-500">{t('payment_clearance', 'Payment Clearance:')}{' '}</span>
                 <span className="font-bold text-emerald-700">{market.paymentTerms}</span>
               </div>
             </div>
 
             <div className="p-3.5 rounded-xl sm:rounded-2xl bg-zinc-50 border border-zinc-200 space-y-2">
               <h3 className="font-extrabold text-zinc-900 uppercase tracking-wider text-[10px] sm:text-[11px]">
-                Mandi Contacts & Rating
+                {t('mandi_contacts_rating', 'Mandi Contacts & Rating')}
               </h3>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Officer / Incharge:</span>
+                <span className="text-zinc-500">{t('officer_incharge', 'Officer / Incharge:')}{' '}</span>
                 <span className="font-bold text-zinc-800 truncate max-w-[150px]">{market.contactPerson}</span>
               </div>
               <div className="flex justify-between items-center">
@@ -154,7 +156,7 @@ export const MarketDetailsModal: React.FC<MarketDetailsModalProps> = ({
                 </a>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Farmer Rating:</span>
+                <span className="text-zinc-500">{t('farmer_rating', 'Farmer Rating:')}{' '}</span>
                 <span className="font-bold text-zinc-800">
                   ⭐ {market.rating} / 5.0 ({market.reviewCount})
                 </span>
@@ -165,7 +167,7 @@ export const MarketDetailsModal: React.FC<MarketDetailsModalProps> = ({
           {/* Mandi Amenities & Facilities */}
           <div>
             <h3 className="text-xs font-black uppercase tracking-wider text-zinc-700 mb-2">
-              Mandi Facilities:
+              {t('mandi_facilities', 'Mandi Facilities:')}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {market.facilities.map((fac, idx) => (
@@ -183,7 +185,7 @@ export const MarketDetailsModal: React.FC<MarketDetailsModalProps> = ({
                       <span className="truncate">{fac.name}</span>
                       {fac.available && (
                         <span className="text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1 rounded shrink-0">
-                          Active
+                          {t('active', 'Active')}
                         </span>
                       )}
                     </div>
@@ -201,7 +203,7 @@ export const MarketDetailsModal: React.FC<MarketDetailsModalProps> = ({
             onClick={onClose}
             className="hidden sm:inline-block px-4 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-800 text-xs font-bold border border-zinc-300 transition-colors"
           >
-            ← Back
+            {t("back", "← Back")}
           </button>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -209,13 +211,13 @@ export const MarketDetailsModal: React.FC<MarketDetailsModalProps> = ({
               href={`tel:${market.contactPhone}`}
               className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 px-3.5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold transition-colors"
             >
-              <span>📞 Call Mandi</span>
+              <span>{t("call_mandi", "📞 Call Mandi")}</span>
             </a>
             <button
-              onClick={() => alert(`Directions to ${market.name} (~${market.distanceKm} km from Plot): Route via NH-16 active. Est travel time ~${Math.round(market.distanceKm / 40)} hours.`)}
+              onClick={() => alert(t("directions_to_mandi", `Directions to ${market.name} (~${market.distanceKm} km from Plot): Route via NH-16 active. Est travel time ~${Math.round(market.distanceKm / 40)} hours.`))}
               className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 px-3.5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-xs transition-colors"
             >
-              <span>🗺️ Navigation</span>
+              <span>{t("navigation_button", "🗺️ Navigation")}</span>
             </button>
           </div>
         </div>

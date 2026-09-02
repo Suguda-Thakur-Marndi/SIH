@@ -3,11 +3,14 @@ export const dynamic = 'force-dynamic';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sprout, ShieldCheck, Building2, User, Phone, MapPin, CheckCircle, ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import { Sprout, ShieldCheck, User, Phone, MapPin, CheckCircle, ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import LanguageSelector from '@/components/LanguageSelector';
+import { useLanguage } from '@/lib/language-context';
 
 export default function OnboardingPage() {
+  const { t } = useLanguage();
   const router = useRouter();
-  const [role, setRole] = useState<'farmer' | 'admin' | 'bank'>('farmer');
+  const [role, setRole] = useState<'farmer' | 'admin'>('farmer');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -86,16 +89,6 @@ export default function OnboardingPage() {
     district: 'Mayurbhanj',
     designation: 'Senior Agriculture Officer',
     department: 'Department of Agriculture & Farmers Empowerment'
-  });
-
-  // Bank / Insurer form state
-  const [bankForm, setBankForm] = useState({
-    name: 'Subhashree Nayak',
-    phone: '+91 97761 44332',
-    bank_name: 'State Bank of India - Krishi Vikas Branch',
-    district: 'Mayurbhanj',
-    branch_code: 'SBI0004123',
-    designation: 'Agricultural Field Officer (AFO)'
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -178,7 +171,7 @@ export default function OnboardingPage() {
 
         setSuccess(true);
         setTimeout(() => {
-          router.push('/admin/dashboard');
+          router.push('/dashboard');
         }, 1200);
 
       } else if (role === 'admin') {
@@ -198,28 +191,7 @@ export default function OnboardingPage() {
 
         setSuccess(true);
         setTimeout(() => {
-          router.push('/agriculture-officer-dashboard');
-        }, 1200);
-
-      } else {
-        await fetch('/api/profile', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: 'banker-active',
-            name: bankForm.name,
-            email: 'afo@sbi.co.in',
-            role: 'bank',
-            phone: bankForm.phone,
-            district: bankForm.district,
-            bank_name: bankForm.bank_name,
-            designation: bankForm.designation
-          })
-        });
-
-        setSuccess(true);
-        setTimeout(() => {
-          router.push('/insurance');
+          router.push('/officer-dashboard');
         }, 1200);
       }
     } catch (err) {
@@ -238,14 +210,18 @@ export default function OnboardingPage() {
 
       <div className="relative z-10 w-full max-w-3xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-black/60">
         
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-3">
+        {/* Header with Language Selector */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
             Smart Crop Ecosystem Setup
           </div>
+          <LanguageSelector variant="compact" />
+        </div>
+
+        <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Complete Your Role Profile
+            {t('register_farmer', 'Complete Your Role Profile')}
           </h1>
           <p className="text-sm text-zinc-400 mt-2 max-w-md mx-auto">
             Your information is automatically synced to AWS RDS MySQL to personalize your intelligence portal and market data.
@@ -253,7 +229,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Role Selection Tabs */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
           <button
             type="button"
             onClick={() => setRole('farmer')}
@@ -266,8 +242,8 @@ export default function OnboardingPage() {
             <div className={`p-2.5 rounded-xl mb-2.5 ${role === 'farmer' ? 'bg-emerald-500 text-white' : 'bg-white/10 text-zinc-300'}`}>
               <Sprout className="w-5 h-5" />
             </div>
-            <span className="text-sm font-bold">Farmer</span>
-            <span className="text-xs text-zinc-400 mt-0.5">Crop, Farm & Mandi</span>
+            <span className="text-sm font-bold">{t('role_farmer', 'Farmer')}</span>
+            <span className="text-xs text-zinc-400 mt-0.5">Crop, Farm & Mandi Advisory</span>
           </button>
 
           <button
@@ -282,24 +258,8 @@ export default function OnboardingPage() {
             <div className={`p-2.5 rounded-xl mb-2.5 ${role === 'admin' ? 'bg-teal-500 text-white' : 'bg-white/10 text-zinc-300'}`}>
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <span className="text-sm font-bold">Agriculture Officer</span>
-            <span className="text-xs text-zinc-400 mt-0.5">District Monitoring</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setRole('bank')}
-            className={`flex flex-col items-center text-center p-4 rounded-2xl border transition-all duration-200 ${
-              role === 'bank'
-                ? 'bg-blue-600/20 border-blue-500 ring-2 ring-blue-500/30 text-white'
-                : 'bg-white/5 border-white/10 hover:bg-white/10 text-zinc-400 hover:text-zinc-200'
-            }`}
-          >
-            <div className={`p-2.5 rounded-xl mb-2.5 ${role === 'bank' ? 'bg-blue-500 text-white' : 'bg-white/10 text-zinc-300'}`}>
-              <Building2 className="w-5 h-5" />
-            </div>
-            <span className="text-sm font-bold">Bank & Insurance</span>
-            <span className="text-xs text-zinc-400 mt-0.5">KCC & PMFBY Claims</span>
+            <span className="text-sm font-bold">{t('role_officer', 'Agriculture Extension Officer')}</span>
+            <span className="text-xs text-zinc-400 mt-0.5">District Distress Monitoring & Alerts</span>
           </button>
         </div>
 
@@ -516,56 +476,6 @@ export default function OnboardingPage() {
                     value={officerForm.designation}
                     onChange={e => setOfficerForm({ ...officerForm, designation: e.target.value })}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-teal-500"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {role === 'bank' && (
-            <div className="space-y-4">
-              <div className="border-b border-white/10 pb-2">
-                <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Bank & Insurer Information</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1.5">Officer Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={bankForm.name}
-                    onChange={e => setBankForm({ ...bankForm, name: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1.5">Bank / Insurer Organization</label>
-                  <input
-                    type="text"
-                    required
-                    value={bankForm.bank_name}
-                    onChange={e => setBankForm({ ...bankForm, bank_name: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1.5">Branch Code / IFSC</label>
-                  <input
-                    type="text"
-                    required
-                    value={bankForm.branch_code}
-                    onChange={e => setBankForm({ ...bankForm, branch_code: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1.5">Designation</label>
-                  <input
-                    type="text"
-                    required
-                    value={bankForm.designation}
-                    onChange={e => setBankForm({ ...bankForm, designation: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500"
                   />
                 </div>
               </div>

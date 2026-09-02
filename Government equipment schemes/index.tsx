@@ -9,7 +9,9 @@ import CategoryFilter from './components/CategoryFilter';
 import SchemeCard from './components/SchemeCard';
 import SchemeDetails from './SchemeDetails';
 
+import { useLanguage } from '@/lib/language-context';
 export const SchemeHub: React.FC = () => {
+  const { t } = useLanguage();
   const {
     schemes,
     farmerProfile,
@@ -112,7 +114,7 @@ export const SchemeHub: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-xs uppercase font-bold tracking-wider text-[#6B6B66]">
-                  Filter by Category
+                  {t('filter_by_category', 'Filter by Category')}
                 </h2>
                 <span className="text-xs text-[#6B6B66] font-medium">
                   Showing {filteredSchemes.length} of {schemes.length} schemes

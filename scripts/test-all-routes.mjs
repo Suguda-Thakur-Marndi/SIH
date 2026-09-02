@@ -33,11 +33,6 @@ const FRONTEND_ROUTES = [
   { path: '/crop-details', expected: [200], name: 'Crop Details & Calendar' },
   { path: '/risk-details', expected: [200], name: 'Risk Diagnostics' },
   { path: '/recommended-actions', expected: [200], name: 'Recommended Actions' },
-  { path: '/equipment', expected: [200], name: 'Equipment Marketplace' },
-  { path: '/financial-support', expected: [200], name: 'Financial Support (KCC)' },
-  { path: '/financial-support/detail', expected: [200], name: 'Loan Application Form' },
-  { path: '/financial-support/acknowledgement', expected: [200], name: 'Application Receipt' },
-  { path: '/insurance', expected: [200], name: 'Crop Insurance (PMFBY)' },
   { path: '/farmer-profile', expected: [200], name: 'Farmer Profile' },
   { path: '/notifications', expected: [200], name: 'Notifications Center' },
 
@@ -49,18 +44,9 @@ const FRONTEND_ROUTES = [
   { path: '/officer-dashboard/farmers', expected: [200], name: 'High-Risk Farmers Directory' },
   { path: '/officer-dashboard/map', expected: [200], name: 'Officer Distress Map' },
 
-  // Bank Partner Portal
-  { path: '/bank', expected: [200, 307, 308], name: 'Bank Route Connector' },
-  { path: '/bank-portal', expected: [200], name: 'Bank Partner Portal' },
-  { path: '/bank-portal/dashboard', expected: [200], name: 'Bank Dashboard' },
-  { path: '/bank-portal/facilities', expected: [200], name: 'Credit Facilities List' },
-  { path: '/bank-portal/facilities/add', expected: [200], name: 'Add Facility Wizard' },
-  { path: '/bank-portal/register', expected: [200], name: 'Bank Registration' },
-  { path: '/bank-insurance/dashboard', expected: [200], name: 'Bank & Insurance Underwriting' },
-
   // Government Hub
   { path: '/government', expected: [200, 307, 308], name: 'Government Connector' },
-  { path: '/government/dashboard', expected: [200], name: 'Government CHC Hub' },
+  { path: '/government/dashboard', expected: [200], name: 'Government Dashboard' },
 ];
 
 const API_ROUTES = [
@@ -71,8 +57,6 @@ const API_ROUTES = [
   { path: '/api/farmer/dashboard', method: 'GET', token: farmerToken, name: 'Farmer Dashboard Telemetry' },
   { path: '/api/farmer/risk', method: 'GET', token: farmerToken, name: 'Farmer Risk Assessment' },
   { path: '/api/farmer/recommendations', method: 'GET', token: farmerToken, name: 'Farmer Recommendations' },
-  { path: '/api/equipment', method: 'GET', token: farmerToken, name: 'Equipment Catalog API' },
-  { path: '/api/facilities', method: 'GET', token: farmerToken, name: 'Financial Facilities API' },
   { path: '/api/notifications', method: 'GET', token: farmerToken, name: 'Notifications API' },
 ];
 

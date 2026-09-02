@@ -1,28 +1,30 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import RiskHeader from './components/RiskHeader';
 import RiskFactorsSection from './components/RiskFactorsSection';
 import AiReasoningSection from './components/AiReasoningSection';
+import { useLanguage } from '@/lib/language-context';
 
 export default function RiskDetailsPage() {
+  const { languageCode, language } = useLanguage();
   const [aiLoading, setAiLoading] = useState(false);
   const [riskData] = useState({
     overallScore: 78,
     cropName: 'Paddy (Swarna MTU 7029)',
     riskLevel: 'HIGH',
     factors: [
-      { name: 'Weather Stress (Rainfall Deficit)', score: 68, max: 100, level: 'HIGH', detail: '22% deficit in 14-day cumulative rainfall in Baripada block.' },
-      { name: 'Soil Moisture Depletion', score: 64, max: 100, level: 'HIGH', detail: 'Moisture dropped to 24% at 15cm depth during flowering stage.' },
-      { name: 'Market Volatility & Price Risk', score: 42, max: 100, level: 'MEDIUM', detail: 'Wholesale arrival surge expected within 10 days.' },
-      { name: 'Credit & Repayment Pressure', score: 35, max: 100, level: 'LOW', detail: 'KCC repayment due on Nov 30; interest subvention active.' },
-      { name: 'Pest & Disease Pressure', score: 22, max: 100, level: 'LOW', detail: 'Brown plant hopper activity within permissible threshold.' }
+      { key: 'weather', name: 'Weather Stress (Rainfall Deficit)', nameKey: 'weather_stress_rainfall', score: 68, max: 100, level: 'HIGH', detailKey: 'risk_weather_desc', detail: '22% deficit in 14-day cumulative rainfall in Baripada block.' },
+      { key: 'soil', name: 'Soil Moisture Depletion', nameKey: 'soil_moisture_depletion', score: 64, max: 100, level: 'HIGH', detailKey: 'risk_soil_desc', detail: 'Moisture dropped to 24% at 15cm depth during flowering stage.' },
+      { key: 'market', name: 'Market Volatility & Price Risk', nameKey: 'market_volatility_price_risk', score: 42, max: 100, level: 'MEDIUM', detailKey: 'risk_market_desc', detail: 'Wholesale arrival surge expected within 10 days.' },
+      { key: 'credit', name: 'Credit & Repayment Pressure', nameKey: 'credit_repayment_pressure', score: 35, max: 100, level: 'LOW', detailKey: 'risk_credit_desc', detail: 'KCC repayment due on Nov 30; interest subvention active.' },
+      { key: 'pest', name: 'Pest & Disease Pressure', nameKey: 'pest_disease_pressure', score: 22, max: 100, level: 'LOW', detailKey: 'risk_pest_desc', detail: 'Brown plant hopper activity within permissible threshold.' }
     ]
   });
 
   const [aiExplanation, setAiExplanation] = useState<any>(null);
 
-  const fetchAiExplanation = async () => {
+  const fetchAiExplanation = useCallback(async () => {
     setAiLoading(true);
     try {
       const res = await fetch('/api/ai/risk-explanation', {
@@ -34,7 +36,9 @@ export default function RiskDetailsPage() {
           weatherRisk: 68,
           marketRisk: 42,
           soilMoisture: '24% (Deficit)',
-          district: 'Mayurbhanj, Odisha'
+          district: 'Mayurbhanj, Odisha',
+          language: language,
+          languageCode: languageCode
         })
       });
       const json = await res.json();
@@ -46,11 +50,13 @@ export default function RiskDetailsPage() {
     } finally {
       setAiLoading(false);
     }
-  };
+  }, [language, languageCode]);
 
   useEffect(() => {
     fetchAiExplanation();
-  }, []);
+  }, [fetchAiExplanation]);
+
+
 
   return (
     <div className="relative min-h-screen font-sans overflow-x-hidden text-slate-900">

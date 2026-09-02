@@ -27,8 +27,11 @@ import {
   LogOut
 } from "lucide-react";
 import { smartCropAuth } from "@/lib/smartcrop-auth";
+import { useLanguage } from "@/lib/language-context";
+import LanguageSelector from "@/components/LanguageSelector";
 
 export default function FarmerProfilePage() {
+  const { t } = useLanguage();
   // Master Farmer State (following PRD specs & mock data)
   const [farmer, setFarmer] = useState({
     name: "Ramesh",
@@ -66,10 +69,16 @@ export default function FarmerProfilePage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showSkeleton, setShowSkeleton] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedFarm, setExpandedFarm] = useState<string | null>(null);
   const router = useRouter();
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setShowSkeleton(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Load from DB API on mount
   React.useEffect(() => {
@@ -139,6 +148,18 @@ export default function FarmerProfilePage() {
 
   // Skeleton loader — shown while not yet mounted or still loading data
   if (!mounted || loading) {
+    if (!showSkeleton) {
+      return (
+        <div className="relative min-h-screen w-full bg-[#e8ece9] text-[#1e2a22] font-sans antialiased overflow-x-hidden">
+          <div
+            className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center sm:bg-top bg-no-repeat opacity-95 transition-all duration-700"
+            style={{ backgroundImage: `url('/farmer-bg.png')` }}
+          />
+          <div className="fixed inset-0 pointer-events-none z-0 bg-gradient-to-b from-white/60 via-white/20 to-black/35 backdrop-blur-[2px]" />
+        </div>
+      );
+    }
+
     return (
       <div className="relative min-h-screen w-full bg-[#e8ece9] font-sans antialiased overflow-x-hidden">
         {/* Background shimmer */}
@@ -393,26 +414,26 @@ export default function FarmerProfilePage() {
               href="/crop-monitoring"
               className="px-4 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5 text-[#3f5245] hover:text-black hover:bg-white/50"
             >
-              Crop Monitor
+              {t('monitoring', 'Crop Monitor')}
             </Link>
             <Link
               href="/market"
               className="px-4 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5 text-[#3f5245] hover:text-black hover:bg-white/50"
             >
-              Market
+              {t('market_prices', 'Market')}
             </Link>
             <Link
-              href="/insurance"
+              href="/schemes"
               className="px-4 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5 text-[#3f5245] hover:text-black hover:bg-white/50"
             >
-              Insurance
+              {t('schemes', 'Govt Schemes')}
             </Link>
             <Link
               href="/farmer-profile"
               className="px-4 py-1.5 rounded-full transition-all duration-200 flex items-center gap-1.5 bg-[#1c2e22] text-white shadow-sm font-semibold"
             >
               <div className="w-1.5 h-1.5 rounded-full bg-[#d8e678]" />
-              Profile
+              {t('farmer_profile', 'Profile')}
             </Link>
           </nav>
 
@@ -432,7 +453,7 @@ export default function FarmerProfilePage() {
                     <input
                       autoFocus
                       type="text"
-                      placeholder="Search farms, crops..."
+                      placeholder={t('search_placeholder', 'Search farms, crops...')}
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
                       className="flex-1 text-sm outline-none bg-transparent placeholder:text-gray-400 text-[#1e2a22]"
@@ -467,7 +488,7 @@ export default function FarmerProfilePage() {
                       f.crop.toLowerCase().includes(searchQuery.toLowerCase()) ||
                       f.location.toLowerCase().includes(searchQuery.toLowerCase())
                     ).length === 0 && (
-                      <p className="text-xs text-gray-400 px-2 py-1">No farms found</p>
+                      <p className="text-xs text-gray-400 px-2 py-1">{t('no_farms_found', 'No farms found')}</p>
                     )}
                   </div>
                 </div>
@@ -481,6 +502,7 @@ export default function FarmerProfilePage() {
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#d8e678] border border-black/20 rounded-full" />
             </button>
+            <LanguageSelector variant="compact" />
             <div
               onClick={openEditModal}
               className="flex items-center gap-2 pl-2 pr-3 py-1 bg-black/5 hover:bg-black/10 border border-black/5 rounded-full cursor-pointer transition"
@@ -498,7 +520,7 @@ export default function FarmerProfilePage() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-semibold shadow-sm transition hover:scale-105 cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Logout</span>
+              <span className="hidden sm:inline">{t('logout', 'Logout')}</span>
             </button>
           </div>
         </header>
@@ -511,15 +533,15 @@ export default function FarmerProfilePage() {
             <div className="lg:col-span-8 space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1f3d2b]/10 border border-[#1f3d2b]/15 text-[#1f3d2b] text-xs font-semibold">
                 <Sparkles className="w-3.5 h-3.5 text-[#3b7c4a]" />
-                <span>Smart Crop Precision Dashboard</span>
+                <span>{t('smart_crop_dashboard', 'Smart Crop Precision Dashboard')}</span>
               </div>
 
               <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[#16271c] leading-[1.2]">
-                Farmer Profile & Precision Farm Intelligence
+                {t('farmer_profile_title', 'Farmer Profile & Precision Farm Intelligence')}
               </h1>
 
               <p className="text-sm sm:text-base text-[#4a5f51] max-w-2xl leading-relaxed">
-                Empowering <span className="font-semibold text-black">{farmer.name}</span> with automated crop telemetry, real-time stress surveillance, drone soil scanning, and multilingual advisories.
+                {t('empowering', 'Empowering')} <span className="font-semibold text-black">{farmer.name}</span> {t('with_telemetry', 'with automated crop telemetry, real-time stress surveillance, drone soil scanning, and multilingual advisories.')}
               </p>
 
               {/* Action Buttons */}
@@ -529,7 +551,7 @@ export default function FarmerProfilePage() {
                   className="px-5 py-2.5 rounded-full bg-[#1c2e22] hover:bg-[#2a4533] text-[#d8e678] font-medium text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-black/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <Edit3 className="w-4 h-4" />
-                  <span>Edit Profile Details</span>
+                  <span>{t('edit_profile_details', 'Edit Profile Details')}</span>
                 </button>
 
                 <button
@@ -537,7 +559,7 @@ export default function FarmerProfilePage() {
                   className="px-5 py-2.5 rounded-full bg-white/90 hover:bg-white text-[#1f3d2b] border border-[#1f3d2b]/20 font-medium text-xs sm:text-sm flex items-center gap-2 shadow-sm transition hover:scale-[1.02]"
                 >
                   <Plus className="w-4 h-4 text-[#3b7c4a]" />
-                  <span>Add Another Plot / Farm</span>
+                  <span>{t('add_plot', 'Add Another Plot / Farm')}</span>
                 </button>
 
                 <button
@@ -545,7 +567,7 @@ export default function FarmerProfilePage() {
                   className="px-5 py-2.5 rounded-full bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-medium text-xs sm:text-sm flex items-center gap-2 shadow-sm transition hover:scale-[1.02] cursor-pointer"
                 >
                   <LogOut className="w-4 h-4 text-red-600" />
-                  <span>Sign Out</span>
+                  <span>{t('sign_out', 'Sign Out')}</span>
                 </button>
               </div>
             </div>
@@ -557,7 +579,7 @@ export default function FarmerProfilePage() {
 
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <span className="text-[11px] uppercase tracking-wider text-[#9bb3a1] font-semibold">Profile Accuracy</span>
+                    <span className="text-[11px] uppercase tracking-wider text-[#9bb3a1] font-semibold">{t('profile_accuracy', 'Profile Accuracy')}</span>
                     <h3 className="text-3xl font-black text-white mt-0.5 tracking-tight">{farmer.profileCompleteness}%</h3>
                   </div>
                   <div className="w-10 h-10 rounded-xl bg-[#d8e678] text-black flex items-center justify-center font-bold shadow-md">
@@ -566,7 +588,7 @@ export default function FarmerProfilePage() {
                 </div>
 
                 <p className="text-xs text-[#a6bdaf] leading-snug mb-3">
-                  High completeness unlocks targeted drone scanning & state subsidy qualification.
+                  {t('accuracy_unlocks', 'High completeness unlocks targeted drone scanning & state subsidy qualification.')}
                 </p>
 
                 {/* Progress Bar */}
@@ -578,8 +600,8 @@ export default function FarmerProfilePage() {
                 </div>
 
                 <div className="mt-3 flex items-center justify-between text-[11px] text-[#8ea494]">
-                  <span>Village: {farmer.village}</span>
-                  <span className="text-[#d8e678] font-semibold">Verified</span>
+                  <span>{t('village_label', 'Village:')} {farmer.village}</span>
+                  <span className="text-[#d8e678] font-semibold">{t('verified', 'Verified')}</span>
                 </div>
               </div>
             </div>
@@ -593,8 +615,8 @@ export default function FarmerProfilePage() {
                 {farmer.farms.length}
               </div>
               <div>
-                <p className="text-[11px] text-[#7a8b6f] font-medium leading-none">Registered</p>
-                <p className="text-xs sm:text-sm font-bold text-[#1e2a22]">Total Plots</p>
+                <p className="text-[11px] text-[#7a8b6f] font-medium leading-none">{t("registered", "Registered")}</p>
+                <p className="text-xs sm:text-sm font-bold text-[#1e2a22]">{t("total_plots", "Total Plots")}</p>
               </div>
             </div>
 
@@ -603,7 +625,7 @@ export default function FarmerProfilePage() {
                 {farmer.landArea.split(" ")[0]}
               </div>
               <div>
-                <p className="text-[11px] text-[#7a8b6f] font-medium leading-none">Acreage</p>
+                <p className="text-[11px] text-[#7a8b6f] font-medium leading-none">{t("acreage", "Acreage")}</p>
                 <p className="text-xs sm:text-sm font-bold text-[#1e2a22]">{farmer.landArea}</p>
               </div>
             </div>
@@ -613,7 +635,7 @@ export default function FarmerProfilePage() {
                 🌾
               </div>
               <div>
-                <p className="text-[11px] text-[#7a8b6f] font-medium leading-none">Current Crop</p>
+                <p className="text-[11px] text-[#7a8b6f] font-medium leading-none">{t("current_crop", "Current Crop")}</p>
                 <p className="text-xs sm:text-sm font-bold text-[#1e2a22]">{farmer.currentCrop}</p>
               </div>
             </div>
@@ -623,8 +645,8 @@ export default function FarmerProfilePage() {
                 {farmer.loanDueInDays}d
               </div>
               <div>
-                <p className="text-[11px] text-[#7a8b6f] font-medium leading-none">Due In</p>
-                <p className="text-xs sm:text-sm font-bold text-[#1e2a22]">Credit Window</p>
+                <p className="text-[11px] text-[#7a8b6f] font-medium leading-none">{t("due_in", "Due In")}</p>
+                <p className="text-xs sm:text-sm font-bold text-[#1e2a22]">{t("credit_window", "Credit Window")}</p>
               </div>
             </div>
           </div>
@@ -644,8 +666,8 @@ export default function FarmerProfilePage() {
                     <User className="w-4 h-4" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-[#16271c]">Personal Information</h2>
-                    <p className="text-xs text-[#7a8b6f]">Primary contact and KYC record</p>
+                    <h2 className="text-base font-bold text-[#16271c]">{t("personal_information", "Personal Information")}</h2>
+                    <p className="text-xs text-[#7a8b6f]">{t("primary_contact_kyc", "Primary contact and KYC record")}</p>
                   </div>
                 </div>
                 <button
@@ -653,28 +675,28 @@ export default function FarmerProfilePage() {
                   className="p-1.5 hover:bg-black/5 rounded-lg text-[#2f6b3c] transition text-xs font-semibold flex items-center gap-1"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
-                  <span>Edit</span>
+                  <span>{t("edit", "Edit")}</span>
                 </button>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-xs sm:text-sm">
                 <div className="bg-white/60 p-3 rounded-2xl border border-black/5">
-                  <span className="text-[11px] text-[#7a8b6f] block font-medium">Full Name</span>
+                  <span className="text-[11px] text-[#7a8b6f] block font-medium">{t("full_name", "Full Name")}</span>
                   <span className="font-semibold text-[#1e2a22] mt-0.5 block">{farmer.name}</span>
                 </div>
 
                 <div className="bg-white/60 p-3 rounded-2xl border border-black/5">
-                  <span className="text-[11px] text-[#7a8b6f] block font-medium">Contact Phone</span>
+                  <span className="text-[11px] text-[#7a8b6f] block font-medium">{t("contact_phone", "Contact Phone")}</span>
                   <span className="font-semibold text-[#1e2a22] mt-0.5 block font-mono">{farmer.maskedPhone}</span>
                 </div>
 
                 <div className="bg-white/60 p-3 rounded-2xl border border-black/5">
-                  <span className="text-[11px] text-[#7a8b6f] block font-medium">Village</span>
+                  <span className="text-[11px] text-[#7a8b6f] block font-medium">{t("village", "Village")}</span>
                   <span className="font-semibold text-[#1e2a22] mt-0.5 block">{farmer.village}</span>
                 </div>
 
                 <div className="bg-white/60 p-3 rounded-2xl border border-black/5">
-                  <span className="text-[11px] text-[#7a8b6f] block font-medium">District & State</span>
+                  <span className="text-[11px] text-[#7a8b6f] block font-medium">{t("district_state", "District & State")}</span>
                   <span className="font-semibold text-[#1e2a22] mt-0.5 block">{farmer.district}, {farmer.state}</span>
                 </div>
               </div>
@@ -688,8 +710,8 @@ export default function FarmerProfilePage() {
                     <Layers className="w-4 h-4" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-[#16271c]">My Registered Farms</h2>
-                    <p className="text-xs text-[#7a8b6f]">Agricultural parcels linked to Smart Crop</p>
+                    <h2 className="text-base font-bold text-[#16271c]">{t("my_registered_farms", "My Registered Farms")}</h2>
+                    <p className="text-xs text-[#7a8b6f]">{t("agricultural_parcels_desc", "Agricultural parcels linked to Smart Crop")}</p>
                   </div>
                 </div>
                 <button
@@ -697,7 +719,7 @@ export default function FarmerProfilePage() {
                   className="px-3 py-1 bg-[#1f3d2b] hover:bg-[#2f6b3c] text-white text-xs font-semibold rounded-full flex items-center gap-1 transition"
                 >
                   <Plus className="w-3 h-3" />
-                  <span>Add Farm</span>
+                  <span>{t("add_farm", "Add Farm")}</span>
                 </button>
               </div>
 
@@ -733,23 +755,23 @@ export default function FarmerProfilePage() {
                     {expandedFarm === farm.id && (
                       <div className="px-4 pb-4 pt-1 border-t border-black/5 grid grid-cols-2 sm:grid-cols-3 gap-3 animate-in slide-in-from-top-2 duration-200">
                         <div className="p-3 bg-[#f2f6ee] rounded-xl">
-                          <p className="text-[11px] text-[#7a8b6f] mb-0.5">Total Area</p>
+                          <p className="text-[11px] text-[#7a8b6f] mb-0.5">{t("total_area", "Total Area")}</p>
                           <p className="text-sm font-bold text-[#1e2a22]">{farm.area}</p>
                         </div>
                         <div className="p-3 bg-[#f2f6ee] rounded-xl">
-                          <p className="text-[11px] text-[#7a8b6f] mb-0.5">Current Crop</p>
+                          <p className="text-[11px] text-[#7a8b6f] mb-0.5">{t("current_crop", "Current Crop")}</p>
                           <p className="text-sm font-bold text-[#2f6b3c]">{farm.crop}</p>
                         </div>
                         <div className="p-3 bg-[#f2f6ee] rounded-xl">
-                          <p className="text-[11px] text-[#7a8b6f] mb-0.5">Location</p>
+                          <p className="text-[11px] text-[#7a8b6f] mb-0.5">{t("location", "Location")}</p>
                           <p className="text-sm font-bold text-[#1e2a22]">{farm.location}</p>
                         </div>
                         <div className="p-3 bg-[#f2f6ee] rounded-xl">
-                          <p className="text-[11px] text-[#7a8b6f] mb-0.5">Status</p>
+                          <p className="text-[11px] text-[#7a8b6f] mb-0.5">{t("status", "Status")}</p>
                           <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">{farm.status}</span>
                         </div>
                         <div className="col-span-2 p-3 bg-[#fffbea] rounded-xl border border-yellow-100">
-                          <p className="text-[11px] text-[#7a8b6f] mb-0.5">Farm ID</p>
+                          <p className="text-[11px] text-[#7a8b6f] mb-0.5">{t("farm_id", "Farm ID")}</p>
                           <p className="text-xs font-mono text-[#1e2a22]">FARM-{farm.id.toString().padStart(4, "0")}</p>
                         </div>
                       </div>
@@ -766,26 +788,26 @@ export default function FarmerProfilePage() {
                   <MapPin className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-[#16271c]">Land & Soil Telemetry</h2>
-                  <p className="text-xs text-[#7a8b6f]">Drone calibrated geographic parameters</p>
+                  <h2 className="text-base font-bold text-[#16271c]">{t("land_soil_telemetry", "Land & Soil Telemetry")}</h2>
+                  <p className="text-xs text-[#7a8b6f]">{t("drone_calibrated_desc", "Drone calibrated geographic parameters")}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="p-3 bg-white/60 rounded-xl border border-black/5">
-                  <span className="text-[11px] text-[#7a8b6f] block">Total Operational Land</span>
+                  <span className="text-[11px] text-[#7a8b6f] block">{t("total_operational_land", "Total Operational Land")}</span>
                   <span className="font-bold text-[#1e2a22] text-sm mt-0.5 block">{farmer.landArea}</span>
                 </div>
                 <div className="p-3 bg-white/60 rounded-xl border border-black/5">
-                  <span className="text-[11px] text-[#7a8b6f] block">Irrigation Access</span>
-                  <span className="font-bold text-[#1e2a22] text-sm mt-0.5 block">Canal + Tubewell</span>
+                  <span className="text-[11px] text-[#7a8b6f] block">{t("irrigation_access", "Irrigation Access")}</span>
+                  <span className="font-bold text-[#1e2a22] text-sm mt-0.5 block">{t("canal_tubewell", "Canal + Tubewell")}</span>
                 </div>
                 <div className="p-3 bg-white/60 rounded-xl border border-black/5">
-                  <span className="text-[11px] text-[#7a8b6f] block">Soil Classification</span>
-                  <span className="font-bold text-[#1e2a22] text-sm mt-0.5 block">Alluvial Sandy Loam</span>
+                  <span className="text-[11px] text-[#7a8b6f] block">{t("soil_classification", "Soil Classification")}</span>
+                  <span className="font-bold text-[#1e2a22] text-sm mt-0.5 block">{t("alluvial_sandy_loam", "Alluvial Sandy Loam")}</span>
                 </div>
                 <div className="p-3 bg-white/60 rounded-xl border border-black/5">
-                  <span className="text-[11px] text-[#7a8b6f] block">Drone Scan Status</span>
+                  <span className="text-[11px] text-[#7a8b6f] block">{t("drone_scan_status", "Drone Scan Status")}</span>
                   <span className="font-bold text-emerald-700 text-sm mt-0.5 flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Calibrated
                   </span>
@@ -806,8 +828,8 @@ export default function FarmerProfilePage() {
                     🌾
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-[#16271c]">Current Crop Lifecycle</h2>
-                    <p className="text-xs text-[#7a8b6f]">Active season telemetry</p>
+                    <h2 className="text-base font-bold text-[#16271c]">{t("current_crop_lifecycle", "Current Crop Lifecycle")}</h2>
+                    <p className="text-xs text-[#7a8b6f]">{t("active_season_telemetry", "Active season telemetry")}</p>
                   </div>
                 </div>
                 <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-semibold text-xs flex items-center gap-1">
@@ -820,7 +842,7 @@ export default function FarmerProfilePage() {
                 {/* CURRENT label — PRD §15 */}
                 <div className="inline-flex items-center gap-1.5 mb-2 px-2 py-0.5 rounded-full bg-emerald-700/10 border border-emerald-700/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                  <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Current — Kharif 2026</span>
+                  <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">{t("current_kharif_2026", "Current — Kharif 2026")}</span>
                 </div>
                 <div className="flex justify-between items-start">
                   <div>
@@ -831,23 +853,23 @@ export default function FarmerProfilePage() {
                     onClick={() => router.push('/crop-details')}
                     className="px-3 py-1.5 bg-[#1c2e22] text-[#d8e678] text-xs font-semibold rounded-xl flex items-center gap-1 hover:bg-black transition shadow-sm"
                   >
-                    <span>View Crop</span>
+                    <span>{t("view_crop", "View Crop")}</span>
                     <ExternalLink className="w-3 h-3" />
                   </button>
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-black/5 grid grid-cols-3 gap-2 text-center text-xs">
                   <div>
-                    <span className="text-[10px] text-[#7a8b6f] block">Vegetative Days</span>
-                    <span className="font-bold text-[#1e2a22]">42 Days</span>
+                    <span className="text-[10px] text-[#7a8b6f] block">{t("vegetative_days", "Vegetative Days")}</span>
+                    <span className="font-bold text-[#1e2a22]">{t("days_count", "{count} Days", { count: 42 })}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-[#7a8b6f] block">Moisture Index</span>
-                    <span className="font-bold text-amber-700">68% (Low)</span>
+                    <span className="text-[10px] text-[#7a8b6f] block">{t("moisture_index", "Moisture Index")}</span>
+                    <span className="font-bold text-amber-700">{t("moisture_low", "68% (Low)")}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-[#7a8b6f] block">Pest Risk</span>
-                    <span className="font-bold text-emerald-700">Low Risk</span>
+                    <span className="text-[10px] text-[#7a8b6f] block">{t("pest_risk", "Pest Risk")}</span>
+                    <span className="font-bold text-emerald-700">{t("low_risk", "Low Risk")}</span>
                   </div>
                 </div>
               </div>
@@ -861,28 +883,28 @@ export default function FarmerProfilePage() {
                     <IndianRupee className="w-4 h-4" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-[#16271c]">Financial Context & Credit</h2>
-                    <p className="text-xs text-[#7a8b6f]">KCC & Agricultural credit window</p>
+                    <h2 className="text-base font-bold text-[#16271c]">{t("financial_context_credit", "Financial Context & Credit")}</h2>
+                    <p className="text-xs text-[#7a8b6f]">{t("kcc_agri_credit_desc", "KCC & Agricultural credit window")}</p>
                   </div>
                 </div>
                 <span className="text-xs font-bold text-[#c97a1e] bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> Due in {farmer.loanDueInDays} days
+                  <Clock className="w-3 h-3" /> {t("due_in_days", "Due in {days} days", { days: farmer.loanDueInDays })}
                 </span>
               </div>
 
               <div className="p-4 bg-white/60 rounded-2xl border border-black/5 space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-[#7a8b6f]">KCC Active Balance</span>
+                  <span className="text-xs text-[#7a8b6f]">{t("kcc_active_balance", "KCC Active Balance")}</span>
                   <span className="text-lg font-extrabold text-[#16271c] font-mono">{farmer.loanAmount}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-[#7a8b6f]">Repayment Due Date</span>
+                  <span className="text-[#7a8b6f]">{t("repayment_due_date", "Repayment Due Date")}</span>
                   <span className="font-semibold text-[#1e2a22]">{farmer.loanDueDate}</span>
                 </div>
                 <div className="pt-2 border-t border-black/5 flex items-center justify-between text-xs text-[#5a7260]">
-                  <span>Distress Shield Status:</span>
+                  <span>{t("distress_shield_status", "Distress Shield Status:")}</span>
                   <span className="text-emerald-700 font-semibold flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> Advisory Support Eligible
+                    <CheckCircle2 className="w-3 h-3" /> {t("advisory_support_eligible", "Advisory Support Eligible")}
                   </span>
                 </div>
               </div>
@@ -896,31 +918,31 @@ export default function FarmerProfilePage() {
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-[#16271c]">Insurance</h2>
-                    <p className="text-xs text-[#7a8b6f]">Current protection status</p>
+                    <h2 className="text-base font-bold text-[#16271c]">{t("insurance", "Insurance")}</h2>
+                    <p className="text-xs text-[#7a8b6f]">{t("current_protection_status", "Current protection status")}</p>
                   </div>
                 </div>
-                <span className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200" aria-label="Insurance status: Not Registered">Not Registered</span>
+                <span className="text-[10px] font-extrabold uppercase px-2 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200" aria-label="Insurance status: Not Registered">{t("not_registered", "Not Registered")}</span>
               </div>
 
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between items-center py-2 border-b border-black/5">
-                  <span className="text-[#7a8b6f]">Crop</span>
+                  <span className="text-[#7a8b6f]">{t("crop", "Crop")}</span>
                   <span className="font-bold text-[#16271c]">{farmer.currentCrop}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-black/5">
-                  <span className="text-[#7a8b6f]">Farm</span>
+                  <span className="text-[#7a8b6f]">{t("farm", "Farm")}</span>
                   <span className="font-bold text-[#16271c]">{farmer.farms[0]?.name ?? 'Farm 01'}</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-[#7a8b6f]">Area</span>
+                  <span className="text-[#7a8b6f]">{t("area", "Area")}</span>
                   <span className="font-bold text-[#16271c]">{farmer.landArea}</span>
                 </div>
               </div>
               <div className="pt-4 flex flex-col gap-2">
-                <p className="text-[11px] text-center text-[#5a7260]">You may be eligible for crop insurance.</p>
-                <Link href="/insurance" className="w-full text-center px-4 py-2.5 bg-[#1c2e22] text-[#d8e678] font-bold text-xs rounded-xl shadow-sm hover:bg-[#2a4533] transition">
-                  View Insurance →
+                <p className="text-[11px] text-center text-[#5a7260]">{t('explore_schemes_text', 'Explore matching government schemes & subsidies.')}</p>
+                <Link href="/schemes" className="w-full text-center px-4 py-2.5 bg-[#1c2e22] text-[#d8e678] font-bold text-xs rounded-xl shadow-sm hover:bg-[#2a4533] transition">
+                  {t('view_schemes', 'View Schemes →')}
                 </Link>
               </div>
             </div>
@@ -935,19 +957,19 @@ export default function FarmerProfilePage() {
                     <Bell className="w-4 h-4" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-[#16271c]">Alert Channels & Notifications</h2>
-                    <p className="text-xs text-[#7a8b6f]">Select channels for automated advisories</p>
+                    <h2 className="text-base font-bold text-[#16271c]">{t("alert_channels", "Alert Channels & Notifications")}</h2>
+                    <p className="text-xs text-[#7a8b6f]">{t("select_channels_desc", "Select channels for automated advisories")}</p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-2.5 text-xs">
                 {[
-                  { key: "weather", title: "Weather & Rain Alerts", desc: "Heavy rain, storm & frost warnings" },
-                  { key: "risk", title: "Pest & Crop Stress Alerts", desc: "Drone spectral pest detection" },
-                  { key: "market", title: "Mandi Price Changes", desc: "Daily district price updates" },
-                  { key: "farming", title: "Farming Calendar Reminders", desc: "Sowing, fertilizer & harvesting dates" },
-                  { key: "officer", title: "Agriculture Officer Updates", desc: "Direct messages from block officer" }
+                  { key: "weather", title: t("alert_weather_title", "Weather & Rain Alerts"), desc: t("alert_weather_desc", "Heavy rain, storm & frost warnings") },
+                  { key: "risk", title: t("alert_risk_title", "Pest & Crop Stress Alerts"), desc: t("alert_risk_desc", "Drone spectral pest detection") },
+                  { key: "market", title: t("alert_market_title", "Mandi Price Changes"), desc: t("alert_market_desc", "Daily district price updates") },
+                  { key: "farming", title: t("alert_farming_title", "Farming Calendar Reminders"), desc: t("alert_farming_desc", "Sowing, fertilizer & harvesting dates") },
+                  { key: "officer", title: t("alert_officer_title", "Agriculture Officer Updates"), desc: t("alert_officer_desc", "Direct messages from block officer") }
                 ].map(item => {
                   const enabled = farmer.notifications[item.key as keyof typeof farmer.notifications];
                   return (
@@ -996,8 +1018,8 @@ export default function FarmerProfilePage() {
                   <Edit3 className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#16271c]">Edit Profile Details</h3>
-                  <p className="text-xs text-[#7a8b6f]">Update your personal & contact records</p>
+                  <h3 className="text-base font-bold text-[#16271c]">{t("edit_profile_details", "Edit Profile Details")}</h3>
+                  <p className="text-xs text-[#7a8b6f]">{t("update_personal_contact", "Update your personal & contact records")}</p>
                 </div>
               </div>
               <button
@@ -1010,50 +1032,50 @@ export default function FarmerProfilePage() {
 
             <form onSubmit={handleSaveProfile} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">Full Name</label>
+                <label className="block font-semibold text-gray-700 mb-1">{t("full_name", "Full Name")}</label>
                 <input
                   type="text"
                   value={editFormData.name}
                   onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2f6b3c]"
-                  placeholder="Enter full name"
+                  placeholder={t("enter_full_name", "Enter full name")}
                 />
                 {errors.name && <p className="text-red-500 text-[11px] mt-1">{errors.name}</p>}
               </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">Phone Number (10 digits)</label>
+                <label className="block font-semibold text-gray-700 mb-1">{t("phone_number_label", "Phone Number (10 digits)")}</label>
                 <input
                   type="text"
                   value={editFormData.phone}
                   onChange={(e) => setEditFormData(prev => ({ ...prev, phone: e.target.value }))}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2f6b3c]"
-                  placeholder="+91 9XXXXXXXXX"
+                  placeholder={t("phone_placeholder", "+91 9XXXXXXXXX")}
                 />
                 {errors.phone && <p className="text-red-500 text-[11px] mt-1">{errors.phone}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Village</label>
+                  <label className="block font-semibold text-gray-700 mb-1">{t("village", "Village")}</label>
                   <input
                     type="text"
                     value={editFormData.village}
                     onChange={(e) => setEditFormData(prev => ({ ...prev, village: e.target.value }))}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2f6b3c]"
-                    placeholder="Village"
+                    placeholder={t("village_placeholder", "Village")}
                   />
                   {errors.village && <p className="text-red-500 text-[11px] mt-1">{errors.village}</p>}
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">District</label>
+                  <label className="block font-semibold text-gray-700 mb-1">{t("district_label", "District")}</label>
                   <input
                     type="text"
                     value={editFormData.district}
                     onChange={(e) => setEditFormData(prev => ({ ...prev, district: e.target.value }))}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2f6b3c]"
-                    placeholder="District"
+                    placeholder={t("district_placeholder", "District")}
                   />
                   {errors.district && <p className="text-red-500 text-[11px] mt-1">{errors.district}</p>}
                 </div>
@@ -1086,23 +1108,23 @@ export default function FarmerProfilePage() {
       <div className="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-xl border-t border-black/10 py-2 px-6 flex justify-around items-center z-40 md:hidden shadow-lg">
         <Link href="/dashboard" className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#1f3d2b]">
           <Home className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Home</span>
+          <span className="text-[10px] font-medium">{t("home", "Home")}</span>
         </Link>
         <Link href="/crop-monitoring" className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#1f3d2b]">
           <Sprout className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Crop</span>
+          <span className="text-[10px] font-medium">{t("crop", "Crop")}</span>
         </Link>
-        <Link href="/insurance" className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#1f3d2b]">
+        <Link href="/schemes" className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#1f3d2b]">
           <ShieldCheck className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Insurance</span>
+          <span className="text-[10px] font-medium">{t('schemes', 'Schemes')}</span>
         </Link>
         <Link href="/market" className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#1f3d2b]">
           <Store className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Market</span>
+          <span className="text-[10px] font-medium">{t("market", "Market")}</span>
         </Link>
         <Link href="/farmer-profile" className="flex flex-col items-center gap-1 text-[#1f3d2b] font-bold">
           <User className="w-5 h-5 text-[#2f6b3c]" />
-          <span className="text-[10px]">Profile</span>
+          <span className="text-[10px]">{t("profile", "Profile")}</span>
         </Link>
       </div>
 

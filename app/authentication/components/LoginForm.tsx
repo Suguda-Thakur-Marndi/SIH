@@ -84,7 +84,7 @@ export default function LoginForm({
     }
   };
 
-  const fillDemo = (role: 'farmer' | 'admin' | 'bank') => {
+  const fillDemo = (role: 'farmer' | 'admin') => {
     setError(null);
     setValidationErrors({});
     if (role === 'farmer') {
@@ -94,10 +94,6 @@ export default function LoginForm({
     } else if (role === 'admin') {
       setAuthMethod('email');
       setEmail('admin@agri.gov.in');
-      setPassword('Password123!');
-    } else if (role === 'bank') {
-      setAuthMethod('email');
-      setEmail('bank@sbi.co.in');
       setPassword('Password123!');
     }
   };
@@ -283,14 +279,6 @@ export default function LoginForm({
             className="text-emerald-700 hover:underline font-medium cursor-pointer"
           >
             {t('role_officer', 'Officer')}
-          </button>
-          <span>•</span>
-          <button
-            type="button"
-            onClick={() => fillDemo('bank')}
-            className="text-emerald-700 hover:underline font-medium cursor-pointer"
-          >
-            {t('role_bank', 'Bank')}
           </button>
         </div>
       </div>

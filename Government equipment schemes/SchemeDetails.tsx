@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Scheme, FarmerProfile } from './types';
 import { EligibilityBadge } from './components/EligibilityBadge';
+import { useLanguage } from '@/lib/language-context';
 import { FarmerProfileCard } from './components/FarmerProfileCard';
 import { DocumentChecklist } from './components/DocumentChecklist';
 import { ApplicationTimeline } from './components/ApplicationTimeline';
@@ -25,6 +26,7 @@ export const SchemeDetails: React.FC<SchemeDetailsProps> = ({
   onApply,
   onToggleDocReady,
 }) => {
+  const { t } = useLanguage();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -56,7 +58,7 @@ export const SchemeDetails: React.FC<SchemeDetailsProps> = ({
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-white/90 hover:bg-white text-[#1A1A1A] border border-gray-200 shadow-sm transition-all cursor-pointer min-h-[44px]"
         >
           <span>←</span>
-          <span>Back to Schemes</span>
+          <span>{t('schemeDetails.back_to_schemes')}</span>
         </button>
 
         <div className="flex items-center gap-2.5">
@@ -79,7 +81,7 @@ export const SchemeDetails: React.FC<SchemeDetailsProps> = ({
         <div className="mt-5 p-4 rounded-2xl bg-[#F8F8F6] border border-gray-200/80 text-[#1A1A1A] flex items-center justify-between flex-wrap gap-3">
           <div>
             <span className="text-xs text-[#6B6B66] font-semibold block mb-0.5">
-              {isSimpleText ? '💰 Cash / Benefit Amount:' : '✨ Eligible Benefit:'}
+              {isSimpleText ? t('schemeDetails.cash_benefit_amount') : t('schemeDetails.eligible_benefit')}
             </span>
             <span className="font-extrabold text-emerald-800 text-sm md:text-base">
               {scheme.benefitSummary}
@@ -87,7 +89,7 @@ export const SchemeDetails: React.FC<SchemeDetailsProps> = ({
           </div>
           {isApplied && (
             <span className="px-3 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200">
-              ✓ Application Submitted
+              {t('schemeDetails.application_submitted')}
             </span>
           )}
         </div>
@@ -101,7 +103,7 @@ export const SchemeDetails: React.FC<SchemeDetailsProps> = ({
           <div className="p-6 rounded-[24px] bg-white/90 border border-white/90 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <h2 className="text-sm font-bold text-[#1A1A1A] uppercase tracking-wide mb-2.5 flex items-center gap-2">
               <span>📖</span>
-              <span>About the Scheme</span>
+              <span>{t('schemeDetails.about_scheme')}</span>
             </h2>
             <p className="text-sm text-[#4A4A4A] leading-relaxed font-medium">
               {scheme.fullDescription}
@@ -113,10 +115,10 @@ export const SchemeDetails: React.FC<SchemeDetailsProps> = ({
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-[#1A1A1A] uppercase tracking-wide flex items-center gap-2">
                 <span>🎯</span>
-                <span>Why You Qualify ({scheme.eligibilityPercent}% Match)</span>
+                <span>{t('schemeDetails.why_you_qualify')} ({scheme.eligibilityPercent}% Match)</span>
               </h2>
               <span className="text-xs text-emerald-800 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                Personalized
+                {t('schemeDetails.personalized')}
               </span>
             </div>
 
@@ -156,7 +158,7 @@ export const SchemeDetails: React.FC<SchemeDetailsProps> = ({
           <div className="p-6 rounded-[24px] bg-white/90 border border-white/90 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <h2 className="text-sm font-bold text-[#1A1A1A] uppercase tracking-wide mb-3.5 flex items-center gap-2">
               <span>🎁</span>
-              <span>Key Scheme Benefits</span>
+              <span>{t('schemeDetails.key_scheme_benefits')}</span>
             </h2>
             <ul className="space-y-2.5">
               {scheme.benefits.map((benefit, i) => (
@@ -175,7 +177,7 @@ export const SchemeDetails: React.FC<SchemeDetailsProps> = ({
           <div className="p-6 rounded-[24px] bg-white/90 border border-white/90 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <h2 className="text-sm font-bold text-[#1A1A1A] uppercase tracking-wide mb-3.5 flex items-center gap-2">
               <span>📁</span>
-              <span>Required Documents</span>
+              <span>{t('schemeDetails.required_documents')}</span>
             </h2>
             <DocumentChecklist
               schemeId={scheme.id}
@@ -214,7 +216,7 @@ export const SchemeDetails: React.FC<SchemeDetailsProps> = ({
                 onClick={handleApplyClick}
                 className="w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-[#CFE362] hover:bg-[#c2d755] text-[#1A1A1A] shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[48px]"
               >
-                <span>🚀 Apply for Scheme</span>
+                <span>{t('schemeDetails.apply_for_scheme')}</span>
               </button>
             )}
 
@@ -234,7 +236,7 @@ export const SchemeDetails: React.FC<SchemeDetailsProps> = ({
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-[#1A1A1A] flex items-center gap-2">
                 <span>📝</span>
-                <span>Confirm Application</span>
+                <span>{t('schemeDetails.confirm_application')}</span>
               </h3>
               <button
                 onClick={() => setShowConfirmModal(false)}
@@ -279,10 +281,10 @@ export const SchemeDetails: React.FC<SchemeDetailsProps> = ({
                 {isSubmitting ? (
                   <>
                     <span className="w-3 h-3 border-2 border-[#1A1A1A] border-t-transparent rounded-full animate-spin" />
-                    Submitting...
+                    {t('schemeDetails.submitting')}
                   </>
                 ) : (
-                  'Confirm & Submit'
+                  t('schemeDetails.confirm_application')
                 )}
               </button>
             </div>

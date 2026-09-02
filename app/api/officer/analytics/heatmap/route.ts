@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import { extractBearerToken, verifyJwt } from '@/lib/auth-jwt';
+import { calculateBlockTrend } from '@/lib/trend-calculator';
 
 async function getOfficerUser(req: NextRequest) {
   let userId = 'usr_admin_demo_1';
@@ -32,7 +33,8 @@ export async function GET(req: NextRequest) {
 
     const days = parseInt(timeRange.replace('d', '')) || 7;
 
-    const query = `
+    // Current window query
+    const queryCurrent = `
       SELECT 
         f.village as block,
         COUNT(DISTINCT f.id) as totalFarmers,
@@ -54,12 +56,38 @@ export async function GET(req: NextRequest) {
       ORDER BY avgScore DESC
     `;
 
+    // Previous window query for trend comparison
+    const queryPrevious = `
+      SELECT 
+        f.village as block,
+        ROUND(AVG(r.score), 1) as avgScore
+      FROM farmers f
+      LEFT JOIN (
+        SELECT farmer_id, MAX(score) as score
+        FROM risk_scores
+        WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+          AND created_at < DATE_SUB(CURDATE(), INTERVAL ? DAY)
+        GROUP BY farmer_id
+      ) r ON f.id = r.farmer_id
+      WHERE f.district = ?
+      GROUP BY f.village
+    `;
+
     let data: any[] = [];
 
     try {
-      const [rows]: any = await pool.query(query, [days, district]);
-      if (rows && rows.length > 0) {
-        data = rows.map((row: any) => {
+      const [rowsCurrent]: any = await pool.query(queryCurrent, [days, district]);
+      const [rowsPrevious]: any = await pool.query(queryPrevious, [days * 2, days, district]);
+
+      const prevMap = new Map<string, number>();
+      if (rowsPrevious && rowsPrevious.length > 0) {
+        rowsPrevious.forEach((r: any) => {
+          if (r.block) prevMap.set(r.block, Number(r.avgScore) || 0);
+        });
+      }
+
+      if (rowsCurrent && rowsCurrent.length > 0) {
+        data = rowsCurrent.map((row: any) => {
           let primaryFactor = 'None';
           if (row.weatherCount >= row.marketCount && row.weatherCount >= row.loanCount && row.weatherCount > 0) {
             primaryFactor = 'Weather / Rainfall';
@@ -69,13 +97,22 @@ export async function GET(req: NextRequest) {
             primaryFactor = 'Loan Proximity';
           }
 
+          const currentAvg = Number(row.avgScore) || 55;
+          const prevAvg = prevMap.get(row.block) ?? null;
+          const trend = calculateBlockTrend(currentAvg, prevAvg, 3);
+
+          const predicted7dScore = Math.min(100, Math.max(0, Math.round((currentAvg + trend.trend_delta) * 10) / 10));
+
           return {
             block: row.block || 'Baripada',
             totalFarmers: Number(row.totalFarmers) || 45,
-            avgScore: Number(row.avgScore) || 55,
+            avgScore: currentAvg,
             highRiskCount: Number(row.highRiskCount) || 0,
             moderateRiskCount: Number(row.moderateRiskCount) || 0,
-            primaryFactor
+            primaryFactor,
+            trendDirection: trend.trend_direction,
+            trendDelta: trend.trend_delta,
+            predicted7dScore,
           };
         });
       }
@@ -84,16 +121,34 @@ export async function GET(req: NextRequest) {
     }
 
     if (data.length === 0) {
-      data = [
-        { block: 'Baripada', totalFarmers: 94, avgScore: 78.4, highRiskCount: 14, moderateRiskCount: 38, primaryFactor: 'Weather / Rainfall' },
-        { block: 'Betnoti', totalFarmers: 72, avgScore: 72.1, highRiskCount: 9, moderateRiskCount: 28, primaryFactor: 'Weather / Rainfall' },
-        { block: 'Badasahi', totalFarmers: 68, avgScore: 68.6, highRiskCount: 6, moderateRiskCount: 24, primaryFactor: 'Market Prices' },
-        { block: 'Kuliana', totalFarmers: 54, avgScore: 56.2, highRiskCount: 4, moderateRiskCount: 22, primaryFactor: 'Loan Proximity' },
-        { block: 'Udala', totalFarmers: 62, avgScore: 64.8, highRiskCount: 5, moderateRiskCount: 26, primaryFactor: 'Loan Proximity' },
-        { block: 'Karanjia', totalFarmers: 48, avgScore: 49.3, highRiskCount: 0, moderateRiskCount: 18, primaryFactor: 'Weather / Rainfall' },
-        { block: 'Rairangpur', totalFarmers: 52, avgScore: 42.0, highRiskCount: 0, moderateRiskCount: 12, primaryFactor: 'Market Prices' },
-        { block: 'Jashipur', totalFarmers: 44, avgScore: 38.5, highRiskCount: 0, moderateRiskCount: 9, primaryFactor: 'None' },
+      // Demo fallbacks with window trends for Mayurbhanj blocks
+      const demoBlocks = [
+        { block: 'Baripada', totalFarmers: 94, avgScore: 78.4, prevScore: 72.0, highRiskCount: 14, moderateRiskCount: 38, primaryFactor: 'Weather / Rainfall' },
+        { block: 'Betnoti', totalFarmers: 72, avgScore: 72.1, prevScore: 68.0, highRiskCount: 9, moderateRiskCount: 28, primaryFactor: 'Weather / Rainfall' },
+        { block: 'Badasahi', totalFarmers: 68, avgScore: 68.6, prevScore: 67.5, highRiskCount: 6, moderateRiskCount: 24, primaryFactor: 'Market Prices' },
+        { block: 'Kuliana', totalFarmers: 54, avgScore: 56.2, prevScore: 60.1, highRiskCount: 4, moderateRiskCount: 22, primaryFactor: 'Loan Proximity' },
+        { block: 'Udala', totalFarmers: 62, avgScore: 64.8, prevScore: 61.2, highRiskCount: 5, moderateRiskCount: 26, primaryFactor: 'Loan Proximity' },
+        { block: 'Karanjia', totalFarmers: 48, avgScore: 49.3, prevScore: 50.0, highRiskCount: 0, moderateRiskCount: 18, primaryFactor: 'Weather / Rainfall' },
+        { block: 'Rairangpur', totalFarmers: 52, avgScore: 42.0, prevScore: 48.5, highRiskCount: 0, moderateRiskCount: 12, primaryFactor: 'Market Prices' },
+        { block: 'Jashipur', totalFarmers: 44, avgScore: 38.5, prevScore: 40.0, highRiskCount: 0, moderateRiskCount: 9, primaryFactor: 'None' },
       ];
+
+      data = demoBlocks.map(item => {
+        const trend = calculateBlockTrend(item.avgScore, item.prevScore, 3);
+        const predicted7dScore = Math.min(100, Math.max(0, Math.round((item.avgScore + trend.trend_delta) * 10) / 10));
+
+        return {
+          block: item.block,
+          totalFarmers: item.totalFarmers,
+          avgScore: item.avgScore,
+          highRiskCount: item.highRiskCount,
+          moderateRiskCount: item.moderateRiskCount,
+          primaryFactor: item.primaryFactor,
+          trendDirection: trend.trend_direction,
+          trendDelta: trend.trend_delta,
+          predicted7dScore,
+        };
+      });
     }
 
     return NextResponse.json({
@@ -107,3 +162,4 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+

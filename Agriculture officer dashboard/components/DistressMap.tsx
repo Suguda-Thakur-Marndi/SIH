@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import Link from "next/link";
 import { MapPin, Maximize2, ArrowUpRight, Plus, Minus, RotateCcw, Phone, AlertTriangle, ShieldCheck, RefreshCw } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
+import { useBandwidth } from "@/lib/bandwidth-context";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -36,6 +37,7 @@ export interface DbDistressFarmer {
 
 export default function DistressMap() {
   const { t } = useLanguage();
+  const { isLiteMode } = useBandwidth();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
@@ -147,7 +149,11 @@ export default function DistressMap() {
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
-    filteredFarmers.forEach((farmer) => {
+    const farmersToPlot = isLiteMode
+      ? filteredFarmers.filter(f => f.riskLevel === 'HIGH' || f.riskLevel === 'MODERATE').slice(0, 25)
+      : filteredFarmers;
+
+    farmersToPlot.forEach((farmer) => {
       if (!farmer.latitude || !farmer.longitude) return;
 
       const isHigh = farmer.riskLevel === "HIGH";
@@ -188,7 +194,7 @@ export default function DistressMap() {
 
       markersRef.current.push(marker);
     });
-  }, [filteredFarmers, mapLoaded]);
+  }, [filteredFarmers, mapLoaded, isLiteMode]);
 
   const handleZoomIn = () => {
     if (mapRef.current) mapRef.current.zoomIn({ duration: 250 });
@@ -381,7 +387,7 @@ export default function DistressMap() {
                 <span className="text-amber-700 font-black">{selectedFarmer.rainfallRisk ?? 68}%</span>
               </div>
               <div className="bg-white p-1 rounded border border-black/5">
-                <span className="block text-slate-400 font-normal">Soil Moisture</span>
+                <span className="block text-slate-400 font-normal">{t("soil_moisture", "Soil Moisture")}</span>
                 <span className="text-blue-700 font-black">{selectedFarmer.soilMoisture ?? 24}%</span>
               </div>
               <div className="bg-white p-1 rounded border border-black/5">

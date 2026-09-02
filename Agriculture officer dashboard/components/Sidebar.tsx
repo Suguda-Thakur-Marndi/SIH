@@ -1,6 +1,7 @@
 "use client";
 
 import { Home, AlertTriangle, MapPin, BarChart2, Bell, Database, Clock, Settings, Globe, LogOut } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/language-context";
 import { smartCropAuth } from "@/lib/smartcrop-auth";
@@ -37,7 +38,7 @@ export default function Sidebar({ isOpen, activeKey = "command_center" }: { isOp
           const isActive = item.key === activeKey;
           const translatedName = t(item.key, item.defaultName);
           return (
-            <a
+            <Link
               key={item.key}
               href={item.href ?? "#"}
               className={`flex items-center gap-2 md:gap-3 py-2 px-3 md:py-2.5 md:px-4 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap ${
@@ -48,7 +49,7 @@ export default function Sidebar({ isOpen, activeKey = "command_center" }: { isOp
             >
               <Icon className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
               <span>{translatedName}</span>
-            </a>
+            </Link>
           );
         })}
       </nav>

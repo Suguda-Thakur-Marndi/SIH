@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { RegisteredCrop, Activity, WeatherDay } from "./types";
-import { INITIAL_CROPS } from "./mockData";
+import { INITIAL_CROPS, translateWeatherAlert } from "./mockData";
 import { useWeather } from "./useWeather";
 import { useSoil } from "./useSoil";
 import { SoilData } from "./soilService";
@@ -16,6 +16,7 @@ import { HarvestSection } from "./components/HarvestSection";
 import { WeatherForecastSection } from "./components/WeatherForecastSection";
 import { AddActivityModal } from "./components/AddActivityModal";
 import { AiAgronomistDrawer } from "./components/AiAgronomistDrawer";
+import { useLanguage } from "@/lib/language-context";
 
 // Today's real date in YYYY-MM-DD (IST)
 const todayIST = new Date(
@@ -165,22 +166,26 @@ export default function CropMonitoringPage() {
     setIsAiDrawerOpen(true);
   };
 
+  const { t } = useLanguage();
+
   // ── Derive live weather alerts for the banner ──────────────────────────
   const liveWeatherAlerts = useMemo((): string[] => {
-    if (!weatherForecast.length) return currentCrop.weatherAlerts;
+    if (!weatherForecast.length) {
+      return currentCrop.weatherAlerts.map((alt) => translateWeatherAlert(alt, t));
+    }
     const alerts: string[] = [];
     const today = weatherForecast[0];
     if (today) {
       if (today.condition === "storm") {
-        alerts.push("⛈️ Thunderstorm alert today. Secure equipment and avoid field work.");
+        alerts.push(t("alert_thunderstorm", "⛈️ Thunderstorm alert today. Secure equipment and avoid field work."));
       } else if (today.condition === "rainy" && today.rainChance >= 60) {
         alerts.push(
-          `🌧️ Moderate to heavy rainfall (${today.rainChance}% chance) expected. Postpone foliar nutrient sprays.`
+          t("alert_heavy_rain", `🌧️ Moderate to heavy rainfall (${today.rainChance}% chance) expected. Postpone foliar nutrient sprays.`, { chance: today.rainChance })
         );
       }
       if (today.humidity >= 85) {
         alerts.push(
-          `💧 Morning relative humidity ${today.humidity}% — favorable for fungal spores. Maintain drainage bunds.`
+          t("alert_humidity_fungal", `💧 Morning relative humidity ${today.humidity}% — favorable for fungal spores. Maintain drainage bunds.`, { humidity: today.humidity })
         );
       }
     }
@@ -188,14 +193,14 @@ export default function CropMonitoringPage() {
     if (tomorrow) {
       if (tomorrow.condition === "rainy" && tomorrow.rainChance >= 70) {
         alerts.push(
-          `🌦️ Rain forecast tomorrow (${tomorrow.rainChance}% chance). Plan field tasks accordingly.`
+          t("alert_rain_tomorrow", `🌦️ Rain forecast tomorrow (${tomorrow.rainChance}% chance). Plan field tasks accordingly.`, { chance: tomorrow.rainChance })
         );
       } else if (tomorrow.condition === "sunny") {
-        alerts.push("☀️ Clear skies tomorrow. Good window for top-dressing and mechanical operations.");
+        alerts.push(t("alert_clear_skies", "☀️ Clear skies tomorrow. Good window for top-dressing and mechanical operations."));
       }
     }
-    return alerts.length > 0 ? alerts : currentCrop.weatherAlerts;
-  }, [weatherForecast, currentCrop.weatherAlerts]);
+    return alerts.length > 0 ? alerts : currentCrop.weatherAlerts.map((alt) => translateWeatherAlert(alt, t));
+  }, [weatherForecast, currentCrop.weatherAlerts, t]);
 
   return (
     /*

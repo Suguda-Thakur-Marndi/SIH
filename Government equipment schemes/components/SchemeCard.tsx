@@ -4,6 +4,7 @@ import React from 'react';
 import { Scheme } from '../types';
 import { EligibilityBadge } from './EligibilityBadge';
 
+import { useLanguage } from '@/lib/language-context';
 interface SchemeCardProps {
   scheme: Scheme;
   onViewDetails: (id: string) => void;
@@ -15,6 +16,7 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
   onViewDetails,
   isSimpleText = false,
 }) => {
+  const { t } = useLanguage();
   const readyDocsCount = scheme.documents.filter((d) => d.status === 'ready').length;
   const totalDocsCount = scheme.documents.length;
   const isAllDocsReady = readyDocsCount === totalDocsCount;
@@ -25,14 +27,14 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
             <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-ping" />
-            Submitted
+            {t('submitted', 'Submitted')}
           </span>
         );
       case 'verification':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-            Under Verification
+            {t('under_verification', 'Under Verification')}
           </span>
         );
       case 'approved':
@@ -105,7 +107,7 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({
           onClick={() => onViewDetails(scheme.id)}
           className="px-4 py-2 rounded-xl text-xs font-bold bg-[#CFE362] hover:bg-[#c2d755] text-[#1A1A1A] transition-all shadow-sm flex items-center gap-1.5 cursor-pointer min-h-[40px]"
         >
-          <span>{scheme.applicationStatus === 'not_applied' ? 'View Details' : 'Track Status'}</span>
+          <span>{scheme.applicationStatus === 'not_applied' ? t('schemeCard.view_details') : t('schemeCard.track_status')}</span>
           <span>→</span>
         </button>
       </div>

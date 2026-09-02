@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useLanguage } from "@/lib/language-context";
 import { CropMarketInfo, Market } from "../types";
 import { calculateNetRealization, findBestMarket, formatCurrency } from "../marketService";
 
@@ -15,6 +16,8 @@ export const MarketSummaryCards: React.FC<MarketSummaryCardsProps> = ({
   markets,
   onOpenMarket,
 }) => {
+  const { t } = useLanguage();
+
   // Compute highest gross price
   const highestPriceMarket = markets.length > 0
     ? markets.reduce((max, m) => (m.pricePerQuintal > max.pricePerQuintal ? m : max), markets[0])
@@ -43,7 +46,7 @@ export const MarketSummaryCards: React.FC<MarketSummaryCardsProps> = ({
         <div>
           <div className="flex items-center justify-between">
             <span className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-wider truncate">
-              Highest Price
+              {t("max_price", "Highest Price")}
             </span>
             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 text-xs sm:text-sm font-bold shrink-0">
               📈
@@ -79,10 +82,10 @@ export const MarketSummaryCards: React.FC<MarketSummaryCardsProps> = ({
         <div>
           <div className="flex items-center justify-between">
             <span className="text-[10px] sm:text-xs font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1 truncate">
-              <span>🏆</span> Best Net
+              <span>🏆</span> {t('best_net', 'Best Net')}
             </span>
             <span className="text-[9px] sm:text-xs bg-emerald-500/40 text-emerald-100 px-1.5 sm:px-2 py-0.2 rounded-full border border-emerald-400/40 font-bold shrink-0">
-              Top Pick
+              {t('top_pick', 'Top Pick')}
             </span>
           </div>
           <div className="mt-2 sm:mt-3 flex items-baseline gap-1 sm:gap-2">
@@ -107,7 +110,7 @@ export const MarketSummaryCards: React.FC<MarketSummaryCardsProps> = ({
         <div>
           <div className="flex items-center justify-between">
             <span className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-wider truncate">
-              Govt. MSP
+              {t('govt_msp_label', 'Govt. MSP')}
             </span>
             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 text-xs sm:text-sm font-bold shrink-0">
               ⚖️
@@ -135,7 +138,7 @@ export const MarketSummaryCards: React.FC<MarketSummaryCardsProps> = ({
         <div>
           <div className="flex items-center justify-between">
             <span className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-wider truncate">
-              Mandis
+              {t('mandis', 'Mandis')}
             </span>
             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-teal-100 flex items-center justify-center text-teal-700 text-xs sm:text-sm font-bold shrink-0">
               🏪
@@ -145,12 +148,12 @@ export const MarketSummaryCards: React.FC<MarketSummaryCardsProps> = ({
             <span className="text-xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight">
               {markets.length}
             </span>
-            <span className="text-[10px] sm:text-xs font-semibold text-zinc-500">Yards</span>
+            <span className="text-[10px] sm:text-xs font-semibold text-zinc-500">{t('yards', 'Yards')}</span>
           </div>
         </div>
         <div className="mt-2 flex items-center justify-between text-[10px] sm:text-xs text-zinc-600 pt-1 border-t border-zinc-100">
-          <span>Avg: ~{avgDistance} km</span>
-          <span className="font-semibold text-teal-700">Radius 250km</span>
+          <span>{t('avg_distance', 'Avg: ~{distance} km', { distance: avgDistance })}</span>
+          <span className="font-semibold text-teal-700">{t('radius_250km', 'Radius 250km')}</span>
         </div>
       </div>
     </section>

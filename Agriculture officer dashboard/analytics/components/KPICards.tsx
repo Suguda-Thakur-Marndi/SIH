@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Users, AlertTriangle, Activity, CheckCircle, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
+import { useLanguage } from '@/lib/language-context';
 
 interface OverviewData {
   highRiskFarmers: { count: number; delta: number; deltaPercent: number };
@@ -11,6 +12,8 @@ interface OverviewData {
 }
 
 export function KPICards({ data, loading }: { data: OverviewData | null, loading: boolean }) {
+  const { t } = useLanguage();
+
   if (loading || !data) {
     const skeletonColors = [
       { bg: 'bg-red-500/20', border: 'border-red-500/30' },
@@ -39,7 +42,7 @@ export function KPICards({ data, loading }: { data: OverviewData | null, loading
 
   const kpis = [
     {
-      title: "High-Risk Farmers",
+      title: t('high_risk_farmers', 'High-Risk Farmers'),
       value: data.highRiskFarmers.count,
       icon: AlertTriangle,
       color: "text-red-700",
@@ -51,7 +54,7 @@ export function KPICards({ data, loading }: { data: OverviewData | null, loading
       isFocus: true,
     },
     {
-      title: "Moderate Risk",
+      title: t('medium_risk_farmers', 'Moderate Risk'),
       value: data.moderateRiskFarmers.count,
       icon: Activity,
       color: "text-amber-800",
@@ -63,7 +66,7 @@ export function KPICards({ data, loading }: { data: OverviewData | null, loading
       isFocus: false,
     },
     {
-      title: "Active Distress Alerts",
+      title: t('live_distress_alerts', 'Active Distress Alerts'),
       value: data.activeDistressAlerts.count,
       icon: Users,
       color: "text-blue-800",
@@ -75,7 +78,7 @@ export function KPICards({ data, loading }: { data: OverviewData | null, loading
       isFocus: false,
     },
     {
-      title: "Pending Interventions",
+      title: t('priority_interventions', 'Pending Interventions'),
       value: data.pendingInterventions.count,
       icon: CheckCircle,
       color: "text-emerald-800",
@@ -87,6 +90,7 @@ export function KPICards({ data, loading }: { data: OverviewData | null, loading
       isFocus: false,
     }
   ];
+
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">

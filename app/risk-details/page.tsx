@@ -3,7 +3,7 @@ import RiskDetailsPage from "@/Risk Detail Page/Risk Detail Page";
 
 export const metadata = {
   title: "Smart Crop | Crop Distress Risk Details",
-  description: "AI-Powered Farm Distress Reasoning, Sub-factor Analysis & Gemini Agronomic Explanations.",
+  description: "AI-Powered Farm Distress Reasoning, Sub-factor Analysis & NVIDIA AI Agronomic Explanations.",
 };
 
 export default function Page() {

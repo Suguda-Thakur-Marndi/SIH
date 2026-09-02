@@ -1,7 +1,8 @@
-"use client";
+ "use client";
 
 import React from "react";
 import { CropMarketInfo } from "../types";
+import { useLanguage } from "@/lib/language-context";
 
 interface MarketHeaderProps {
   crops: CropMarketInfo[];
@@ -28,6 +29,7 @@ export const MarketHeader: React.FC<MarketHeaderProps> = ({
   apiSource: _apiSource,
   totalRecords = 0,
 }) => {
+  const { t } = useLanguage();
 
   return (
     <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-xl border-b border-emerald-900/10 px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 shadow-xs transition-all">
@@ -41,22 +43,22 @@ export const MarketHeader: React.FC<MarketHeaderProps> = ({
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-md border border-emerald-300/60">
-                  Smart Farm OS
+                  {t('smart_farm_os', 'Smart Farm OS')}
                 </span>
                 {isLiveApi ? (
                   <span className="text-[10px] sm:text-xs text-emerald-800 bg-emerald-100/90 font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-emerald-300 truncate max-w-[190px] sm:max-w-none">
                     <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-600 animate-pulse shrink-0"></span>
-                    Live Feed ({totalRecords} mandis)
+                    {t('live_feed', 'Live Feed')} ({totalRecords} {t('mandis', 'mandis')})
                   </span>
                 ) : (
                   <span className="text-[10px] sm:text-xs text-amber-800 bg-amber-100 font-semibold inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-amber-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                    Benchmark Mode
+                    {t('benchmark_mode', 'Benchmark Mode')}
                   </span>
                 )}
               </div>
               <h1 className="text-base sm:text-2xl font-extrabold tracking-tight text-zinc-900 truncate mt-0.5">
-                Mandi Net Realization
+                {t('mandi_prices_title', 'Mandi Net Realization')}
               </h1>
             </div>
           </div>
@@ -66,7 +68,7 @@ export const MarketHeader: React.FC<MarketHeaderProps> = ({
             <button
               onClick={onOpenCompareAll}
               className="p-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs active:scale-95 transition-all"
-              title="Compare all markets"
+              title={t('compare_all_markets_tooltip', 'Compare all nearby markets side-by-side')}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -76,7 +78,7 @@ export const MarketHeader: React.FC<MarketHeaderProps> = ({
               onClick={onRefresh}
               disabled={isRefreshing}
               className="p-2 rounded-xl bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-300 shadow-xs disabled:opacity-50"
-              title="Refresh Mandi Rates"
+              title={t('refresh_mandi_rates', 'Refresh Mandi Rates')}
             >
               <svg
                 className={`w-4 h-4 text-emerald-700 ${isRefreshing ? "animate-spin" : ""}`}
@@ -100,12 +102,12 @@ export const MarketHeader: React.FC<MarketHeaderProps> = ({
           {/* Crop Selector (Full Width on Mobile) */}
           <div className="relative w-full sm:w-auto flex-1 sm:flex-initial">
             <label htmlFor="market-crop-select" className="sr-only">
-              Select Current Crop
+              {t('select_current_crop', 'Select Current Crop')}
             </label>
             <div className="flex items-center justify-between sm:justify-start bg-zinc-900 hover:bg-zinc-800 text-zinc-100 text-xs sm:text-sm font-semibold rounded-xl pl-3 pr-2 py-2 sm:py-2.5 border border-zinc-700 shadow-sm transition-colors cursor-pointer group">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="text-zinc-400 text-[10px] sm:text-xs uppercase tracking-wider font-bold shrink-0">
-                  Crop:
+                  {t('crop_label', 'Crop')}:
                 </span>
                 <select
                   id="market-crop-select"
@@ -133,19 +135,19 @@ export const MarketHeader: React.FC<MarketHeaderProps> = ({
             <button
               onClick={onOpenCompareAll}
               className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white text-sm font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
-              title="Compare all nearby markets side-by-side"
+              title={t('compare_all_markets_tooltip', 'Compare all nearby markets side-by-side')}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
-              <span>Compare All</span>
+              <span>{t('compare_all', 'Compare All')}</span>
             </button>
 
             <button
               onClick={onRefresh}
               disabled={isRefreshing}
               className="p-2.5 rounded-xl bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-300/80 shadow-xs transition-colors disabled:opacity-50"
-              title="Refresh Mandi Rates"
+              title={t('refresh_mandi_rates', 'Refresh Mandi Rates')}
             >
               <svg
                 className={`w-4 h-4 text-emerald-700 ${isRefreshing ? "animate-spin" : ""}`}

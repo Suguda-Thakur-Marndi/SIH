@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { CropMarketInfo, Market, TimeFrame, PricePoint } from "../types";
 import { formatCurrency } from "../marketService";
+import { useLanguage } from '@/lib/language-context';
+import { useBandwidth } from '@/lib/bandwidth-context';
 
 interface PriceTrendChartProps {
   currentCrop: CropMarketInfo;
@@ -13,6 +15,8 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
   currentCrop,
   markets,
 }) => {
+  const { t } = useLanguage();
+  const { isLiteMode } = useBandwidth();
   const [selectedMarketId, setSelectedMarketId] = useState<string>(
     markets[0]?.id || ""
   );
@@ -76,10 +80,10 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-lg sm:text-2xl font-black text-zinc-900 tracking-tight flex items-center gap-1.5">
-              <span>📈</span> Mandi Price Trend
+              <span>📈</span> {t('mandi_price_trend', 'Mandi Price Trend')}
             </h2>
             <span className="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-0.5 rounded-full border border-teal-300">
-              {timeframe} View
+              {timeframe} {t('view', 'View')}
             </span>
           </div>
           <p className="text-xs sm:text-sm text-zinc-600 mt-0.5">
@@ -123,148 +127,176 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
 
       {/* Main Chart + Stats Section */}
       <div className="mt-4 sm:mt-6 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-center">
-        {/* Left: SVG Chart Canvas */}
+        {/* Left: SVG Chart Canvas or Lite Mode Table */}
         <div className="lg:col-span-8 bg-zinc-900 text-white p-3 sm:p-4 rounded-2xl border border-zinc-800 shadow-inner relative overflow-hidden">
           <div className="flex items-center justify-between mb-2 text-xs">
             <span className="text-emerald-400 font-bold flex items-center gap-1 truncate text-[11px] sm:text-xs">
-              🌾 {activeMarket.name}
+              🌾 {activeMarket.name} {isLiteMode && <span className="text-[10px] bg-amber-500/20 text-amber-300 font-medium px-1.5 py-0.5 rounded ml-1">Lite Table View</span>}
             </span>
             <span className="text-zinc-400 text-[10px] sm:text-[11px] shrink-0">
               MSP: <span className="text-amber-300 font-bold">{formatCurrency(currentCrop.msp)}</span>
             </span>
           </div>
 
-          <div className="w-full overflow-hidden">
-            <svg
-              viewBox={`0 0 ${width} ${height}`}
-              className="w-full h-auto select-none"
-              style={{ maxHeight: "220px" }}
-            >
-              <defs>
-                <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-                </linearGradient>
-              </defs>
-
-              {/* Horizontal Grid lines & Y-axis labels */}
-              {[0, 0.25, 0.5, 0.75, 1].map((pct, i) => {
-                const yVal = padTop + chartH * pct;
-                const priceLabel = Math.round(chartMax - pct * priceRange);
-                return (
-                  <g key={i}>
-                    <line
-                      x1={padLeft}
-                      y1={yVal}
-                      x2={width - padRight}
-                      y2={yVal}
-                      stroke="rgba(255,255,255,0.08)"
-                      strokeDasharray={pct === 0.5 ? "0" : "4 4"}
-                    />
-                    <text
-                      x={padLeft - 6}
-                      y={yVal + 3}
-                      textAnchor="end"
-                      fill="#71717a"
-                      fontSize="9.5"
-                      fontWeight="bold"
-                    >
-                      ₹{priceLabel}
-                    </text>
-                  </g>
-                );
-              })}
-
-              {/* Govt MSP Reference line if in view */}
-              {currentCrop.msp >= chartMin && currentCrop.msp <= chartMax && (
-                <g>
-                  {(() => {
-                    const mspY = padTop + chartH - ((currentCrop.msp - chartMin) / priceRange) * chartH;
+          {isLiteMode ? (
+            <div className="w-full max-h-[220px] overflow-y-auto border border-zinc-800 rounded-xl bg-zinc-950/80 p-2 text-xs">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="text-zinc-400 border-b border-zinc-800 pb-1 text-[11px]">
+                    <th className="py-1">Date</th>
+                    <th className="py-1 text-right">Modal Price</th>
+                    <th className="py-1 text-right">vs MSP</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/60 font-mono">
+                  {points.slice(-8).reverse().map((p, idx) => {
+                    const diff = p.price - currentCrop.msp;
                     return (
-                      <>
-                        <line
-                          x1={padLeft}
-                          y1={mspY}
-                          x2={width - padRight}
-                          y2={mspY}
-                          stroke="#f59e0b"
-                          strokeWidth="1.5"
-                          strokeDasharray="6 4"
-                        />
-                        <text
-                          x={width - padRight - 5}
-                          y={mspY - 4}
-                          textAnchor="end"
-                          fill="#fbbf24"
-                          fontSize="9"
-                          fontWeight="bold"
-                        >
-                          Govt MSP: ₹{currentCrop.msp}
-                        </text>
-                      </>
+                      <tr key={idx} className="hover:bg-zinc-800/50">
+                        <td className="py-1 text-zinc-300 text-[11px]">{p.date}</td>
+                        <td className="py-1 text-right font-bold text-emerald-400">₹{p.price}</td>
+                        <td className={`py-1 text-right font-medium text-[10px] ${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {diff >= 0 ? `+₹${diff}` : `-₹${Math.abs(diff)}`}
+                        </td>
+                      </tr>
                     );
-                  })()}
-                </g>
-              )}
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="w-full overflow-hidden">
+              <svg
+                viewBox={`0 0 ${width} ${height}`}
+                className="w-full h-auto select-none"
+                style={{ maxHeight: "220px" }}
+              >
+                <defs>
+                  <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
 
-              {/* Shaded Area Under Curve */}
-              {areaPoints && (
-                <polygon points={areaPoints} fill="url(#trendGradient)" />
-              )}
-
-              {/* Main Line */}
-              {polylinePoints && (
-                <polyline
-                  points={polylinePoints}
-                  fill="none"
-                  stroke="#34d399"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              )}
-
-              {/* Data Points */}
-              {points.map((p, i) => {
-                const { x, y } = getCoordinates(p, i);
-                const isHovered = hoveredPoint?.date === p.date;
-                return (
-                  <g
-                    key={i}
-                    onClick={() => setHoveredPoint(isHovered ? null : p)}
-                    onMouseEnter={() => setHoveredPoint(p)}
-                    onMouseLeave={() => setHoveredPoint(null)}
-                    className="cursor-pointer"
-                  >
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r={isHovered ? 6 : 3.5}
-                      fill={isHovered ? "#fbbf24" : "#10b981"}
-                      stroke="#064e3b"
-                      strokeWidth="2"
-                      className="transition-all"
-                    />
-                    {/* X-axis label */}
-                    {(points.length <= 8 || i % Math.ceil(points.length / 5) === 0) && (
+                {/* Horizontal Grid lines & Y-axis labels */}
+                {[0, 0.25, 0.5, 0.75, 1].map((pct, i) => {
+                  const yVal = padTop + chartH * pct;
+                  const priceLabel = Math.round(chartMax - pct * priceRange);
+                  return (
+                    <g key={i}>
+                      <line
+                        x1={padLeft}
+                        y1={yVal}
+                        x2={width - padRight}
+                        y2={yVal}
+                        stroke="rgba(255,255,255,0.08)"
+                        strokeDasharray={pct === 0.5 ? "0" : "4 4"}
+                      />
                       <text
-                        x={x}
-                        y={height - 8}
-                        textAnchor="middle"
-                        fill="#a1a1aa"
-                        fontSize="9"
+                        x={padLeft - 6}
+                        y={yVal + 3}
+                        textAnchor="end"
+                        fill="#71717a"
+                        fontSize="9.5"
+                        fontWeight="bold"
                       >
-                        {p.label}
+                        ₹{priceLabel}
                       </text>
-                    )}
+                    </g>
+                  );
+                })}
+
+                {/* Govt MSP Reference line if in view */}
+                {currentCrop.msp >= chartMin && currentCrop.msp <= chartMax && (
+                  <g>
+                    {(() => {
+                      const mspY = padTop + chartH - ((currentCrop.msp - chartMin) / priceRange) * chartH;
+                      return (
+                        <>
+                          <line
+                            x1={padLeft}
+                            y1={mspY}
+                            x2={width - padRight}
+                            y2={mspY}
+                            stroke="#f59e0b"
+                            strokeWidth="1.5"
+                            strokeDasharray="6 4"
+                          />
+                          <text
+                            x={width - padRight - 5}
+                            y={mspY - 4}
+                            textAnchor="end"
+                            fill="#fbbf24"
+                            fontSize="9"
+                            fontWeight="bold"
+                          >
+                            Govt MSP: ₹{currentCrop.msp}
+                          </text>
+                        </>
+                      );
+                    })()}
                   </g>
-                );
-              })}
-            </svg>
-          </div>
+                )}
+
+                {/* Shaded Area Under Curve */}
+                {areaPoints && (
+                  <polygon points={areaPoints} fill="url(#trendGradient)" />
+                )}
+
+                {/* Main Line */}
+                {polylinePoints && (
+                  <polyline
+                    points={polylinePoints}
+                    fill="none"
+                    stroke="#34d399"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                )}
+
+                {/* Data Points */}
+                {points.map((p, i) => {
+                  const { x, y } = getCoordinates(p, i);
+                  const isHovered = hoveredPoint?.date === p.date;
+                  return (
+                    <g
+                      key={i}
+                      onClick={() => setHoveredPoint(isHovered ? null : p)}
+                      onMouseEnter={() => setHoveredPoint(p)}
+                      onMouseLeave={() => setHoveredPoint(null)}
+                      className="cursor-pointer"
+                    >
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r={isHovered ? 6 : 3.5}
+                        fill={isHovered ? "#fbbf24" : "#10b981"}
+                        stroke="#064e3b"
+                        strokeWidth="2"
+                        className="transition-all"
+                      />
+                      {/* X-axis label */}
+                      {(points.length <= 8 || i % Math.ceil(points.length / 5) === 0) && (
+                        <text
+                          x={x}
+                          y={height - 8}
+                          textAnchor="middle"
+                          fill="#a1a1aa"
+                          fontSize="9"
+                        >
+                          {p.label}
+                        </text>
+                      )}
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+          )}
 
           {/* Active Hover / Tap Point Tooltip */}
-          {hoveredPoint && (
+          {!isLiteMode && hoveredPoint && (
             <div className="absolute top-7 left-1/2 -translate-x-1/2 bg-zinc-800/95 border border-emerald-500/50 text-white text-[11px] px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1.5 pointer-events-none">
               <span className="text-zinc-400">{hoveredPoint.label}:</span>
               <span className="font-black text-emerald-400">{formatCurrency(hoveredPoint.price)}/qtl</span>
@@ -277,18 +309,18 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
           {/* Card 1: 30-day Price Movement */}
           <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-zinc-50 border border-zinc-200">
             <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-zinc-500 block">
-              30-Day Trend Movement
+              {t('trend_movement_30d', '30-Day Trend Movement')}
             </span>
 
             <div className="mt-1.5 sm:mt-2 flex items-center justify-between">
               <div>
-                <span className="text-[10px] sm:text-xs text-zinc-400 block">Current Price</span>
+                <span className="text-[10px] sm:text-xs text-zinc-400 block">{t('current_price', 'Current Price')}{' '}</span>
                 <span className="text-base sm:text-lg font-black text-zinc-900">
                   {formatCurrency(currentPrice)}/qtl
                 </span>
               </div>
               <div className="text-right">
-                <span className="text-[10px] sm:text-xs text-zinc-400 block">30 Days Ago</span>
+                <span className="text-[10px] sm:text-xs text-zinc-400 block">{t('days_ago_30', '30 Days Ago')}</span>
                 <span className="text-xs sm:text-sm font-semibold text-zinc-600">
                   {formatCurrency(oldPrice)}/qtl
                 </span>
@@ -296,7 +328,7 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
             </div>
 
             <div className="mt-2.5 pt-2.5 border-t border-zinc-200 flex items-center justify-between">
-              <span className="text-[11px] sm:text-xs text-zinc-600 font-medium">Net Shift:</span>
+              <span className="text-[11px] sm:text-xs text-zinc-600 font-medium">{t('net_shift', 'Net Shift:')}{' '}</span>
               <span
                 className={`inline-flex items-center text-[11px] sm:text-xs font-black px-2 py-0.5 rounded-md ${
                   priceDiff >= 0
@@ -313,7 +345,7 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
           <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-emerald-50/80 border border-emerald-200">
             <div className="flex items-center justify-between">
               <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-emerald-800">
-                Market Momentum
+                {t('market_momentum', 'Market Momentum')}
               </span>
               <span className="text-[10px] sm:text-xs font-black text-emerald-950 bg-emerald-200 px-2 py-0.5 rounded">
                 {trendDirection}

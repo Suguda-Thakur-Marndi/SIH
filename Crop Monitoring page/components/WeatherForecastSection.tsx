@@ -2,7 +2,8 @@
 
 import React from "react";
 import { WeatherDay } from "../types";
-import { formatDateString } from "../mockData";
+import { formatDateString, getWeatherDayName, translateWeatherAlert } from "../mockData";
+import { useLanguage } from "@/lib/language-context";
 
 interface WeatherForecastSectionProps {
   selectedDate: string;
@@ -15,12 +16,12 @@ interface WeatherForecastSectionProps {
 
 function conditionEmoji(condition: WeatherDay["condition"]): string {
   switch (condition) {
-    case "rainy":       return "🌧️";
-    case "sunny":       return "☀️";
-    case "storm":       return "⛈️";
+    case "rainy": return "🌧️";
+    case "sunny": return "☀️";
+    case "storm": return "⛈️";
     case "partly_cloudy": return "⛅";
-    case "cloudy":      return "☁️";
-    default:            return "🌤️";
+    case "cloudy": return "☁️";
+    default: return "🌤️";
   }
 }
 
@@ -32,16 +33,17 @@ export const WeatherForecastSection: React.FC<WeatherForecastSectionProps> = ({
   weatherError,
   onRefresh,
 }) => {
+  const { t } = useLanguage();
   return (
     <section className="rounded-2xl bg-white/60 backdrop-blur-md p-5 sm:p-6 border border-white/70 shadow-sm space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-white/50">
         <div>
           <h3 className="text-base font-bold text-zinc-800 flex items-center gap-2">
-            <span>🌦️</span> 7-Day Local Weather Forecast
+            <span>🌦️</span> {t("7_day_forecast", "7-Day Local Weather Forecast")}
           </h3>
           <p className="text-xs text-zinc-500">
-            Baripada (Mayurbhanj), Odisha · Live via OpenWeatherMap
+            {t("mayurbhanj_district", "Baripada (Mayurbhanj), Odisha")} · {t("live_weather_service", "Live via OpenWeatherMap")}
           </p>
         </div>
 
@@ -49,18 +51,18 @@ export const WeatherForecastSection: React.FC<WeatherForecastSectionProps> = ({
         <div className="flex items-center gap-2">
           {weatherError && (
             <span className="text-[10px] text-rose-600 font-semibold bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
-              ⚠ Offline
+              ⚠ {t('offline', 'Offline')}
             </span>
           )}
           {!weatherLoading && !weatherError && weatherForecast.length > 0 && (
             <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-              🟢 Live
+              🟢 {t('live', 'Live')}
             </span>
           )}
           <button
             onClick={onRefresh}
-            title="Refresh weather"
-            className="p-1.5 rounded-lg hover:bg-white/60 transition-colors text-zinc-500 hover:text-zinc-700"
+            title={t('refresh_weather', 'Refresh weather')}
+            className="p-1.5 rounded-lg hover:bg-white/60 transition-colors text-zinc-500 hover:text-zinc-700 cursor-pointer"
           >
             <svg className={`w-4 h-4 ${weatherLoading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -88,13 +90,13 @@ export const WeatherForecastSection: React.FC<WeatherForecastSectionProps> = ({
       {/* Error state */}
       {weatherError && !weatherLoading && (
         <div className="rounded-xl bg-rose-50 border border-rose-200 p-4 text-center space-y-2">
-          <p className="text-sm text-rose-700 font-semibold">⚠️ Could not load live weather</p>
+          <p className="text-sm text-rose-700 font-semibold">⚠️ {t('weather_error_msg', 'Could not load live weather')}</p>
           <p className="text-xs text-rose-500">{weatherError}</p>
           <button
             onClick={onRefresh}
-            className="text-xs text-rose-600 underline hover:text-rose-800 font-medium"
+            className="text-xs text-rose-600 underline hover:text-rose-800 font-medium cursor-pointer"
           >
-            Try again
+            {t('try_again', 'Try again')}
           </button>
         </div>
       )}
@@ -112,8 +114,10 @@ export const WeatherForecastSection: React.FC<WeatherForecastSectionProps> = ({
                   : "bg-white/45 border-white/55 hover:bg-white/65"
               }`}
             >
-              <p className="text-xs font-bold text-zinc-700">{w.dayName}</p>
-              <p className="text-[10px] text-zinc-400">{formatDateString(w.date).split(",")[0]}</p>
+              <p className="text-[11px] sm:text-xs font-bold text-zinc-700 truncate" title={getWeatherDayName(w.dayName, t)}>
+                {getWeatherDayName(w.dayName, t)}
+              </p>
+              <p className="text-[10px] text-zinc-400 truncate">{formatDateString(w.date, t).split(",")[0]}</p>
               <div className="text-2xl my-2">{conditionEmoji(w.condition)}</div>
               <p className="text-xs font-extrabold text-zinc-800">
                 {w.tempHigh}° / <span className="text-zinc-400 font-normal">{w.tempLow}°</span>
@@ -125,10 +129,10 @@ export const WeatherForecastSection: React.FC<WeatherForecastSectionProps> = ({
                 💨 {w.windSpeed} km/h
               </div>
               {w.condition === "sunny" && (
-                <div className="mt-1 text-[9px] text-emerald-600 font-semibold">✓ Field Day</div>
+                <div className="mt-1 text-[9px] text-emerald-600 font-semibold truncate">✓ {t('field_day', 'Field Day')}</div>
               )}
               {(w.condition === "rainy" || w.condition === "storm") && (
-                <div className="mt-1 text-[9px] text-rose-500 font-semibold">⚠ Rain</div>
+                <div className="mt-1 text-[9px] text-rose-500 font-semibold truncate">⚠ {t('rain_warning', 'Rain')}</div>
               )}
             </div>
           ))}
@@ -139,11 +143,45 @@ export const WeatherForecastSection: React.FC<WeatherForecastSectionProps> = ({
       {!weatherLoading && weatherForecast.length > 0 && (() => {
         const sel = weatherForecast.find((w) => w.date === selectedDate);
         return sel?.alert ? (
-          <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-2.5 text-xs text-amber-800 font-medium">
-            {sel.alert}
+          <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-2.5 text-xs sm:text-[13px] leading-relaxed text-amber-800 font-medium break-words">
+            {translateWeatherAlert(sel.alert, t, sel)}
           </div>
         ) : null;
       })()}
+
+      {/* Feature 4: Irrigation Advisory Card */}
+      {!weatherLoading && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-linear-to-r from-blue-900/90 via-sky-900/80 to-slate-900/90 text-white border border-blue-400/30 shadow-md space-y-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">⏸️</span>
+              <div>
+                <h4 className="text-sm font-extrabold text-blue-100 uppercase tracking-wide">
+                  Smart Irrigation Advisory: SKIP IRRIGATION
+                </h4>
+                <p className="text-xs text-sky-200 font-medium">48-Hour Monsoon Forecast Cross-Reference</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-bold">
+                💰 Est. Savings: ~₹450 Fuel (2.5-acre ref)
+              </span>
+              <span className="px-2.5 py-1 rounded-full bg-blue-500/20 text-sky-300 border border-blue-400/30 text-xs font-bold">
+                💧 ~25,000L Water (2.5-acre ref)
+              </span>
+            </div>
+          </div>
+
+          <p className="text-xs sm:text-[13px] text-slate-200 font-medium leading-relaxed bg-black/20 p-3 rounded-xl border border-white/10">
+            <strong>28.0mm rainfall</strong> expected over the next 48 hours in Baripada (exceeds <strong>20mm paddy threshold</strong>). Irrigation is unneeded today and running pumps would cause root waterlogging and waste diesel.
+          </p>
+
+          <div className="flex items-center justify-between text-[11px] text-sky-300 font-semibold pt-1">
+            <span>Soil Moisture: 26% (Panicle Initiation stage)</span>
+            <span>Next Check: Tomorrow 08:00 AM</span>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

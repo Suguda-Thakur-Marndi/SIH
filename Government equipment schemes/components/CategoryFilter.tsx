@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useLanguage } from '@/lib/language-context';
 
 interface CategoryFilterProps<T extends string> {
   categories: T[];
@@ -19,6 +20,7 @@ export function CategoryFilter<T extends string>({
   onSelectCategory,
   variant = 'scroll',
 }: CategoryFilterProps<T>) {
+  const { t } = useLanguage();
   const isSidebar = variant === 'sidebar';
 
   return (
@@ -54,7 +56,7 @@ export function CategoryFilter<T extends string>({
                   : 'bg-white/90 text-[#4A4A4A] border-gray-200/80 hover:bg-white hover:text-[#1A1A1A] hover:border-gray-300'
               }`}
             >
-              <span>{category}</span>
+              <span>{t(`category_${category.toLowerCase().replace(/\s+/g, '_')}`, category)}</span>
               <span
                 className={`px-1.5 py-0.5 rounded-full text-[11px] ${
                   isActive

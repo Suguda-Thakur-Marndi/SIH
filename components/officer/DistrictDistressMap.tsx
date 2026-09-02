@@ -21,6 +21,7 @@ import {
   Radio,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/language-context';
+import { useBandwidth } from '@/lib/bandwidth-context';
 import { DistressFarmer } from '@/app/api/officer/farmers/route';
 
 // MapLibre GL import
@@ -54,6 +55,7 @@ export default function DistrictDistressMap({
   onFarmerSelect,
 }: DistrictDistressMapProps) {
   const { t } = useLanguage();
+  const { isLiteMode } = useBandwidth();
 
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -663,8 +665,12 @@ export default function DistrictDistressMap({
       if (!filteredFarmers.length) return;
 
       const bounds = new maplibregl.LngLatBounds();
+      // In Lite Mode: prioritize high & moderate risk markers to reduce DOM overhead
+      const farmersToPlot = isLiteMode 
+        ? filteredFarmers.filter(f => f.riskLevel === 'HIGH' || f.riskLevel === 'MODERATE').slice(0, 30)
+        : filteredFarmers;
 
-      filteredFarmers.forEach((farmer) => {
+      farmersToPlot.forEach((farmer) => {
         const lng = Number(farmer.longitude);
         const lat = Number(farmer.latitude);
         if (isNaN(lng) || isNaN(lat) || (lng === 0 && lat === 0)) return;
@@ -745,7 +751,7 @@ export default function DistrictDistressMap({
     } else {
       map.once('load', renderMarkers);
     }
-  }, [filteredFarmers, handleSelectFarmer]);
+  }, [filteredFarmers, handleSelectFarmer, isLiteMode]);
 
   // Reset Filters Handler
   const handleResetFilters = () => {
@@ -1288,7 +1294,7 @@ export default function DistrictDistressMap({
                   </div>
 
                   <div className="p-2.5 rounded-xl bg-white border border-black/5">
-                    <div className="text-[10px] text-neutral-400 uppercase">Soil Moisture</div>
+                    <div className="text-[10px] text-neutral-400 uppercase">{t("soil_moisture", "Soil Moisture")}</div>
                     <div className="font-bold text-blue-700 mt-0.5">{selectedFarmer.soilMoisture}%</div>
                     <div className="text-[10px] text-neutral-500">Deficit (-32%)</div>
                   </div>

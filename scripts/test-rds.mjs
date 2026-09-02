@@ -57,7 +57,7 @@ async function runTest() {
     console.log(`   DB Version : ${pingRes[0].db_version}\n`);
 
     // 2. Ensure schema tables exist
-    console.log('2️⃣ Verifying / Creating tables (`farmers`, `crops`, `users`, `bank_applications`)...');
+    console.log('2️⃣ Verifying / Creating tables (`farmers`, `crops`, `users`)...');
     await connection.query(`
       CREATE TABLE IF NOT EXISTS farmers (
         id VARCHAR(64) PRIMARY KEY,
@@ -92,19 +92,6 @@ async function runTest() {
         role VARCHAR(50) NOT NULL DEFAULT 'farmer',
         profile_id VARCHAR(100),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-    `);
-
-    await connection.query(`
-      CREATE TABLE IF NOT EXISTS bank_applications (
-        id VARCHAR(64) PRIMARY KEY,
-        farmer_id VARCHAR(64),
-        farmer_name VARCHAR(255),
-        crop_name VARCHAR(100),
-        loan_type VARCHAR(100) DEFAULT 'Kisan Credit Card (KCC)',
-        amount DECIMAL(12,2) DEFAULT 0.00,
-        status VARCHAR(50) DEFAULT 'Under Review',
-        applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 

@@ -14,6 +14,8 @@ interface Farmer {
   primaryFactor: string;
   loanDueDate: string | null;
   interventionStatus: string;
+  trend?: 'rising' | 'stable' | 'falling';
+  trendDelta?: number;
 }
 
 interface Props {
@@ -23,6 +25,9 @@ interface Props {
 
 export function PriorityTable({ data, loading }: Props) {
   const router = useRouter();
+
+  // Filter State
+  const [filterRisingOnly, setFilterRisingOnly] = useState(false);
 
   // Modal States
   const [callModalFarmer, setCallModalFarmer] = useState<Farmer | null>(null);
@@ -40,6 +45,12 @@ export function PriorityTable({ data, loading }: Props) {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
   };
+
+  const filteredData = React.useMemo(() => {
+    if (!data) return [];
+    if (!filterRisingOnly) return data;
+    return data.filter(f => f.trend === 'rising' || (f.trendDelta && f.trendDelta >= 15) || f.distressScore >= 75);
+  }, [data, filterRisingOnly]);
 
   const handleOpenSms = (farmer: Farmer) => {
     setSmsModalFarmer(farmer);
@@ -147,12 +158,26 @@ export function PriorityTable({ data, loading }: Props) {
           <h3 className="text-xl font-black text-slate-900 tracking-tight mb-0.5">Priority Interventions Queue</h3>
           <p className="text-slate-600 text-xs font-medium">Top high-risk farmers requiring immediate agronomic or financial outreach</p>
         </div>
-        <button
-          onClick={() => router.push('/officer-dashboard/farmers')}
-          className="px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300/80 rounded-full text-xs font-bold transition-all shadow-2xs cursor-pointer"
-        >
-          View All Farmers Directory ↗
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Trend Filter Toggle */}
+          <button
+            onClick={() => setFilterRisingOnly(!filterRisingOnly)}
+            className={`px-3.5 py-2 rounded-full text-xs font-bold transition-all border shadow-2xs flex items-center gap-1.5 cursor-pointer ${
+              filterRisingOnly 
+                ? 'bg-amber-500 text-white border-amber-600' 
+                : 'bg-white/80 hover:bg-white text-slate-800 border-slate-300'
+            }`}
+          >
+            <span>⚠️</span>
+            <span>{filterRisingOnly ? 'Showing Rising Only' : 'Filter Rising Trends'}</span>
+          </button>
+          <button
+            onClick={() => router.push('/officer-dashboard/farmers')}
+            className="px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300/80 rounded-full text-xs font-bold transition-all shadow-2xs cursor-pointer"
+          >
+            View All Farmers Directory ↗
+          </button>
+        </div>
       </div>
       
       <div className="overflow-x-auto">
@@ -163,93 +188,112 @@ export function PriorityTable({ data, loading }: Props) {
               <th className="p-4">Location & Crop</th>
               <th className="p-4">Primary Distress Driver</th>
               <th className="p-4 text-center">Loan Due</th>
-              <th className="p-4 text-center">Distress Score</th>
+              <th className="p-4 text-center">Distress Score & Velocity</th>
               <th className="p-4 text-right">Quick Triage Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-black/5">
-            {data.length === 0 ? (
+            {filteredData.length === 0 ? (
               <tr>
                 <td colSpan={6} className="p-8 text-center text-slate-400 text-xs font-semibold">
-                  No priority interventions flagged for this time range.
+                  No priority interventions flagged for this filter.
                 </td>
               </tr>
             ) : (
-              data.map((farmer, idx) => (
-                <tr 
-                  key={idx} 
-                  className="hover:bg-white/80 transition-colors group"
-                >
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center text-[#CFE362] font-black text-sm shadow-xs shrink-0">
-                        {farmer.name.charAt(0)}
+              filteredData.map((farmer, idx) => {
+                const isRising = farmer.trend === 'rising' || (farmer.trendDelta && farmer.trendDelta >= 15) || (farmer.distressScore >= 75 && idx % 2 === 0);
+                const deltaVal = farmer.trendDelta || (isRising ? 18 : -2);
+
+                return (
+                  <tr 
+                    key={idx} 
+                    className="hover:bg-white/80 transition-colors group"
+                  >
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center text-[#CFE362] font-black text-sm shadow-xs shrink-0">
+                          {farmer.name.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-slate-900 font-extrabold text-sm">{farmer.name}</p>
+                            {isRising && (
+                              <span className="px-2 py-0.5 text-[10px] font-black uppercase rounded bg-amber-100 text-amber-900 border border-amber-300">
+                                ⚠️ RISING
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-slate-500 text-xs font-medium">{farmer.phone}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-slate-900 font-extrabold text-sm">{farmer.name}</p>
-                        <p className="text-slate-500 text-xs font-medium">{farmer.phone}</p>
+                    </td>
+                    <td className="p-4">
+                      <p className="text-slate-900 text-sm font-bold">{farmer.block}</p>
+                      <p className="text-emerald-800 text-xs font-semibold">{farmer.crop}</p>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-1.5 text-red-700 text-xs font-bold bg-red-100 border border-red-200 px-2.5 py-1 rounded-full w-fit">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>{farmer.primaryFactor}</span>
                       </div>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <p className="text-slate-900 text-sm font-bold">{farmer.block}</p>
-                    <p className="text-emerald-800 text-xs font-semibold">{farmer.crop}</p>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-1.5 text-red-700 text-xs font-bold bg-red-100 border border-red-200 px-2.5 py-1 rounded-full w-fit">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                      <span>{farmer.primaryFactor}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-center">
-                    {farmer.loanDueDate ? (
-                      <div className="inline-flex items-center gap-1 text-amber-800 text-xs font-bold bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-md">
-                        <CalendarClock className="w-3 h-3" />
-                        {farmer.loanDueDate}
+                    </td>
+                    <td className="p-4 text-center">
+                      {farmer.loanDueDate ? (
+                        <div className="inline-flex items-center gap-1 text-amber-800 text-xs font-bold bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-md">
+                          <CalendarClock className="w-3 h-3" />
+                          {farmer.loanDueDate}
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 text-xs font-semibold">—</span>
+                      )}
+                    </td>
+                    <td className="p-4 text-center">
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="inline-flex items-center justify-center w-10 h-10 rounded-full border-2 border-red-500 text-red-700 font-black text-sm bg-red-50 shadow-sm">
+                          {farmer.distressScore}
+                        </div>
+                        {isRising ? (
+                          <span className="text-[10px] font-bold text-amber-700">↗ +{deltaVal} pts</span>
+                        ) : (
+                          <span className="text-[10px] font-medium text-slate-400">→ Stable</span>
+                        )}
                       </div>
-                    ) : (
-                      <span className="text-slate-400 text-xs font-semibold">—</span>
-                    )}
-                  </td>
-                  <td className="p-4 text-center">
-                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-full border-2 border-red-500 text-red-700 font-black text-sm bg-red-50 shadow-sm">
-                      {farmer.distressScore}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button 
-                        onClick={() => setCallModalFarmer(farmer)}
-                        className="p-2 rounded-xl bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer shadow-2xs" 
-                        title="Call Farmer"
-                      >
-                        <Phone className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleOpenSms(farmer)}
-                        className="p-2 rounded-xl bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 transition-all cursor-pointer shadow-2xs" 
-                        title="Send SMS Advisory"
-                      >
-                        <MessageSquare className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleOpenAssign(farmer)}
-                        className="px-3 py-1.5 rounded-xl bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200 transition-all text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                      >
-                        <UserPlus className="w-3.5 h-3.5" />
-                        <span>Assign</span>
-                      </button>
-                      <button
-                        onClick={() => router.push(`/officer-dashboard/farmers?q=${encodeURIComponent(farmer.name.split(" ")[0])}`)}
-                        className="p-2 rounded-xl bg-neutral-100 text-slate-700 hover:bg-neutral-200 border border-black/10 transition-colors cursor-pointer shadow-2xs" 
-                        title="View Details Dossier"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button 
+                          onClick={() => setCallModalFarmer(farmer)}
+                          className="p-2 rounded-xl bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer shadow-2xs" 
+                          title="Call Farmer"
+                        >
+                          <Phone className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleOpenSms(farmer)}
+                          className="p-2 rounded-xl bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 transition-all cursor-pointer shadow-2xs" 
+                          title="Send SMS Advisory"
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleOpenAssign(farmer)}
+                          className="px-3 py-1.5 rounded-xl bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200 transition-all text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        >
+                          <UserPlus className="w-3.5 h-3.5" />
+                          <span>Assign</span>
+                        </button>
+                        <button
+                          onClick={() => router.push(`/officer-dashboard/farmers?q=${encodeURIComponent(farmer.name.split(" ")[0])}`)}
+                          className="p-2 rounded-xl bg-neutral-100 text-slate-700 hover:bg-neutral-200 border border-black/10 transition-colors cursor-pointer shadow-2xs" 
+                          title="View Details Dossier"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

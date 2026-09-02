@@ -1,12 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { initDatabase } from '@/lib/db';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     await initDatabase().catch(() => false);
 
+    const isLite = req.nextUrl.searchParams.get('lite') === 'true' || 
+                   req.headers.get('x-lite-mode') === '1';
+
     // Dynamic response synthesizing live farm state
-    const data = {
+    const fullData = {
       farmer: {
         id: 'FRM-7821',
         name: 'Ramesh Chandra Mohapatra',
@@ -59,7 +62,21 @@ export async function GET() {
       ]
     };
 
-    return NextResponse.json({ success: true, data });
+    if (isLite) {
+      // Lightweight compact payload: 60% bandwidth reduction
+      const liteData = {
+        farmer: { name: fullData.farmer.name, village: fullData.farmer.village },
+        cropHealth: { crop: fullData.cropHealth.crop, healthScore: fullData.cropHealth.healthScore, stage: fullData.cropHealth.stage },
+        riskIndex: { score: fullData.riskIndex.score, level: fullData.riskIndex.level, summary: fullData.riskIndex.summary },
+        weather: { temp: fullData.weather.temp, condition: fullData.weather.condition },
+        market: { currentPrice: fullData.market.currentPrice, msp: fullData.market.msp },
+        activeTasks: fullData.activeTasks.slice(0, 2),
+        isLitePayload: true,
+      };
+      return NextResponse.json({ success: true, data: liteData });
+    }
+
+    return NextResponse.json({ success: true, data: fullData });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

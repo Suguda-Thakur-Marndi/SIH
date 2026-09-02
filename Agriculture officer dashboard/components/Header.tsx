@@ -3,6 +3,7 @@
 import { Search, Bell, Menu, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import LanguageSelector from "@/components/LanguageSelector";
+import { DataSaverToggle } from "@/components/DataSaverToggle";
 import { useLanguage } from "@/lib/language-context";
 import { smartCropAuth } from "@/lib/smartcrop-auth";
 
@@ -41,13 +42,20 @@ export default function Header({ onToggleSidebar }: { onToggleSidebar: () => voi
 
       {/* Right side: actions */}
       <div className="flex items-center gap-3">
+        {/* 2G Data Saver Mode Toggle */}
+        <DataSaverToggle />
+
         {/* Language Selector */}
         <LanguageSelector variant="glass" />
 
         <button className="p-2.5 rounded-full hover:bg-white/40 text-[#1A1A1A] transition-colors cursor-pointer">
           <Search className="w-5 h-5" />
         </button>
-        <button className="relative p-2.5 rounded-full hover:bg-white/40 text-[#1A1A1A] transition-colors cursor-pointer">
+        <button
+          onClick={() => router.push('/notifications')}
+          title={t('alerts', 'Alerts & Notifications')}
+          className="relative p-2.5 rounded-full hover:bg-white/40 text-[#1A1A1A] transition-colors cursor-pointer"
+        >
           <Bell className="w-5 h-5" />
           <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />

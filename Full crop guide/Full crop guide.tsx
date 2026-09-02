@@ -18,8 +18,10 @@ import {
 import { CROPS_GUIDE_DATA, CropFullGuide, CultivationStage } from '@/lib/cropGuideData';
 import CropAudioPlayer from '@/components/CropAudioPlayer';
 import CropAiChatbot from '@/components/CropAiChatbot';
+import { useLanguage } from '@/lib/language-context';
 
 function FullCropGuideContent() {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const cropParam = searchParams.get('crop')?.toLowerCase() || 'paddy';
 
@@ -58,14 +60,14 @@ function FullCropGuideContent() {
               className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-emerald-800 bg-white/90 hover:bg-white px-3.5 py-2 rounded-xl shadow-xs border border-emerald-200 transition-all"
             >
               <ArrowLeft className="w-4 h-4" />
-              Dashboard
+              {t('back', 'Dashboard')}
             </Link>
             <Link
               href="/alternative-crop"
               className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 px-3.5 py-2 rounded-xl border border-teal-200 transition-all"
             >
               <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-              Alternative Crops
+              {t('alternative_crops', 'Alternative Crops')}
             </Link>
           </div>
 

@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
 import { LanguageProvider } from "@/lib/language-context";
+import { BandwidthProvider } from "@/lib/bandwidth-context";
 import LanguageSelector from "@/components/LanguageSelector";
+import { PageTranslationSync } from "@/components/PageTranslationSync";
+import { OfflineAlertBanner } from "@/components/DataSaverToggle";
+import { ProactiveAgronomistBot } from "@/components/ProactiveAgronomistBot";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,13 +20,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Crop | Farm Intelligence Platform",
-  description: "AI-Powered Farm Intelligence, Crop Advisory, Mandi Prices and Financial Support.",
+  title: "Smart Crop | Smart Crop Advisory & Farmer Distress Early-Warning System",
+  description: "AI-Powered Multilingual Crop Advisory, Climate Distress Early-Warning, and Mandi Intelligence for Smallholder Farmers.",
 };
-
-const publishableKey =
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
-  "pk_test_YXNzdXJlZC1hbGllbi01OTgxLmNsZXJrLmFjY291bnRzLmRldiQ";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -43,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 try {
                   new window.google.translate.TranslateElement({
                     pageLanguage: 'en',
-                    includedLanguages: 'en,hi,or,bn,te,ta,mr,gu,pa,kn,ml,as,ur,ne,sa,mai,sd,ks,kok,mni,brx,doi,sat',
+                    includedLanguages: 'en,hi,or,bn,te,ta,mr,gu,pa,kn,ml,as,ur,ne',
                     autoDisplay: false,
                     layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
                   }, 'google_translate_element');
@@ -55,20 +54,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         <Script
-          id="google-translate-lib"
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
           strategy="afterInteractive"
         />
 
         {/* Hidden Google Translate container */}
         <div id="google_translate_element" style={{ display: 'none' }} aria-hidden="true" />
-        <ClerkProvider publishableKey={publishableKey}>
+        <BandwidthProvider>
           <LanguageProvider>
+            <OfflineAlertBanner />
             {children}
+            {/* Proactive AI Agronomist Top-Right Floating Assistant */}
+            <ProactiveAgronomistBot />
             {/* Global floating Language Switcher */}
             <LanguageSelector variant="floating" />
+            {/* Sync Google Translate on route changes */}
+            <PageTranslationSync />
           </LanguageProvider>
-        </ClerkProvider>
+        </BandwidthProvider>
       </body>
     </html>
   );

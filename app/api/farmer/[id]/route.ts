@@ -10,14 +10,17 @@ export async function GET(
 
   try {
     // 1. Try Prisma query if available
-    const farmer = await prisma.farmer.findUnique({
-      where: { id },
-      include: {
-        insurance: true,
-        crops: true,
-        farms: true,
-      },
-    }).catch(() => null);
+    const farmer = await Promise.race([
+      prisma.farmer.findUnique({
+        where: { id },
+        include: {
+          insurance: true,
+          crops: true,
+          farms: true,
+        },
+      }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Prisma timeout')), 200))
+    ]).catch(() => null) as any;
 
     if (farmer) {
       return NextResponse.json(farmer);
@@ -28,13 +31,16 @@ export async function GET(
 
   try {
     // 2. Try MySQL direct query
-    const rows = await query<any[]>(
-      `SELECT id, name, phone, email, district, village, language, land_area, loan_amount, loan_due_date, state 
-       FROM farmers 
-       WHERE id = ? OR phone = ? 
-       LIMIT 1;`,
-      [id, id]
-    ).catch(() => []);
+    const rows = await Promise.race([
+      query<any[]>(
+        `SELECT id, name, phone, email, district, village, language, land_area, loan_amount, loan_due_date, state 
+         FROM farmers 
+         WHERE id = ? OR phone = ? 
+         LIMIT 1;`,
+        [id, id]
+      ),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('MySQL timeout')), 200))
+    ]).catch(() => []) as any[];
 
     if (rows && rows.length > 0) {
       const f = rows[0];

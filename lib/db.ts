@@ -192,61 +192,33 @@ export async function initDatabase(): Promise<boolean> {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
 
-      // 7. Equipment Inventory & Rentals table
+      // 7. Mandi Prices Benchmark table
       await connection.query(`
-        CREATE TABLE IF NOT EXISTS equipment (
+        CREATE TABLE IF NOT EXISTS mandi_prices (
           id VARCHAR(64) PRIMARY KEY,
-          name VARCHAR(255) NOT NULL,
-          category VARCHAR(100) DEFAULT 'Tractor',
-          daily_rate DECIMAL(10,2) DEFAULT 800.00,
-          available_count INT DEFAULT 3,
-          hub_location VARCHAR(255) DEFAULT 'Baripada Custom Hiring Center',
-          condition_status VARCHAR(50) DEFAULT 'EXCELLENT',
-          operator_included BOOLEAN DEFAULT TRUE,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          crop_name VARCHAR(100) NOT NULL,
+          market_name VARCHAR(255) NOT NULL,
+          district VARCHAR(100) DEFAULT 'Mayurbhanj',
+          state VARCHAR(100) DEFAULT 'Odisha',
+          modal_price DECIMAL(10,2) NOT NULL,
+          min_price DECIMAL(10,2),
+          max_price DECIMAL(10,2),
+          msp DECIMAL(10,2) NOT NULL,
+          recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
 
-      // 8. Equipment Rentals table
+      // 8. Weather Observations table
       await connection.query(`
-        CREATE TABLE IF NOT EXISTS equipment_rentals (
+        CREATE TABLE IF NOT EXISTS weather_observations (
           id VARCHAR(64) PRIMARY KEY,
-          equipment_id VARCHAR(64) NOT NULL,
-          farmer_id VARCHAR(64) NOT NULL,
-          start_date DATE NOT NULL,
-          duration_days INT DEFAULT 1,
-          total_cost DECIMAL(10,2) NOT NULL,
-          status VARCHAR(50) DEFAULT 'CONFIRMED',
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-      `);
-
-      // 9. Bank & Financial Facilities table
-      await connection.query(`
-        CREATE TABLE IF NOT EXISTS financial_facilities (
-          id VARCHAR(64) PRIMARY KEY,
-          bank_name VARCHAR(255) NOT NULL,
-          scheme_name VARCHAR(255) NOT NULL,
-          facility_type VARCHAR(100) DEFAULT 'KCC Loan',
-          interest_rate DECIMAL(5,2) DEFAULT 4.00,
-          max_amount DECIMAL(12,2) DEFAULT 300000.00,
-          subvention_percent DECIMAL(5,2) DEFAULT 3.00,
-          status VARCHAR(50) DEFAULT 'ACTIVE',
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-      `);
-
-      // 10. Loan & Insurance Applications table
-      await connection.query(`
-        CREATE TABLE IF NOT EXISTS applications (
-          id VARCHAR(64) PRIMARY KEY,
-          type VARCHAR(50) NOT NULL DEFAULT 'LOAN',
-          farmer_id VARCHAR(64) NOT NULL,
-          farmer_name VARCHAR(255),
-          facility_id VARCHAR(64),
-          amount DECIMAL(12,2) DEFAULT 0.00,
-          status VARCHAR(50) DEFAULT 'Under Review',
-          submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          farmer_id VARCHAR(64),
+          district VARCHAR(100) DEFAULT 'Mayurbhanj',
+          temperature DECIMAL(5,2),
+          rainfall DECIMAL(8,2) DEFAULT 0.00,
+          forecast_rainfall DECIMAL(8,2) DEFAULT 0.00,
+          humidity DECIMAL(5,2),
+          recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
 

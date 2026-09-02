@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { pool } from '@/lib/db';
+import { signJwt } from '@/lib/auth-jwt';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest) {
       email,
       password,
       state = 'Odisha',
-      district,
+      district = 'Mayurbhanj',
       block = 'Baripada',
       village = 'Baripada',
       latitude,
@@ -27,8 +28,9 @@ export async function POST(req: NextRequest) {
     } = body;
 
     const farmerName = (fullName || name || '').trim();
-    const farmerPhone = (mobileNumber || phone || '').trim().replace(/\D/g, '');
-    const farmerEmail = email ? email.trim().toLowerCase() : null;
+    const rawPhone = (mobileNumber || phone || '').trim().replace(/\D/g, '');
+    const cleanPhone = rawPhone.slice(-10);
+    const farmerEmail = email && email.trim().length > 0 ? email.trim().toLowerCase() : null;
     const farmerDistrict = (district || 'Mayurbhanj').trim();
     const farmerVillage = (village || block || 'Baripada').trim();
     const farmerState = (state || 'Odisha').trim();
@@ -45,33 +47,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!farmerPhone || farmerPhone.length < 10) {
+    if (!cleanPhone || cleanPhone.length !== 10) {
       return NextResponse.json(
-        { error: { code: 'validation_error', message: 'Valid 10-digit mobile number is required.' } },
+        { error: { code: 'validation_error', message: 'Valid 10-digit Indian mobile number is required.' } },
         { status: 400 }
       );
     }
-
-    // Clean Indian 10-digit phone
-    const cleanPhone = farmerPhone.slice(-10);
 
     if (!password || password.length < 6) {
       return NextResponse.json(
-        { error: { code: 'validation_error', message: 'Password must be at least 6 characters.' } },
+        { error: { code: 'validation_error', message: 'Password must be at least 6 characters long.' } },
         { status: 400 }
       );
     }
 
-    // 2. Connect and check duplicate phone in RDS
+    // 2. Connect to database
     const connection = await pool.getConnection();
 
     try {
+      // Check duplicate phone in `farmers` or `users`
       const [existingFarmers]: any = await connection.query(
         'SELECT id FROM farmers WHERE phone = ? LIMIT 1;',
         [cleanPhone]
       );
 
-      if (existingFarmers && existingFarmers.length > 0) {
+      const [existingUsers]: any = await connection.query(
+        'SELECT id FROM users WHERE phone = ? OR (email = ? AND ? IS NOT NULL) LIMIT 1;',
+        [cleanPhone, farmerEmail, farmerEmail]
+      );
+
+      if ((existingFarmers && existingFarmers.length > 0) || (existingUsers && existingUsers.length > 0)) {
         return NextResponse.json(
           { error: { code: 'duplicate_phone', message: 'A farmer with this mobile number is already registered. Please log in.' } },
           { status: 409 }
@@ -82,7 +87,7 @@ export async function POST(req: NextRequest) {
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      // 4. Generate Unique IDs (max varchar 30)
+      // 4. Generate Unique Identifiers
       const timestamp = Date.now();
       const farmerId = `FRM_${timestamp.toString().slice(-8)}_${Math.floor(100 + Math.random() * 900)}`;
       const farmId = `FRM_LAND_${timestamp.toString().slice(-8)}`;
@@ -110,6 +115,55 @@ export async function POST(req: NextRequest) {
         ]
       );
 
+      // Insert into `users` table for unified authentication
+      try {
+        await connection.query(
+          `INSERT INTO users (id, email, name, phone, username, password, role, account_status, profile_id, metadata)
+           VALUES (?, ?, ?, ?, ?, ?, 'farmer', 'active', ?, ?);`,
+          [
+            farmerId,
+            farmerEmail,
+            farmerName,
+            cleanPhone,
+            cleanPhone,
+            hashedPassword,
+            farmerId,
+            JSON.stringify({
+              state: farmerState,
+              district: farmerDistrict,
+              village: farmerVillage,
+              landArea: parsedArea,
+              currentCrop,
+              language: farmerLang
+            })
+          ]
+        );
+      } catch (userErr) {
+        console.warn('[users table insert note]:', userErr);
+      }
+
+      // Insert into `farmer_profiles`
+      try {
+        await connection.query(
+          `INSERT INTO farmer_profiles (id, user_id, name, phone, district, village, state, language, land_area, soil_type)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+          [
+            farmerId,
+            farmerId,
+            farmerName,
+            cleanPhone,
+            farmerDistrict,
+            farmerVillage,
+            farmerState,
+            farmerLang,
+            parsedArea,
+            soilType,
+          ]
+        );
+      } catch (profErr) {
+        console.warn('[farmer_profiles insert note]:', profErr);
+      }
+
       // Insert into `farms`
       await connection.query(
         `INSERT INTO farms (id, farmer_id, name, latitude, longitude, area, soil_type, village, district)
@@ -133,56 +187,107 @@ export async function POST(req: NextRequest) {
         : new Date().toISOString().split('T')[0];
 
       await connection.query(
-        `INSERT INTO crops (id, farmer_id, name, stage, sowing_date)
-         VALUES (?, ?, ?, ?, ?);`,
+        `INSERT INTO crops (id, farmer_id, name, stage, sowing_date, area_acres)
+         VALUES (?, ?, ?, ?, ?, ?);`,
         [
           cropId,
           farmerId,
           currentCrop || 'Rice / Paddy',
           'Vegetative',
           formattedSowingDate,
+          parsedArea,
         ]
       );
 
       // Insert initial welcome notification
-      await connection.query(
-        `INSERT INTO notifications (id, user_id, farmer_id, type, priority, title, message, action_label, action_url)
-         VALUES (?, ?, ?, 'welcome', 'info', 'Welcome to Smart Crop', 'Your farm profile has been successfully registered on AWS RDS.', 'View Farm', '/dashboard');`,
-        [
-          notifId,
-          farmerId,
-          farmerId,
-        ]
-      ).catch(() => {}); // Non-critical if notifications schema differs
+      try {
+        await connection.query(
+          `INSERT INTO notifications (id, user_id, farmer_id, type, priority, title, message, action_label, action_url)
+           VALUES (?, ?, ?, 'welcome', 'info', 'Welcome to Smart Crop', 'Your farm profile has been successfully registered. You are all set to monitor crop health and receive early distress alerts.', 'View Farm Dashboard', '/dashboard');`,
+          [
+            notifId,
+            farmerId,
+            farmerId,
+          ]
+        );
+      } catch (notifErr) {
+        console.warn('[notifications insert note]:', notifErr);
+      }
 
       // Commit transaction
       await connection.commit();
 
-      return NextResponse.json(
+      // Generate signed JWT token
+      const accessToken = signJwt({
+        id: farmerId,
+        name: farmerName,
+        role: 'farmer',
+        email: farmerEmail || undefined,
+        mobileNumber: cleanPhone,
+      }, 86400 * 7);
+
+      const registeredFarmer = {
+        id: farmerId,
+        fullName: farmerName,
+        name: farmerName,
+        phone: cleanPhone,
+        mobileNumber: cleanPhone,
+        email: farmerEmail,
+        role: 'farmer',
+        accountStatus: 'active',
+        district: farmerDistrict,
+        village: farmerVillage,
+        state: farmerState,
+        landArea: parsedArea,
+        currentCrop,
+        metadata: {
+          district: farmerDistrict,
+          village: farmerVillage,
+          state: farmerState,
+          landArea: parsedArea,
+          currentCrop,
+          language: farmerLang
+        }
+      };
+
+      const response = NextResponse.json(
         {
           success: true,
-          message: 'Farmer registered successfully in AWS RDS.',
+          message: 'Farmer registered successfully.',
+          accessToken,
+          userId: farmerId,
           farmerId,
           farmId,
           cropId,
-          farmer: {
-            id: farmerId,
-            name: farmerName,
-            phone: cleanPhone,
-            email: farmerEmail,
-            district: farmerDistrict,
-            village: farmerVillage,
-            state: farmerState,
-            landArea: parsedArea,
-            currentCrop,
-          },
+          role: 'farmer',
+          farmer: registeredFarmer,
+          user: registeredFarmer,
         },
         { status: 201 }
       );
 
+      // Set cookies for authentication session
+      response.cookies.set('smartcrop_token', accessToken, {
+        path: '/',
+        httpOnly: false,
+        sameSite: 'lax',
+        maxAge: 86400 * 7,
+        secure: process.env.NODE_ENV === 'production',
+      });
+
+      response.cookies.set('smartcrop_session', JSON.stringify(registeredFarmer), {
+        path: '/',
+        httpOnly: false,
+        sameSite: 'lax',
+        maxAge: 86400 * 7,
+        secure: process.env.NODE_ENV === 'production',
+      });
+
+      return response;
+
     } catch (dbErr: any) {
       await connection.rollback();
-      console.error('[RDS Farmer Registration Error]:', dbErr);
+      console.error('[Farmer Registration DB Error]:', dbErr);
       return NextResponse.json(
         { error: { code: 'database_error', message: dbErr.message || 'Failed to save farmer to database.' } },
         { status: 500 }
