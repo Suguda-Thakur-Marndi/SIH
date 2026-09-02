@@ -1,7 +1,59 @@
+# Dependencies & build outputs
 node_modules
 .next
+out
+build
+dist
+.turbo
+
+# Git & IDEs
 .git
 .gitignore
+.gitattributes
+.cursor
+.devin
+.gemini
+.idea
+.vscode
+*.swp
+*.swo
+
+# Environment & credentials (CRITICAL SECURITY)
+.env
+.env.local
+.env*.local
+.env.production
+.env.development
+.env.test
 *.pem
+*.key
+*.cert
+*.crt
+
+# BaaS & Deployment metadata
 .insforge
+.vercel
+.clerk
+
+# Large database dumps & audit reports (reduces build context size)
+database_schema.sql
+database_inventory.json
+database_schema_inventory.json
+audit_issues.json
+verified_sql_mismatches.json
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Documentation & specifications
 README.md
+CLAUDE.md
+AGENTS.md
+WORKFLOW.md
+TOTAL_FEATURES.md
+*.md
+
+# OS files
+.DS_Store
+Thumbs.db
